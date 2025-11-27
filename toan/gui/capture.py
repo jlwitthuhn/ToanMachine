@@ -1,6 +1,9 @@
 from tkinter import ttk
 
+from toan.gui.calibrate import VolumeCalibrationDialog
 from toan.soundio import SdDevice, get_input_devices, get_output_devices
+
+_parent: ttk.Notebook
 
 _input_combo: ttk.Combobox
 _input_device_data: list[dict]
@@ -54,9 +57,19 @@ def _extract_lists(
     return out_labels, out_data
 
 
+the_dialog = None
+
+
+def _begin_capture():
+    global the_dialog
+    the_dialog = VolumeCalibrationDialog(_parent)
+
+
 def create_capture_tab(notebook: ttk.Notebook) -> ttk.Frame:
+    global _parent
+    _parent = notebook
+
     input_devices = get_input_devices()
-    print(len(input_devices))
     global _input_device_data
     input_device_labels, _input_device_data = _extract_lists(input_devices)
 
@@ -66,7 +79,7 @@ def create_capture_tab(notebook: ttk.Notebook) -> ttk.Frame:
 
     root = ttk.Frame(notebook)
 
-    output_label = ttk.Label(root, text="Capture send:")
+    output_label = ttk.Label(root, text="Send device:")
     output_label.pack()
 
     global _output_combo
@@ -75,7 +88,7 @@ def create_capture_tab(notebook: ttk.Notebook) -> ttk.Frame:
     _output_combo.bind("<<ComboboxSelected>>", _output_combo_changed)
     _output_combo.pack(fill="x")
 
-    input_label = ttk.Label(root, text="Capture return:")
+    input_label = ttk.Label(root, text="Return device:")
     input_label.pack()
 
     global _input_combo
@@ -87,7 +100,7 @@ def create_capture_tab(notebook: ttk.Notebook) -> ttk.Frame:
     _spacer_label_1 = ttk.Label(root, text="")
     _spacer_label_1.pack()
 
-    begin_button = ttk.Button(root, text="Begin Capture")
+    begin_button = ttk.Button(root, text="Begin Capture", command=_begin_capture)
     begin_button.pack()
 
     return root

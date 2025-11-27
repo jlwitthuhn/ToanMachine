@@ -26,6 +26,8 @@ def _create_debug_tab(notebook: ttk.Notebook) -> ttk.Frame:
 
 
 def run_gui() -> None:
+    sd.default.samplerate = THE_SAMPLE_RATE
+
     root = tk.Tk()
     root.geometry("400x300")
     root.title("Toan Machine")
