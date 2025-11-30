@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 
+from toan.gui.alert import AlertDialog
 from toan.gui.calibrate import VolumeCalibrationDialog
 from toan.soundio import SdChannel, SdDevice, get_input_devices, get_output_devices
 
@@ -84,10 +85,10 @@ class CaptureFrame(ttk.Frame):
 
     def _begin_capture(self):
         if self.input_combo.get() == "":
-            print("Error: No input device selected")
+            AlertDialog(self, "Error", "No return device selected")
             return
         if self.output_combo.get() == "":
-            print("Error: No output device selected")
+            AlertDialog(self, "Error", "No send device selected")
             return
         assert self.input_combo.get() in self.input_device_data
         assert self.output_combo.get() in self.output_device_data
