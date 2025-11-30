@@ -1,24 +1,8 @@
+import tkinter as tk
 from tkinter import ttk
 
 from toan.gui.calibrate import VolumeCalibrationDialog
 from toan.soundio import SdChannel, SdDevice, get_input_devices, get_output_devices
-
-_parent: ttk.Notebook
-_sample_rate: int
-
-_input_combo: ttk.Combobox
-_input_device_data: dict[str, SdChannel]
-
-_output_combo: ttk.Combobox
-_output_device_data: dict[str, SdChannel]
-
-
-def _input_combo_changed(_):
-    _input_combo.selection_clear()
-
-
-def _output_combo_changed(_):
-    _output_combo.selection_clear()
 
 
 def _extract_lists(
@@ -44,70 +28,78 @@ def _extract_lists(
     return out_labels, out_data
 
 
-the_dialog = None
+class CaptureFrame(ttk.Frame):
+    parent: ttk.Notebook
+    active_dialog: tk.Toplevel
 
+    sample_rate: int
 
-def _begin_capture():
-    global _input_combo
-    if _input_combo.get() == "":
-        print("Error: No input device selected")
-        return
-    global _output_combo
-    if _output_combo.get() == "":
-        print("Error: No output device selected")
-        return
-    global _input_device_data
-    assert _input_combo.get() in _input_device_data
-    global _output_device_data
-    assert _output_combo.get() in _output_device_data
-    global the_dialog
-    global _sample_rate
-    the_dialog = VolumeCalibrationDialog(
-        _parent,
-        _output_device_data[_output_combo.get()],
-        _input_device_data[_input_combo.get()],
-        _sample_rate,
-    )
+    input_combo: ttk.Combobox
+    input_device_data: dict[str, SdChannel]
 
+    output_combo: ttk.Combobox
+    output_device_data: dict[str, SdChannel]
 
-def create_capture_tab(notebook: ttk.Notebook, sample_rate: int) -> ttk.Frame:
-    global _parent
-    _parent = notebook
-    global _sample_rate
-    _sample_rate = sample_rate
+    def __init__(
+        self,
+        parent: ttk.Notebook,
+        sample_rate: int,
+    ):
+        super().__init__(parent)
 
-    input_devices = get_input_devices()
-    global _input_device_data
-    input_device_labels, _input_device_data = _extract_lists(input_devices)
+        self.parent = parent
+        self.sample_rate = sample_rate
 
-    output_devices = get_output_devices()
-    global _output_device_data
-    output_device_labels, _output_device_data = _extract_lists(output_devices)
+        input_devices = get_input_devices()
+        input_device_labels, self.input_device_data = _extract_lists(input_devices)
 
-    root = ttk.Frame(notebook)
+        output_devices = get_output_devices()
+        output_device_labels, self.output_device_data = _extract_lists(output_devices)
 
-    output_label = ttk.Label(root, text="Send device:")
-    output_label.pack()
+        root = self
 
-    global _output_combo
-    _output_combo = ttk.Combobox(root, state="readonly")
-    _output_combo["values"] = output_device_labels
-    _output_combo.bind("<<ComboboxSelected>>", _output_combo_changed)
-    _output_combo.pack(fill="x")
+        output_label = ttk.Label(root, text="Send device:")
+        output_label.pack()
 
-    input_label = ttk.Label(root, text="Return device:")
-    input_label.pack()
+        self.output_combo = ttk.Combobox(root, state="readonly")
+        self.output_combo["values"] = output_device_labels
+        self.output_combo.bind("<<ComboboxSelected>>", self._combobox_changed_output)
+        self.output_combo.pack(fill="x")
 
-    global _input_combo
-    _input_combo = ttk.Combobox(root, state="readonly")
-    _input_combo["values"] = input_device_labels
-    _input_combo.bind("<<ComboboxSelected>>", _input_combo_changed)
-    _input_combo.pack(fill="x")
+        input_label = ttk.Label(root, text="Return device:")
+        input_label.pack()
 
-    _spacer_label_1 = ttk.Label(root, text="")
-    _spacer_label_1.pack()
+        self.input_combo = ttk.Combobox(root, state="readonly")
+        self.input_combo["values"] = input_device_labels
+        self.input_combo.bind("<<ComboboxSelected>>", self._combobox_changed_input)
+        self.input_combo.pack(fill="x")
 
-    begin_button = ttk.Button(root, text="Begin Capture", command=_begin_capture)
-    begin_button.pack()
+        spacer_label_1 = ttk.Label(root, text="")
+        spacer_label_1.pack()
 
-    return root
+        begin_button = ttk.Button(
+            root, text="Begin Capture", command=self._begin_capture
+        )
+        begin_button.pack()
+
+    def _begin_capture(self):
+        if self.input_combo.get() == "":
+            print("Error: No input device selected")
+            return
+        if self.output_combo.get() == "":
+            print("Error: No output device selected")
+            return
+        assert self.input_combo.get() in self.input_device_data
+        assert self.output_combo.get() in self.output_device_data
+        self.active_dialog = VolumeCalibrationDialog(
+            self.parent,
+            self.output_device_data[self.output_combo.get()],
+            self.input_device_data[self.input_combo.get()],
+            self.sample_rate,
+        )
+
+    def _combobox_changed_input(self, _):
+        self.input_combo.selection_clear()
+
+    def _combobox_changed_output(self, _):
+        self.output_combo.selection_clear()

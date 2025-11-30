@@ -4,7 +4,7 @@ from tkinter import ttk
 import sounddevice as sd
 
 from toan.generate import generate_capture_signal
-from toan.gui.capture import create_capture_tab
+from toan.gui.capture import CaptureFrame
 
 THE_SAMPLE_RATE = 44100
 
@@ -40,7 +40,7 @@ def run_gui() -> None:
     tab_debug = _create_debug_tab(notebook)
     notebook.add(tab_debug, text="Debug")
 
-    tab_capture = create_capture_tab(notebook, THE_SAMPLE_RATE)
+    tab_capture = CaptureFrame(notebook, THE_SAMPLE_RATE)
     notebook.add(tab_capture, text="Capture")
 
     notebook.pack(fill="both", expand=True)
