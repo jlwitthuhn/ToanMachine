@@ -1,15 +1,16 @@
 from tkinter import ttk
 
 from toan.gui.calibrate import VolumeCalibrationDialog
-from toan.soundio import SdDevice, get_input_devices, get_output_devices
+from toan.soundio import SdChannel, SdDevice, get_input_devices, get_output_devices
 
 _parent: ttk.Notebook
+_sample_rate: int
 
 _input_combo: ttk.Combobox
-_input_device_data: list[dict]
+_input_device_data: dict[str, SdChannel]
 
 _output_combo: ttk.Combobox
-_output_device_data: list[dict]
+_output_device_data: dict[str, SdChannel]
 
 
 def _input_combo_changed(_):
@@ -22,9 +23,9 @@ def _output_combo_changed(_):
 
 def _extract_lists(
     device_list: list[SdDevice], include_in: bool = True, include_out: bool = True
-) -> tuple[list[str], list[dict]]:
+) -> tuple[list[str], dict[str, SdChannel]]:
     out_labels = []
-    out_data = []
+    out_data = {}
 
     for device in device_list:
         if include_in:
@@ -32,27 +33,13 @@ def _extract_lists(
                 chan += 1  # 1-indexed
                 label = f"In - {device.index}: {device.name} [ch {chan}]"
                 out_labels.append(label)
-                data = {
-                    "label": label,
-                    "index": device.index,
-                    "name": device.name,
-                    "channel": chan,
-                    "dir": "input",
-                }
-                out_data.append(data)
+                out_data[label] = SdChannel(device.index, chan)
         if include_out:
             for chan in range(device.channels_out):
                 chan += 1  # 1-indexed
                 label = f"Out - {device.index}: {device.name} [ch {chan}]"
                 out_labels.append(label)
-                data = {
-                    "label": label,
-                    "index": device.index,
-                    "name": device.name,
-                    "channel": chan,
-                    "dir": "output",
-                }
-                out_data.append(data)
+                out_data[label] = SdChannel(device.index, chan)
 
     return out_labels, out_data
 
@@ -61,13 +48,33 @@ the_dialog = None
 
 
 def _begin_capture():
+    global _input_combo
+    if _input_combo.get() == "":
+        print("Error: No input device selected")
+        return
+    global _output_combo
+    if _output_combo.get() == "":
+        print("Error: No output device selected")
+        return
+    global _input_device_data
+    assert _input_combo.get() in _input_device_data
+    global _output_device_data
+    assert _output_combo.get() in _output_device_data
     global the_dialog
-    the_dialog = VolumeCalibrationDialog(_parent)
+    global _sample_rate
+    the_dialog = VolumeCalibrationDialog(
+        _parent,
+        _output_device_data[_output_combo.get()],
+        _input_device_data[_input_combo.get()],
+        _sample_rate,
+    )
 
 
-def create_capture_tab(notebook: ttk.Notebook) -> ttk.Frame:
+def create_capture_tab(notebook: ttk.Notebook, sample_rate: int) -> ttk.Frame:
     global _parent
     _parent = notebook
+    global _sample_rate
+    _sample_rate = sample_rate
 
     input_devices = get_input_devices()
     global _input_device_data

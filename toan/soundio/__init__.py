@@ -4,6 +4,12 @@ import sounddevice as sd
 
 
 @dataclass
+class SdChannel:
+    device_index: int
+    channel_index: int
+
+
+@dataclass
 class SdDevice:
     index: int
     name: str

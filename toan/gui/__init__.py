@@ -40,7 +40,7 @@ def run_gui() -> None:
     tab_debug = _create_debug_tab(notebook)
     notebook.add(tab_debug, text="Debug")
 
-    tab_capture = create_capture_tab(notebook)
+    tab_capture = create_capture_tab(notebook, THE_SAMPLE_RATE)
     notebook.add(tab_capture, text="Capture")
 
     notebook.pack(fill="both", expand=True)
