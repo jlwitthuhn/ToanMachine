@@ -1,14 +1,14 @@
 import numpy as np
 
 from toan.generate.chirp import generate_chirp
-from toan.generate.pitch import generate_pitch
 from toan.generate.scale import generate_semitone_scale
 from toan.mix import concat_signals
+from toan.music import get_note_frequency_by_name
 
 
 def generate_capture_signal(sample_rate: int) -> np.ndarray:
     AMPLITUDE = 0.6
-    c2_pitch = generate_pitch("C", 2, 440.0)
+    c2_pitch = get_note_frequency_by_name("C", 2, 440.0)
 
     sweep_up = generate_chirp(sample_rate, 20.0, 20000.0, AMPLITUDE, 10.0)
     sweep_down = generate_chirp(sample_rate, 20000.0, 20.0, AMPLITUDE, 10.0)

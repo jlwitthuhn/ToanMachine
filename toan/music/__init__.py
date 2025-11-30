@@ -30,9 +30,13 @@ def _get_note_offset(note: str) -> int:
     raise Exception("Invalid note")
 
 
-def generate_pitch(note: str, octave: int, a_freq: float) -> float:
-    a4_octave_offset = octave - 4
-    a4_note_offset = _get_note_offset(note) - _get_note_offset("A")
-    a4_semitone_offset = a4_octave_offset * 12 + a4_note_offset
+def get_note_index_by_name(note: str, octave: int) -> int:
+    return _get_note_offset(note) + 12 * octave
+
+
+def get_note_frequency_by_name(note: str, octave: int, a_freq: float) -> float:
+    a4_index = get_note_index_by_name("A", 4)
+    note_index = get_note_index_by_name(note, octave)
+    a4_semitone_offset = note_index - a4_index
     pitch_adjustment = math.pow(2, a4_semitone_offset / 12)
     return pitch_adjustment * a_freq
