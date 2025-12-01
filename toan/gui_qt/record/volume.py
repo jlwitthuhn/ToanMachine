@@ -12,7 +12,7 @@ VOLUME_TEXT = [
 ]
 
 BAR_PRECISION = 1000
-VOLUME_SAMPLE_COUNT = 3
+VOLUME_SAMPLE_COUNT = 5
 
 
 class RecordVolumePage(QtWidgets.QWizardPage):
@@ -108,5 +108,5 @@ class RecordVolumePage(QtWidgets.QWizardPage):
         self.volume_samples_index = (
             self.volume_samples_index + 1
         ) % VOLUME_SAMPLE_COUNT
-        avg = self.volume_samples.mean()
-        self.bar_progress = min(BAR_PRECISION, math.floor(avg * 1000))
+        out_val = self.volume_samples.max()
+        self.bar_progress = min(BAR_PRECISION, math.floor(out_val * 1000))
