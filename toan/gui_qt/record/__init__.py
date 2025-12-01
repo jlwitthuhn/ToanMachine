@@ -1,5 +1,6 @@
-from PySide6 import QtCore, QtWidgets
+from PySide6 import QtWidgets
 
+from toan.gui_qt.record.device import RecordDevicePage
 from toan.gui_qt.record.intro import RecordIntroPage
 
 
@@ -8,6 +9,7 @@ class RecordWizard(QtWidgets.QWizard):
         super().__init__(parent)
 
         self.addPage(RecordIntroPage(self))
+        self.addPage(RecordDevicePage(self))
 
         self.setWindowTitle("Recording Wizard")
         self.setModal(True)
