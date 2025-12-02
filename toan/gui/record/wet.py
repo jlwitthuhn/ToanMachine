@@ -24,7 +24,8 @@ class RecordWetSignalPage(QtWidgets.QWizardPage):
         hline.setFrameShadow(QtWidgets.QFrame.Shadow.Sunken)
         layout.addWidget(hline)
 
-        button_record = QtWidgets.QPushButton("Record")
+        button_record = QtWidgets.QPushButton("Record", self)
+        button_record.clicked.connect(self._clicked_record)
         layout.addWidget(button_record)
 
         label_progress = QtWidgets.QLabel("Progress:", self)
@@ -35,3 +36,6 @@ class RecordWetSignalPage(QtWidgets.QWizardPage):
 
     def isComplete(self, /):
         return False
+
+    def _clicked_record(self):
+        print("Clicked record")
