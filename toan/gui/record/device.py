@@ -1,6 +1,6 @@
 from PySide6 import QtWidgets
 
-from toan.gui_qt.record import RecordingContext
+from toan.gui.record import RecordingContext
 from toan.soundio import SdChannel, SdDevice, get_input_devices, get_output_devices
 
 DEVICE_TEXT = [

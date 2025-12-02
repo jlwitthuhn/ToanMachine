@@ -5,7 +5,7 @@ import sounddevice as sd
 from PySide6 import QtCore, QtWidgets
 
 from toan.generate import generate_tone
-from toan.gui_qt.record import RecordingContext
+from toan.gui.record import RecordingContext
 
 VOLUME_TEXT = [
     "Set the input gain on your interface so that you are able to record to full range of your pedal's output without clipping.",

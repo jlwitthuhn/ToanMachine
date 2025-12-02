@@ -1,6 +1,6 @@
 from PySide6 import QtWidgets
 
-from toan.gui_qt.record import RecordingContext
+from toan.gui.record import RecordingContext
 
 RECORD_TEXT = [
     "In this section you will send a signal through your pedal and record the result.",

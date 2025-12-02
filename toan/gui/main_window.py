@@ -2,7 +2,7 @@ import sounddevice as sd
 from PySide6 import QtWidgets
 
 from toan.generate import generate_capture_signal
-from toan.gui_qt.record import RecordWizard
+from toan.gui.record import RecordWizard
 
 
 def _clicked_play_training_signal():

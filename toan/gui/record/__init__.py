@@ -1,10 +1,10 @@
 from PySide6 import QtWidgets
 
-from toan.gui_qt.record.context import RecordingContext
-from toan.gui_qt.record.device import RecordDevicePage
-from toan.gui_qt.record.intro import RecordIntroPage
-from toan.gui_qt.record.volume import RecordVolumePage
-from toan.gui_qt.record.wet import RecordWetSignalPage
+from toan.gui.record.context import RecordingContext
+from toan.gui.record.device import RecordDevicePage
+from toan.gui.record.intro import RecordIntroPage
+from toan.gui.record.volume import RecordVolumePage
+from toan.gui.record.wet import RecordWetSignalPage
 
 
 class RecordWizard(QtWidgets.QWizard):
