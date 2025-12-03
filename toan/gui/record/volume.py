@@ -10,6 +10,7 @@ from PySide6 import QtCore, QtWidgets
 
 from toan.generate import generate_tone
 from toan.gui.record import RecordingContext
+from toan.soundio import SdPlayrecController, prepare_play_record
 
 VOLUME_TEXT = [
     "Set the input gain on your interface so that you are able to record to full range of your pedal's output without clipping.",
@@ -34,7 +35,7 @@ class RecordVolumePage(QtWidgets.QWizardPage):
     bar_update_timer: QtCore.QTimer
     text_volume: QtWidgets.QLineEdit
 
-    input_stream: sd.InputStream | None = None
+    io_controller: SdPlayrecController | None = None
     volume_samples: np.ndarray
     volume_samples_index: int = 0
 
@@ -95,12 +96,9 @@ class RecordVolumePage(QtWidgets.QWizardPage):
             self.play_active = False
             self.play_button.setText("Play Test Tone")
             self.bar_update_timer.stop()
-            if self.input_stream is not None:
-                self.input_stream.close()
-                self.input_stream = None
-            if self.output_stream is not None:
-                self.output_stream.close()
-                self.output_stream = None
+            if self.io_controller is not None:
+                self.io_controller.close()
+                self.io_controller = None
             self.bar_progress = 0
             self._update_status()
             return
@@ -118,24 +116,14 @@ class RecordVolumePage(QtWidgets.QWizardPage):
                 "Using the same device for recording and playback is not yet supported."
             )
         sample_rate = self.context.sample_rate
-
-        input_channel = self.context.input_channel
-        self.input_stream = sd.InputStream(
-            samplerate=sample_rate,
-            blocksize=1024,
-            device=input_channel.device_index,
-            callback=self._input_callback,
+        self.io_controller = prepare_play_record(
+            sample_rate,
+            self.context.input_channel,
+            self.context.output_channel,
+            self._input_callback,
+            self._output_callback,
         )
-        self.input_stream.start()
-
-        output_channel = self.context.output_channel
-        self.output_stream = sd.OutputStream(
-            samplerate=sample_rate,
-            blocksize=1024,
-            device=output_channel.device_index,
-            callback=self._output_callback,
-        )
-        self.output_stream.start()
+        self.io_controller.start()
 
     def _update_status(self):
         self.bar_input_level.setValue(self.bar_progress)
