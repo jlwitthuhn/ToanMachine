@@ -15,6 +15,11 @@ SAVE_TEXT = [
     "You did et.",
 ]
 
+SAVE_README_TEXT = [
+    "This zip file was created by Toan Machine to be used for training a neural network.",
+    "If you just want to create a capture there isn't much to see here.",
+]
+
 
 class RecordSavePage(QtWidgets.QWizardPage):
     context: RecordingContext
@@ -48,6 +53,7 @@ class RecordSavePage(QtWidgets.QWizardPage):
         wet_wav.seek(0)
 
         with zipfile.ZipFile(file_path, "w", zipfile.ZIP_DEFLATED) as zip:
+            zip.writestr("readme.txt", "\n\n".join(SAVE_README_TEXT))
             zip.writestr("dry.wav", dry_wav.getvalue())
             zip.writestr("wet.wav", wet_wav.getvalue())
 
