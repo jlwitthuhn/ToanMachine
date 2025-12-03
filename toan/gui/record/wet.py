@@ -74,7 +74,7 @@ class RecordWetSignalPage(QtWidgets.QWizardPage):
     def _clicked_record(self):
         self.button_record.setEnabled(False)
 
-        self.context.signal_raw = generate_capture_signal(
+        self.context.signal_dry = generate_capture_signal(
             self.context.sample_rate, 0.75
         )
 
@@ -102,18 +102,18 @@ class RecordWetSignalPage(QtWidgets.QWizardPage):
     ) -> None:
         channel = self.context.output_channel.channel_index - 1
         outdata.fill(0)
-        if self.signal_out_index >= len(self.context.signal_raw):
+        if self.signal_out_index >= len(self.context.signal_dry):
             return
-        segment = self.context.signal_raw[
+        segment = self.context.signal_dry[
             self.signal_out_index : self.signal_out_index + frames
         ]
         self.signal_out_index += frames
         outdata[0 : len(segment), channel] = segment
 
     def _update_status(self):
-        self.bar_progress.setMaximum(len(self.context.signal_raw))
+        self.bar_progress.setMaximum(len(self.context.signal_dry))
         self.bar_progress.setValue(self.signal_out_index)
-        if self.signal_out_index >= len(self.context.signal_raw):
+        if self.signal_out_index >= len(self.context.signal_dry):
             self._complete()
             self.bar_update_timer.stop()
 

@@ -2,6 +2,10 @@
 # https://www.gnu.org/licenses/gpl-3.0.en.html
 # SPDX-License-Identifier: GPL-3.0-only
 
+import io
+import zipfile
+
+import numpy as np
 import scipy
 from PySide6 import QtWidgets
 
@@ -27,8 +31,24 @@ class RecordSavePage(QtWidgets.QWizardPage):
         layout.addWidget(label)
 
     def validatePage(self) -> bool:
-        file_path, _ = QtWidgets.QFileDialog.getSaveFileName()
+        file_path, _ = QtWidgets.QFileDialog.getSaveFileName(filter="Zip Files (*.zip)")
+
+        dry_wav = io.BytesIO()
         scipy.io.wavfile.write(
-            file_path, self.context.sample_rate, self.context.signal_recorded
+            dry_wav,
+            self.context.sample_rate,
+            self.context.signal_dry.astype(np.float32),
         )
+        dry_wav.seek(0)
+
+        wet_wav = io.BytesIO()
+        scipy.io.wavfile.write(
+            wet_wav, self.context.sample_rate, self.context.signal_recorded
+        )
+        wet_wav.seek(0)
+
+        with zipfile.ZipFile(file_path, "w", zipfile.ZIP_DEFLATED) as zip:
+            zip.writestr("dry.wav", dry_wav.getvalue())
+            zip.writestr("wet.wav", wet_wav.getvalue())
+
         return True
