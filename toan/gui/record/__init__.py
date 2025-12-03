@@ -23,7 +23,7 @@ class RecordWizard(QtWidgets.QWizard):
         self.addPage(RecordDevicePage(self, self.context))
         self.addPage(RecordVolumePage(self, self.context))
         self.addPage(RecordWetSignalPage(self, self.context))
-        self.addPage(RecordSavePage(self))
+        self.addPage(RecordSavePage(self, self.context))
 
         self.setWindowTitle("Recording Wizard")
         self.setModal(True)

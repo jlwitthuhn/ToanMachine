@@ -1,3 +1,4 @@
 numpy == 2.3.5
 pyside6-essentials == 6.10.1
+scipy == 1.16.3
 sounddevice == 0.5.3
