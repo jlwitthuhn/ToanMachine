@@ -7,6 +7,7 @@ from PySide6 import QtWidgets
 from toan.gui.record.context import RecordingContext
 from toan.gui.record.device import RecordDevicePage
 from toan.gui.record.intro import RecordIntroPage
+from toan.gui.record.save import RecordSavePage
 from toan.gui.record.volume import RecordVolumePage
 from toan.gui.record.wet import RecordWetSignalPage
 
@@ -22,6 +23,7 @@ class RecordWizard(QtWidgets.QWizard):
         self.addPage(RecordDevicePage(self, self.context))
         self.addPage(RecordVolumePage(self, self.context))
         self.addPage(RecordWetSignalPage(self, self.context))
+        self.addPage(RecordSavePage(self))
 
         self.setWindowTitle("Recording Wizard")
         self.setModal(True)
