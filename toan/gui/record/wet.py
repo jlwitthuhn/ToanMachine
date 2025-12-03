@@ -1,10 +1,15 @@
 # This file is part of Toan Machine and is licensed under the GPLv3
 # https://www.gnu.org/licenses/gpl-3.0.en.html
 # SPDX-License-Identifier: GPL-3.0-only
+from multiprocessing.spawn import prepare
 
-from PySide6 import QtWidgets
+import numpy as np
+import sounddevice as sd
+from PySide6 import QtCore, QtWidgets
 
+from toan.generate import generate_capture_signal
 from toan.gui.record import RecordingContext
+from toan.soundio import SdPlayrecController, prepare_play_record
 
 RECORD_TEXT = [
     "In this section you will send a signal through your pedal and record the result.",
@@ -13,8 +18,27 @@ RECORD_TEXT = [
 
 
 class RecordWetSignalPage(QtWidgets.QWizardPage):
+    context: RecordingContext
+
+    button_record: QtWidgets.QPushButton
+    bar_progress: QtWidgets.QProgressBar
+    bar_update_timer: QtCore.QTimer
+    io_controller: SdPlayrecController | None = None
+
+    signal_out_index: int
+
+    recorded_samples: list[np.ndarray]
+
     def __init__(self, parent, context: RecordingContext):
         super().__init__(parent)
+        self.context = context
+        self.signal_out_index = 0
+        self.recorded_samples = []
+
+        self.bar_update_timer = QtCore.QTimer()
+        self.bar_update_timer.setInterval(50)
+        self.bar_update_timer.setSingleShot(False)
+        self.bar_update_timer.timeout.connect(self._update_status)
 
         self.setTitle("Record")
         layout = QtWidgets.QVBoxLayout(self)
@@ -28,18 +52,71 @@ class RecordWetSignalPage(QtWidgets.QWizardPage):
         hline.setFrameShadow(QtWidgets.QFrame.Shadow.Sunken)
         layout.addWidget(hline)
 
-        button_record = QtWidgets.QPushButton("Record", self)
-        button_record.clicked.connect(self._clicked_record)
-        layout.addWidget(button_record)
+        self.button_record = QtWidgets.QPushButton("Record", self)
+        self.button_record.clicked.connect(self._clicked_record)
+        layout.addWidget(self.button_record)
 
         label_progress = QtWidgets.QLabel("Progress:", self)
         layout.addWidget(label_progress)
 
-        progress_bar = QtWidgets.QProgressBar(self)
-        layout.addWidget(progress_bar)
+        self.bar_progress = QtWidgets.QProgressBar(self)
+        layout.addWidget(self.bar_progress)
 
-    def isComplete(self, /):
+    def cleanupPage(self):
+        if self.io_controller is not None:
+            self.io_controller.close()
+
+    def isComplete(self):
+        if self.context.signal_recorded is not None:
+            self.cleanupPage()
+            return True
         return False
 
     def _clicked_record(self):
-        print("Clicked record")
+        self.button_record.setEnabled(False)
+
+        self.context.signal_raw = generate_capture_signal(self.context.sample_rate)
+
+        self.signal_out_index = 0
+        self.recorded_samples = []
+
+        self.io_controller = prepare_play_record(
+            self.context.sample_rate,
+            self.context.input_channel,
+            self.context.output_channel,
+            self._input_callback,
+            self._output_callback,
+        )
+        self.io_controller.start()
+
+        self.bar_update_timer.start()
+
+    def _input_callback(
+        self, indata: np.ndarray, frames: int, time, status: sd.CallbackFlags
+    ) -> None:
+        self.recorded_samples.append(indata)
+
+    def _output_callback(
+        self, outdata: np.ndarray, frames: int, time, status: sd.CallbackFlags
+    ) -> None:
+        channel = self.context.output_channel.channel_index - 1
+        outdata.fill(0)
+        if self.signal_out_index >= len(self.context.signal_raw):
+            return
+        segment = self.context.signal_raw[
+            self.signal_out_index : self.signal_out_index + frames
+        ]
+        self.signal_out_index += frames
+        outdata[0 : len(segment), channel] = segment
+
+    def _update_status(self):
+        self.bar_progress.setMaximum(len(self.context.signal_raw))
+        self.bar_progress.setValue(self.signal_out_index)
+        if self.signal_out_index >= len(self.context.signal_raw):
+            self._complete()
+            self.bar_update_timer.stop()
+
+    def _complete(self):
+        self.io_controller.close()
+        self.context.signal_recorded = np.concat(self.recorded_samples)
+        self.completeChanged.emit()
