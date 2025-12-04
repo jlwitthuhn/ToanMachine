@@ -50,19 +50,24 @@ class SdPlayrecController:
             self.stream_io.start()
 
 
-def _get_devices(kind: str | None) -> list[SdDevice]:
-    devices = sd.query_devices(kind=kind)
+def _get_devices(
+    include_input: bool = True, include_output: bool = True
+) -> list[SdDevice]:
+    devices = sd.query_devices()
     if isinstance(devices, dict):
         devices = [devices]
     result = []
     for device in devices:
-        this_device = SdDevice(
-            index=device["index"],
-            name=device["name"],
-            channels_in=device["max_input_channels"],
-            channels_out=device["max_output_channels"],
-        )
-        result.append(this_device)
+        is_input = device["max_input_channels"] > 0
+        is_output = device["max_output_channels"] > 0
+        if (include_input and is_input) or (include_output and is_output):
+            this_device = SdDevice(
+                index=device["index"],
+                name=device["name"],
+                channels_in=device["max_input_channels"],
+                channels_out=device["max_output_channels"],
+            )
+            result.append(this_device)
     return result
 
 
@@ -114,8 +119,8 @@ def prepare_play_record(
 
 
 def get_input_devices() -> list[SdDevice]:
-    return _get_devices("input")
+    return _get_devices(include_input=True, include_output=False)
 
 
 def get_output_devices() -> list[SdDevice]:
-    return _get_devices("output")
+    return _get_devices(include_input=False, include_output=True)
