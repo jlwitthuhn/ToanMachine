@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from typing import Callable
 
 import numpy
+import numpy as np
 import sounddevice as sd
 
 
@@ -28,10 +29,16 @@ class SdPlayrecController:
     stream_out: sd.OutputStream | None
     stream_io: sd.Stream | None
 
-    def __init__(self, stream_in: sd.InputStream, stream_out: sd.OutputStream):
+    def __init__(
+        self,
+        *,
+        stream_in: sd.InputStream | None = None,
+        stream_out: sd.OutputStream | None = None,
+        stream_io: sd.Stream | None = None
+    ):
         self.stream_in = stream_in
         self.stream_out = stream_out
-        self.stream_io = None
+        self.stream_io = stream_io
 
     def close(self):
         if self.stream_in is not None:
@@ -71,28 +78,6 @@ def _get_devices(
     return result
 
 
-def _activate_play_record_2device(
-    sample_rate: int,
-    channel_in: SdChannel,
-    channel_out: SdChannel,
-    callback_in: Callable[[numpy.ndarray, int, any, sd.CallbackFlags], None],
-    callback_out: Callable[[numpy.ndarray, int, any, sd.CallbackFlags], None],
-) -> SdPlayrecController:
-    input_stream = sd.InputStream(
-        samplerate=sample_rate,
-        blocksize=1024,
-        device=channel_in.device_index,
-        callback=callback_in,
-    )
-    output_stream = sd.OutputStream(
-        samplerate=sample_rate,
-        blocksize=1024,
-        device=channel_out.device_index,
-        callback=callback_out,
-    )
-    return SdPlayrecController(input_stream, output_stream)
-
-
 def prepare_play_record(
     sample_rate: int,
     channel_in: SdChannel,
@@ -100,22 +85,40 @@ def prepare_play_record(
     callback_in: Callable[[numpy.ndarray, int, any, sd.CallbackFlags], None],
     callback_out: Callable[[numpy.ndarray, int, any, sd.CallbackFlags], None],
 ) -> SdPlayrecController:
-    if channel_in.device_index == channel_out.device_index:
-        raise Exception("Input and output devices must be different")
 
-    input_stream = sd.InputStream(
-        samplerate=sample_rate,
-        blocksize=1024,
-        device=channel_in.device_index,
-        callback=callback_in,
-    )
-    output_stream = sd.OutputStream(
-        samplerate=sample_rate,
-        blocksize=1024,
-        device=channel_out.device_index,
-        callback=callback_out,
-    )
-    return SdPlayrecController(input_stream, output_stream)
+    if channel_in.device_index == channel_out.device_index:
+
+        def callback_io(
+            indata: np.ndarray,
+            outdata: np.ndarray,
+            frames: int,
+            time,
+            status: sd.CallbackFlags,
+        ) -> None:
+            callback_in(indata, frames, time, status)
+            callback_out(outdata, frames, time, status)
+
+        io_stream = sd.Stream(
+            samplerate=sample_rate,
+            blocksize=1024,
+            device=channel_in.device_index,
+            callback=callback_io,
+        )
+        return SdPlayrecController(stream_io=io_stream)
+    else:
+        input_stream = sd.InputStream(
+            samplerate=sample_rate,
+            blocksize=1024,
+            device=channel_in.device_index,
+            callback=callback_in,
+        )
+        output_stream = sd.OutputStream(
+            samplerate=sample_rate,
+            blocksize=1024,
+            device=channel_out.device_index,
+            callback=callback_out,
+        )
+        return SdPlayrecController(stream_in=input_stream, stream_out=output_stream)
 
 
 def get_input_devices() -> list[SdDevice]:
