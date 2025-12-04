@@ -12,7 +12,7 @@ def generate_tone(
     out = amplitude * np.sin(2 * np.pi * frequency * t)
     if fade:
         # TODO: This should fade in the start of the tone over several samples to avoid hard edges
-        fade_samples = sample_rate // 20
+        fade_samples = sample_rate // 40
         fade_array = np.ma.core.ones_like(out)
         fade_array[:fade_samples] = np.linspace(0.0, 1.0, num=fade_samples)
         fade_array[-fade_samples:] = np.linspace(1.0, 0.0, num=fade_samples)

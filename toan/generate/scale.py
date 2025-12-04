@@ -20,7 +20,7 @@ def _generate_semitone_scale_frequencies(
     return result
 
 
-def generate_semitone_scale(
+def generate_chromatic_scale(
     sample_rate: int,
     low_freq: float,
     steps: int,
