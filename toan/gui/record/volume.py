@@ -108,16 +108,8 @@ class RecordVolumePage(QtWidgets.QWizardPage):
         self._setup_io_streams()
 
     def _setup_io_streams(self):
-        if (
-            self.context.input_channel.device_index
-            == self.context.output_channel.device_index
-        ):
-            raise Exception(
-                "Using the same device for recording and playback is not yet supported."
-            )
-        sample_rate = self.context.sample_rate
         self.io_controller = prepare_play_record(
-            sample_rate,
+            self.context.sample_rate,
             self.context.input_channel,
             self.context.output_channel,
             self._input_callback,
