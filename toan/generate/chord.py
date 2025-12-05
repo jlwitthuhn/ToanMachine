@@ -14,8 +14,9 @@ def _increase_semitones(frequency: float, semitones: int) -> float:
     return frequency * math.pow(2, semitones / 12)
 
 
-def generate_major_chord_chirp(
+def generate_generic_chord_chirp(
     sample_rate: int,
+    shape: list[int],
     begin_note: str,
     begin_octave: int,
     end_note: str,
@@ -25,24 +26,65 @@ def generate_major_chord_chirp(
 ) -> np.ndarray:
     begin_index = get_note_index_by_name(begin_note, begin_octave)
     end_index = get_note_index_by_name(end_note, end_octave)
-    semitones_count = end_index - begin_index - 7
+    semitone_width = max(shape)
+    semitone_count = end_index - begin_index - semitone_width
+    assert 0 < semitone_width <= semitone_count
 
-    root_begin: float = get_note_frequency_by_name(begin_note, begin_octave, 440)
-    root_end: float = _increase_semitones(root_begin, semitones_count)
-    root_chirp = generate_chirp(
-        sample_rate, root_begin, root_end, amplitude / 3, duration
+    note_count = len(shape) + 1
+
+    root_begin: float = get_note_frequency_by_name(begin_note, begin_octave, 440.0)
+    root_end: float = _increase_semitones(root_begin, semitone_count)
+    result = generate_chirp(
+        sample_rate, root_begin, root_end, amplitude / note_count, duration
     )
 
-    third_begin: float = _increase_semitones(root_begin, 4)
-    third_end: float = _increase_semitones(third_begin, semitones_count)
-    third_chirp = generate_chirp(
-        sample_rate, third_begin, third_end, amplitude / 3, duration
+    for this_note_offset in shape:
+        note_begin: float = _increase_semitones(root_begin, this_note_offset)
+        note_end: float = _increase_semitones(note_begin, semitone_count)
+        result += generate_chirp(
+            sample_rate, note_begin, note_end, amplitude / note_count, duration
+        )
+
+    return result
+
+
+def generate_major_chord_chirp(
+    sample_rate: int,
+    begin_note: str,
+    begin_octave: int,
+    end_note: str,
+    end_octave: int,
+    amplitude: float,
+    duration: float,
+) -> np.ndarray:
+    return generate_generic_chord_chirp(
+        sample_rate,
+        [4, 7],
+        begin_note,
+        begin_octave,
+        end_note,
+        end_octave,
+        amplitude,
+        duration,
     )
 
-    fifth_begin: float = _increase_semitones(root_begin, 7)
-    fifth_end: float = _increase_semitones(fifth_begin, semitones_count)
-    fifth_chirp = generate_chirp(
-        sample_rate, fifth_begin, fifth_end, amplitude / 3, duration
-    )
 
-    return root_chirp + third_chirp + fifth_chirp
+def generate_tritone_chirp(
+    sample_rate: int,
+    begin_note: str,
+    begin_octave: int,
+    end_note: str,
+    end_octave: int,
+    amplitude: float,
+    duration: float,
+) -> np.ndarray:
+    return generate_generic_chord_chirp(
+        sample_rate,
+        [6],
+        begin_note,
+        begin_octave,
+        end_note,
+        end_octave,
+        amplitude,
+        duration,
+    )

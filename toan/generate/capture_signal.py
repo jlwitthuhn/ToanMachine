@@ -5,7 +5,7 @@
 import numpy as np
 
 from toan.generate.chirp import generate_chirp
-from toan.generate.chord import generate_major_chord_chirp
+from toan.generate.chord import generate_major_chord_chirp, generate_tritone_chirp
 from toan.generate.scale import generate_chromatic_scale
 from toan.mix import concat_signals
 from toan.music import get_note_frequency_by_name, get_note_index_by_name
@@ -25,9 +25,11 @@ def generate_capture_signal(sample_rate: int, amplitude: float) -> np.ndarray:
     )
     scale = concat_signals(scale_list)
 
-    # Sweeping major chord
     sweep_major_chord = generate_major_chord_chirp(
         sample_rate, "E", 1, "E", 7, amplitude, 6.0
     )
+    sweep_tritone = generate_tritone_chirp(sample_rate, "E", 1, "E", 7, amplitude, 6.0)
 
-    return concat_signals([sweep_up, scale, sweep_major_chord], sample_rate // 2)
+    return concat_signals(
+        [sweep_up, scale, sweep_major_chord, sweep_tritone], sample_rate // 2
+    )
