@@ -6,7 +6,7 @@ import math
 
 import numpy as np
 
-from toan.generate.tone import generate_tone
+from toan.signal.tone import generate_tone
 
 
 def _generate_semitone_scale_frequencies(

@@ -8,8 +8,8 @@ import numpy as np
 import sounddevice as sd
 from PySide6 import QtCore, QtWidgets
 
-from toan.generate import generate_tone
 from toan.gui.record import RecordingContext
+from toan.signal import generate_tone
 from toan.soundio import SdPlayrecController, prepare_play_record
 
 VOLUME_TEXT = [

@@ -6,8 +6,8 @@ import numpy as np
 import sounddevice as sd
 from PySide6 import QtCore, QtWidgets
 
-from toan.generate import generate_capture_signal
 from toan.gui.record import RecordingContext
+from toan.signal import generate_capture_signal
 from toan.soundio import SdPlayrecController, prepare_play_record
 
 RECORD_TEXT = [

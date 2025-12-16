@@ -6,8 +6,8 @@ import math
 
 import numpy as np
 
-from toan.generate.chirp import generate_chirp
 from toan.music import get_note_frequency_by_name, get_note_index_by_name
+from toan.signal.chirp import generate_chirp
 
 
 def _increase_semitones(frequency: float, semitones: int) -> float:
