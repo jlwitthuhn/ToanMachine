@@ -8,6 +8,7 @@ from toan.mix import concat_signals
 from toan.music import get_note_frequency_by_name, get_note_index_by_name
 from toan.signal.chirp import generate_chirp
 from toan.signal.chord import generate_major_chord_chirp, generate_tritone_chirp
+from toan.signal.gaussian import generate_gaussian_pulse
 from toan.signal.scale import generate_chromatic_scale
 
 
@@ -15,7 +16,11 @@ def generate_capture_signal(sample_rate: int, amplitude: float) -> np.ndarray:
     sweep_up = generate_chirp(sample_rate, 20.0, 20000.0, amplitude, 10.0)
 
     # Quarter second of silence
-    silence = np.zeros(sample_rate // 4)
+    silence_quarter = np.zeros(sample_rate // 4)
+
+    # Impulses
+    impulse_real = np.ones(1) * amplitude
+    impulse_short = generate_gaussian_pulse(32) * amplitude
 
     # Lowest bass guitar note is E1
     scale_lo = get_note_frequency_by_name("E", 1, 440)
@@ -34,5 +39,16 @@ def generate_capture_signal(sample_rate: int, amplitude: float) -> np.ndarray:
     sweep_tritone = generate_tritone_chirp(sample_rate, "E", 1, "E", 7, amplitude, 6.0)
 
     return concat_signals(
-        [silence, sweep_up, scale, sweep_major_chord, sweep_tritone], sample_rate // 4
+        [
+            silence_quarter,
+            impulse_real,
+            silence_quarter,
+            impulse_short,
+            silence_quarter,
+            sweep_up,
+            scale,
+            sweep_major_chord,
+            sweep_tritone,
+        ],
+        sample_rate // 4,
     )
