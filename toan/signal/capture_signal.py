@@ -14,6 +14,9 @@ from toan.signal.scale import generate_chromatic_scale
 def generate_capture_signal(sample_rate: int, amplitude: float) -> np.ndarray:
     sweep_up = generate_chirp(sample_rate, 20.0, 20000.0, amplitude, 10.0)
 
+    # Quarter second of silence
+    silence = np.zeros(sample_rate // 4)
+
     # Lowest bass guitar note is E1
     scale_lo = get_note_frequency_by_name("E", 1, 440)
     index_lo = get_note_index_by_name("E", 1)
@@ -31,5 +34,5 @@ def generate_capture_signal(sample_rate: int, amplitude: float) -> np.ndarray:
     sweep_tritone = generate_tritone_chirp(sample_rate, "E", 1, "E", 7, amplitude, 6.0)
 
     return concat_signals(
-        [sweep_up, scale, sweep_major_chord, sweep_tritone], sample_rate // 2
+        [silence, sweep_up, scale, sweep_major_chord, sweep_tritone], sample_rate // 4
     )
