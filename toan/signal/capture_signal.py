@@ -56,6 +56,12 @@ def generate_capture_signal(sample_rate: int, amplitude: float) -> np.ndarray:
     white_noise_full = generate_white_noise(sample_rate) * amplitude
     white_noise_half = white_noise_full * 0.5
     white_noise_quarter = white_noise_half * 0.5
+    gaussian_samples = sample_rate * 2
+    white_noise_gaussian = (
+        generate_white_noise(gaussian_samples)
+        * generate_gaussian_pulse(gaussian_samples)
+        * amplitude
+    )
 
     signal_calibrate_latency = concat_signals(
         [
@@ -77,6 +83,7 @@ def generate_capture_signal(sample_rate: int, amplitude: float) -> np.ndarray:
             white_noise_full,
             white_noise_half,
             white_noise_quarter,
+            white_noise_gaussian,
             sweep_up,
             scale,
             sweep_major_chord,
