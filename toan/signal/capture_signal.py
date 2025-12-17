@@ -11,16 +11,27 @@ from toan.signal.chord import generate_major_chord_chirp, generate_tritone_chirp
 from toan.signal.gaussian import generate_gaussian_pulse
 from toan.signal.scale import generate_chromatic_scale
 
+SEGMENT_DURATION = 5.0
+
 
 def generate_capture_signal(sample_rate: int, amplitude: float) -> np.ndarray:
-    sweep_up = generate_chirp(sample_rate, 20.0, 20000.0, amplitude, 10.0)
+    quarter_second_samples = sample_rate // 4
 
     # Quarter second of silence
-    silence_quarter = np.zeros(sample_rate // 4)
+    silence_quarter = np.zeros(quarter_second_samples)
 
-    # Impulses
-    impulse_real = np.ones(1) * amplitude
-    impulse_short = generate_gaussian_pulse(32) * amplitude
+    # Impulse to measure latency
+    impulse_latency = np.ones(1) * amplitude
+
+    # Impulses just for fun
+    impulse0 = np.ones(1) * amplitude
+    impulse1 = generate_gaussian_pulse(sample_rate // 4000) * amplitude
+    impulse2 = generate_gaussian_pulse(sample_rate // 3000) * amplitude
+    impulse3 = generate_gaussian_pulse(sample_rate // 2000) * amplitude
+    impulse4 = generate_gaussian_pulse(sample_rate // 1500) * amplitude
+
+    # Sweep of audible frequencies
+    sweep_up = generate_chirp(sample_rate, 20.0, 20000.0, amplitude, SEGMENT_DURATION)
 
     # Lowest bass guitar note is E1
     scale_lo = get_note_frequency_by_name("E", 1, 440)
@@ -29,26 +40,46 @@ def generate_capture_signal(sample_rate: int, amplitude: float) -> np.ndarray:
     index_hi = get_note_index_by_name("E", 7)
     scale_steps = index_hi - index_lo
     scale_list = generate_chromatic_scale(
-        sample_rate, scale_lo, scale_steps, amplitude, 0.25
+        sample_rate, scale_lo, scale_steps, amplitude, 0.20
     )
     scale = concat_signals(scale_list)
 
     sweep_major_chord = generate_major_chord_chirp(
-        sample_rate, "E", 1, "E", 7, amplitude, 6.0
+        sample_rate, "E", 1, "E", 7, amplitude, SEGMENT_DURATION
     )
-    sweep_tritone = generate_tritone_chirp(sample_rate, "E", 1, "E", 7, amplitude, 6.0)
+    sweep_tritone = generate_tritone_chirp(
+        sample_rate, "E", 1, "E", 7, amplitude, SEGMENT_DURATION
+    )
 
-    return concat_signals(
+    signal_calibrate_latency = concat_signals(
         [
             silence_quarter,
-            impulse_real,
+            impulse_latency,
+            impulse_latency,
             silence_quarter,
-            impulse_short,
-            silence_quarter,
+        ],
+        quarter_second_samples,
+    )
+
+    signal_train = concat_signals(
+        [
+            impulse0,
+            impulse1,
+            impulse2,
+            impulse3,
+            impulse4,
             sweep_up,
             scale,
             sweep_major_chord,
             sweep_tritone,
         ],
-        sample_rate // 4,
+        quarter_second_samples,
+    )
+
+    return concat_signals(
+        [
+            signal_calibrate_latency,
+            signal_train,
+        ],
+        0,
     )
