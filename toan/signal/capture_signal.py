@@ -11,6 +11,7 @@ from toan.signal.chord import generate_major_chord_chirp, generate_tritone_chirp
 from toan.signal.gaussian import generate_gaussian_pulse
 from toan.signal.noise import generate_white_noise
 from toan.signal.scale import generate_chromatic_scale
+from toan.signal.trig import generate_cosine_wave
 
 SEGMENT_DURATION = 5.0
 
@@ -52,6 +53,12 @@ def generate_capture_signal(sample_rate: int, amplitude: float) -> np.ndarray:
     sweep_tritone = generate_tritone_chirp(
         sample_rate, "E", 1, "E", 7, amplitude, SEGMENT_DURATION
     )
+    assert len(sweep_major_chord) == len(sweep_tritone)
+    cosine_multiplier = generate_cosine_wave(
+        len(sweep_major_chord), sample_rate // 3, amplitude * 0.1, amplitude
+    )
+    sweep_major_chord_cosine = sweep_major_chord * cosine_multiplier
+    sweep_tritone_cosine = sweep_tritone * cosine_multiplier
 
     white_noise_full = generate_white_noise(sample_rate) * amplitude
     white_noise_half = white_noise_full * 0.5
@@ -87,7 +94,9 @@ def generate_capture_signal(sample_rate: int, amplitude: float) -> np.ndarray:
             sweep_up,
             scale,
             sweep_major_chord,
+            sweep_major_chord_cosine,
             sweep_tritone,
+            sweep_tritone_cosine,
         ],
         quarter_second_samples,
     )
