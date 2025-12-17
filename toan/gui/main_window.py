@@ -28,6 +28,9 @@ class MainWindow(QtWidgets.QWidget):
         record_button.clicked.connect(self._clicked_record_device)
         create_layout.addWidget(record_button)
 
+        train_button = QtWidgets.QPushButton("Train Model", self)
+        create_layout.addWidget(train_button)
+
         create_group_box.setLayout(create_layout)
         layout.addWidget(create_group_box)
 
