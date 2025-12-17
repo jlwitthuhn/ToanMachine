@@ -2,7 +2,7 @@
 # https://www.gnu.org/licenses/gpl-3.0.en.html
 # SPDX-License-Identifier: GPL-3.0-only
 
-from PySide6 import QtWidgets
+from PySide6 import QtCore, QtWidgets
 
 from toan.gui.train.input import TrainInputFilePage
 from toan.gui.train.intro import TrainIntroPage
@@ -11,6 +11,7 @@ from toan.gui.train.intro import TrainIntroPage
 class TrainingWizard(QtWidgets.QWizard):
     def __init__(self, parent):
         super().__init__(parent)
+        self.setAttribute(QtCore.Qt.WidgetAttribute.WA_DeleteOnClose)
 
         self.addPage(TrainIntroPage(self))
         self.addPage(TrainInputFilePage(self))

@@ -2,7 +2,7 @@
 # https://www.gnu.org/licenses/gpl-3.0.en.html
 # SPDX-License-Identifier: GPL-3.0-only
 
-from PySide6 import QtWidgets
+from PySide6 import QtCore, QtWidgets
 
 from toan.gui.record.context import RecordingContext
 from toan.gui.record.device import RecordDevicePage
@@ -17,6 +17,7 @@ class RecordWizard(QtWidgets.QWizard):
 
     def __init__(self, parent):
         super().__init__(parent)
+        self.setAttribute(QtCore.Qt.WidgetAttribute.WA_DeleteOnClose)
         self.context = RecordingContext()
 
         self.addPage(RecordIntroPage(self))
