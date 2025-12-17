@@ -2,6 +2,8 @@
 # https://www.gnu.org/licenses/gpl-3.0.en.html
 # SPDX-License-Identifier: GPL-3.0-only
 
+from pathlib import Path
+
 from PySide6 import QtWidgets
 
 
@@ -24,6 +26,7 @@ class TrainInputFilePage(QtWidgets.QWizardPage):
         file_layout.setContentsMargins(0, 0, 0, 0)
 
         self.file_edit = QtWidgets.QLineEdit(self)
+        self.file_edit.textChanged.connect(self.completeChanged)
         file_layout.addWidget(self.file_edit)
 
         file_browse_button = QtWidgets.QPushButton("Browse...")
@@ -33,6 +36,10 @@ class TrainInputFilePage(QtWidgets.QWizardPage):
         layout.addWidget(file_widget)
 
         layout.addStretch(1)
+
+    def isComplete(self):
+        file_path = self.file_edit.text()
+        return Path(file_path).is_file()
 
     def _pressed_browse(self):
         path, _ = QtWidgets.QFileDialog.getOpenFileName(
