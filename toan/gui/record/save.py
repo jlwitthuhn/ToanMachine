@@ -39,6 +39,9 @@ class RecordSavePage(QtWidgets.QWizardPage):
     def validatePage(self) -> bool:
         file_path, _ = QtWidgets.QFileDialog.getSaveFileName(filter="Zip Files (*.zip)")
 
+        if file_path == "":
+            return False
+
         dry_wav = io.BytesIO()
         scipy.io.wavfile.write(
             dry_wav,
