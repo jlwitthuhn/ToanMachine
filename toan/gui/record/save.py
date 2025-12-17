@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
 import io
+import json
 import zipfile
 
 import numpy as np
@@ -52,8 +53,14 @@ class RecordSavePage(QtWidgets.QWizardPage):
         )
         wet_wav.seek(0)
 
+        metadata = {
+            "version": 0,
+            "sample_rate": self.context.sample_rate,
+        }
+
         with zipfile.ZipFile(file_path, "w", zipfile.ZIP_DEFLATED) as zip:
             zip.writestr("readme.txt", "\n\n".join(SAVE_README_TEXT))
+            zip.writestr("config.json", json.dumps(metadata, indent=4))
             zip.writestr("dry.wav", dry_wav.getvalue())
             zip.writestr("wet.wav", wet_wav.getvalue())
 
