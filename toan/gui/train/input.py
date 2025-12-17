@@ -11,7 +11,7 @@ class TrainInputFilePage(QtWidgets.QWizardPage):
     def __init__(self, parent):
         super().__init__(parent)
 
-        self.setTitle("Introduction")
+        self.setTitle("Select Recording")
         layout = QtWidgets.QVBoxLayout(self)
 
         layout.addStretch(1)

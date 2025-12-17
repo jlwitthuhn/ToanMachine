@@ -19,6 +19,7 @@ def _clicked_play_training_signal():
 class MainWindow(QtWidgets.QWidget):
     def __init__(self):
         super().__init__()
+        self.setWindowTitle("Toan Machine")
 
         layout = QtWidgets.QVBoxLayout()
 
