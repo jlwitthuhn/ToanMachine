@@ -13,7 +13,7 @@ from toan.signal.noise import generate_white_noise
 from toan.signal.scale import generate_chromatic_scale
 from toan.signal.trig import generate_cosine_wave
 
-SEGMENT_DURATION = 5.0
+SEGMENT_DURATION = 6.0
 
 
 def generate_capture_signal(sample_rate: int, amplitude: float) -> np.ndarray:
@@ -55,7 +55,7 @@ def generate_capture_signal(sample_rate: int, amplitude: float) -> np.ndarray:
     )
     assert len(sweep_major_chord) == len(sweep_tritone)
     cosine_multiplier = generate_cosine_wave(
-        len(sweep_major_chord), sample_rate // 3, amplitude * 0.1, amplitude
+        len(sweep_major_chord), sample_rate // 4, 0.1, 1.0
     )
     sweep_major_chord_cosine = sweep_major_chord * cosine_multiplier
     sweep_tritone_cosine = sweep_tritone * cosine_multiplier
