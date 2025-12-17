@@ -6,6 +6,7 @@ from PySide6 import QtCore, QtWidgets
 
 from toan.gui.train.input import TrainInputFilePage
 from toan.gui.train.intro import TrainIntroPage
+from toan.gui.train.validate import TrainValidatePage
 
 
 class TrainingWizard(QtWidgets.QWizard):
@@ -15,6 +16,7 @@ class TrainingWizard(QtWidgets.QWizard):
 
         self.addPage(TrainIntroPage(self))
         self.addPage(TrainInputFilePage(self))
+        self.addPage(TrainValidatePage(self))
 
         self.setWindowTitle("Training Wizard")
         self.setModal(True)
