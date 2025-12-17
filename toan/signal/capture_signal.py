@@ -9,6 +9,7 @@ from toan.music import get_note_frequency_by_name, get_note_index_by_name
 from toan.signal.chirp import generate_chirp
 from toan.signal.chord import generate_major_chord_chirp, generate_tritone_chirp
 from toan.signal.gaussian import generate_gaussian_pulse
+from toan.signal.noise import generate_white_noise
 from toan.signal.scale import generate_chromatic_scale
 
 SEGMENT_DURATION = 5.0
@@ -51,6 +52,8 @@ def generate_capture_signal(sample_rate: int, amplitude: float) -> np.ndarray:
         sample_rate, "E", 1, "E", 7, amplitude, SEGMENT_DURATION
     )
 
+    white_noise = generate_white_noise(sample_rate) * amplitude
+
     signal_calibrate_latency = concat_signals(
         [
             silence_quarter,
@@ -68,6 +71,7 @@ def generate_capture_signal(sample_rate: int, amplitude: float) -> np.ndarray:
             impulse2,
             impulse3,
             impulse4,
+            white_noise,
             sweep_up,
             scale,
             sweep_major_chord,
