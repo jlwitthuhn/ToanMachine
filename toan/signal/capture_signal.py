@@ -16,6 +16,7 @@ SEGMENT_DURATION = 5.0
 
 
 def generate_capture_signal(sample_rate: int, amplitude: float) -> np.ndarray:
+    np.random.seed(12345)
     quarter_second_samples = sample_rate // 4
 
     # Quarter second of silence
@@ -52,7 +53,9 @@ def generate_capture_signal(sample_rate: int, amplitude: float) -> np.ndarray:
         sample_rate, "E", 1, "E", 7, amplitude, SEGMENT_DURATION
     )
 
-    white_noise = generate_white_noise(sample_rate) * amplitude
+    white_noise_full = generate_white_noise(sample_rate) * amplitude
+    white_noise_half = white_noise_full * 0.5
+    white_noise_quarter = white_noise_half * 0.5
 
     signal_calibrate_latency = concat_signals(
         [
@@ -71,7 +74,9 @@ def generate_capture_signal(sample_rate: int, amplitude: float) -> np.ndarray:
             impulse2,
             impulse3,
             impulse4,
-            white_noise,
+            white_noise_full,
+            white_noise_half,
+            white_noise_quarter,
             sweep_up,
             scale,
             sweep_major_chord,
