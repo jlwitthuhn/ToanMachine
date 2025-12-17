@@ -6,12 +6,16 @@ from pathlib import Path
 
 from PySide6 import QtWidgets
 
+from toan.gui.train import TrainingContext
+
 
 class TrainInputFilePage(QtWidgets.QWizardPage):
+    context: TrainingContext
     file_edit: QtWidgets.QLineEdit
 
-    def __init__(self, parent):
+    def __init__(self, parent, context: TrainingContext):
         super().__init__(parent)
+        self.context = context
 
         self.setTitle("Select Recording")
         layout = QtWidgets.QVBoxLayout(self)
@@ -40,6 +44,10 @@ class TrainInputFilePage(QtWidgets.QWizardPage):
     def isComplete(self):
         file_path = self.file_edit.text()
         return Path(file_path).is_file()
+
+    def validatePage(self):
+        self.context.input_path = self.file_edit.text()
+        return True
 
     def _pressed_browse(self):
         path, _ = QtWidgets.QFileDialog.getOpenFileName(

@@ -4,12 +4,16 @@
 
 from PySide6 import QtWidgets
 
+from toan.gui.train import TrainingContext
+
 
 class TrainValidatePage(QtWidgets.QWizardPage):
+    context: TrainingContext
     text_edit: QtWidgets.QTextEdit
 
-    def __init__(self, parent):
+    def __init__(self, parent, context: TrainingContext):
         super().__init__(parent)
+        self.context = context
 
         self.setTitle("Checking Input")
         layout = QtWidgets.QVBoxLayout(self)
@@ -20,4 +24,4 @@ class TrainValidatePage(QtWidgets.QWizardPage):
 
     def initializePage(self):
         self.text_edit.clear()
-        self.text_edit.append("Analyzing file: PATH HERE\n")
+        self.text_edit.append(f"Analyzing input file: {self.context.input_path}\n")
