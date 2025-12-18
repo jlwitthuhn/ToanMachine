@@ -1,6 +1,7 @@
 # This file is part of Toan Machine and is licensed under the GPLv3
 # https://www.gnu.org/licenses/gpl-3.0.en.html
 # SPDX-License-Identifier: GPL-3.0-only
+
 import threading
 import zipfile
 
@@ -9,8 +10,13 @@ from PySide6 import QtWidgets
 from toan.gui.train import TrainingContext
 
 
+class _ValidateThreadContext:
+    text_edit: QtWidgets.QTextEdit
+
+
 class TrainValidatePage(QtWidgets.QWizardPage):
     context: TrainingContext
+    thread_context: _ValidateThreadContext | None = None
     text_edit: QtWidgets.QTextEdit
 
     def __init__(self, parent, context: TrainingContext):
@@ -27,21 +33,28 @@ class TrainValidatePage(QtWidgets.QWizardPage):
     def initializePage(self):
         self.text_edit.clear()
         self.text_edit.append(f"Analyzing input file: {self.context.input_path}")
-        threading.Thread(target=self._run_thread).start()
+        self.thread_context = _ValidateThreadContext()
+        self.thread_context.text_edit = self.text_edit
 
-    def _run_thread(self):
-        self.text_edit.append("Loading as zip archive...")
-        try:
-            with zipfile.ZipFile(self.context.input_path, "r") as zip_file:
-                self.text_edit.append("Loading file: config.json")
-                try:
-                    config_json_bytes = zip_file.read("config.json")
-                except KeyError:
-                    self.text_edit.append("Error: config.json not found")
-                    return
-        except zipfile.BadZipFile:
-            self.text_edit.append("Error: File is not a valid zip archive")
-            return
-        except:
-            self.text_edit.append("Error: Unknown error occurred")
-            return
+        def thread_func():
+            _run_thread(self.thread_context, self.context.input_path)
+
+        threading.Thread(target=thread_func).start()
+
+
+def _run_thread(context: _ValidateThreadContext, input_path: str):
+    context.text_edit.append("Loading as zip archive...")
+    try:
+        with zipfile.ZipFile(input_path, "r") as zip_file:
+            context.text_edit.append("Loading file: config.json")
+            try:
+                config_json_bytes = zip_file.read("config.json")
+            except KeyError:
+                context.text_edit.append("Error: config.json not found")
+                return
+    except zipfile.BadZipFile:
+        context.text_edit.append("Error: File is not a valid zip archive")
+        return
+    except:
+        context.text_edit.append("Error: Unknown error occurred")
+        return
