@@ -43,8 +43,13 @@ def generate_capture_signal(sample_rate: int, amplitude: float) -> np.ndarray:
     index_hi = get_note_index_by_name("E", 7)
     scale_steps = index_hi - index_lo
     scale_list = generate_chromatic_scale(
-        sample_rate, scale_lo, scale_steps, amplitude, 0.20
+        sample_rate, scale_lo, scale_steps, amplitude, 0.25
     )
+    scale_step_samples = len(scale_list[0])
+    scale_step_gaussian = generate_gaussian_pulse(scale_step_samples)
+    for scale_step in scale_list:
+        scale_step *= scale_step_gaussian
+        pass
     scale = concat_signals(scale_list)
 
     sweep_major_chord = generate_major_chord_chirp(
