@@ -38,7 +38,10 @@ class TrainValidatePage(QtWidgets.QWizardPage):
                     config_json_bytes = zip_file.read("config.json")
                 except KeyError:
                     self.text_edit.append("Error: config.json not found")
+                    return
         except zipfile.BadZipFile:
             self.text_edit.append("Error: File is not a valid zip archive")
+            return
         except:
             self.text_edit.append("Error: Unknown error occurred")
+            return
