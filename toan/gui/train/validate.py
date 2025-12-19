@@ -1,11 +1,15 @@
 # This file is part of Toan Machine and is licensed under the GPLv3
 # https://www.gnu.org/licenses/gpl-3.0.en.html
 # SPDX-License-Identifier: GPL-3.0-only
+
+import io
 import json
 import threading
 import zipfile
 
+import numpy as np
 from PySide6 import QtGui, QtWidgets
+from scipy.io import wavfile
 
 from toan.gui.train import TrainingContext
 
@@ -112,6 +116,13 @@ def _run_thread(context: _ValidateThreadContext, input_path: str):
                     f"Loading dry signal: {config_json["dry_signal"]}"
                 )
                 dry_signal_bytes = zip_file.read(config_json["dry_signal"])
+                with io.BytesIO(dry_signal_bytes) as dry_bytes_io:
+                    dry_sample_rate, dry_signal = wavfile.read(dry_bytes_io)
+                    if dry_sample_rate != config_json["sample_rate"]:
+                        context.text_edit.append(
+                            "Error: dry signal has unexpected sample rate"
+                        )
+                        return
             except:
                 context.text_edit.append(
                     f"Error: Failed to load dry signal from {config_json["dry_signal"]}"
@@ -123,13 +134,27 @@ def _run_thread(context: _ValidateThreadContext, input_path: str):
                     f"Loading wet signal: {config_json["wet_signal"]}"
                 )
                 wet_signal_bytes = zip_file.read(config_json["wet_signal"])
+                with io.BytesIO(wet_signal_bytes) as wet_bytes_io:
+                    wet_sample_rate, wet_signal = wavfile.read(wet_bytes_io)
+                    if wet_sample_rate != config_json["sample_rate"]:
+                        context.text_edit.append(
+                            "Error: wet signal has unexpected sample rate"
+                        )
+                        return
             except:
                 context.text_edit.append(
                     f"Error: Failed to load wet signal from {config_json["wet_signal"]}"
                 )
                 return
 
-            context.text_edit.append("TODO: Finish validating")
+            # Input file is half a second of silence, a click, quarter second silence, click, half second silence
+            dry_silent = dry_signal[dry_sample_rate // 8 : 3 * dry_sample_rate // 8]
+            dry_noise_floor = np.max(np.abs(dry_silent))
+            context.text_edit.append(f"Dry noise floor: {dry_noise_floor}")
+
+            wet_silent = wet_signal[wet_sample_rate // 8 : 3 * wet_sample_rate // 8]
+            wet_noise_floor = np.max(np.abs(wet_silent))
+            context.text_edit.append(f"Wet noise floor: {wet_noise_floor}")
 
     except zipfile.BadZipFile:
         context.text_edit.append("Error: File is not a valid zip archive")
