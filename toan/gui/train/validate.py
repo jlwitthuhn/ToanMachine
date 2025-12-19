@@ -1,7 +1,7 @@
 # This file is part of Toan Machine and is licensed under the GPLv3
 # https://www.gnu.org/licenses/gpl-3.0.en.html
 # SPDX-License-Identifier: GPL-3.0-only
-
+import json
 import threading
 import zipfile
 
@@ -51,12 +51,86 @@ def _run_thread(context: _ValidateThreadContext, input_path: str):
     context.text_edit.append("Loading as zip archive...")
     try:
         with zipfile.ZipFile(input_path, "r") as zip_file:
-            context.text_edit.append("Loading file: config.json")
+            context.text_edit.append("Loading config...")
+
             try:
                 config_json_bytes = zip_file.read("config.json")
+                config_json = json.loads(config_json_bytes.decode("utf-8"))
             except KeyError:
                 context.text_edit.append("Error: config.json not found")
                 return
+
+            if "version" not in config_json:
+                context.text_edit.append(
+                    "Error: config.json does not contain key 'version'"
+                )
+                return
+            if (
+                not isinstance(config_json["version"], int)
+                or config_json["version"] != 0
+            ):
+                context.text_edit.append("Error: config.json has unknown version")
+                return
+
+            if "device_name" not in config_json or not isinstance(
+                config_json["device_name"], str
+            ):
+                context.text_edit.append(
+                    "Error: config.json does not contain key 'device_name'"
+                )
+                return
+
+            context.text_edit.append(f"Device name: {config_json["device_name"]}")
+
+            if "sample_rate" not in config_json or not isinstance(
+                config_json["sample_rate"], int
+            ):
+                context.text_edit.append(
+                    "Error: config.json does not contain key 'sample_rate'"
+                )
+                return
+
+            context.text_edit.append(f"Sample rate: {config_json["sample_rate"]}")
+
+            if "dry_signal" not in config_json or not isinstance(
+                config_json["dry_signal"], str
+            ):
+                context.text_edit.append(
+                    "Error: config.json does not contain key 'dry_signal'"
+                )
+                return
+            if "wet_signal" not in config_json or not isinstance(
+                config_json["wet_signal"], str
+            ):
+                context.text_edit.append(
+                    "Error: config.json does not contain key 'wet_signal'"
+                )
+                return
+
+            try:
+                context.text_edit.append(
+                    f"Loading dry signal: {config_json["dry_signal"]}"
+                )
+                dry_signal_bytes = zip_file.read(config_json["dry_signal"])
+            except:
+                context.text_edit.append(
+                    f"Error: Failed to load dry signal from {config_json["dry_signal"]}"
+                )
+                return
+
+            try:
+                context.text_edit.append(
+                    f"Loading wet signal: {config_json["wet_signal"]}"
+                )
+                wet_signal_bytes = zip_file.read(config_json["wet_signal"])
+            except:
+                context.text_edit.append(
+                    f"Error: Failed to load wet signal from {config_json["wet_signal"]}"
+                )
+                return
+
+            context.text_edit.append("TODO: Finish validating")
+
     except zipfile.BadZipFile:
         context.text_edit.append("Error: File is not a valid zip archive")
         return
