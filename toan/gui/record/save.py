@@ -58,6 +58,7 @@ class RecordSavePage(QtWidgets.QWizardPage):
 
         metadata = {
             "version": 0,
+            "device_name": self.context.device_name,
             "sample_rate": self.context.sample_rate,
         }
 
