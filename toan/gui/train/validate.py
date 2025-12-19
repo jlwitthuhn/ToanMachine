@@ -149,12 +149,38 @@ def _run_thread(context: _ValidateThreadContext, input_path: str):
 
             # Input file is half a second of silence, a click, quarter second silence, click, half second silence
             dry_silent = dry_signal[dry_sample_rate // 8 : 3 * dry_sample_rate // 8]
+            dry_clicks = dry_signal[3 * dry_sample_rate // 8 : dry_sample_rate]
             dry_noise_floor = np.max(np.abs(dry_silent))
             context.text_edit.append(f"Dry noise floor: {dry_noise_floor}")
 
             wet_silent = wet_signal[wet_sample_rate // 8 : 3 * wet_sample_rate // 8]
             wet_noise_floor = np.max(np.abs(wet_silent))
             context.text_edit.append(f"Wet noise floor: {wet_noise_floor}")
+
+            # For both files, we want to find the first sample that exceeds 3x the noise floor
+            target_signal_strength = wet_noise_floor * 3
+
+            dry_click_indices = []
+            dry_click_iters_remaining = 0
+            for i in range(len(dry_clicks)):
+                this_sample = dry_clicks[i]
+                if np.abs(this_sample) > target_signal_strength:
+                    if dry_click_iters_remaining <= 0:
+                        dry_click_indices.append(i)
+
+                if np.abs(this_sample) < wet_noise_floor * 2:
+                    dry_click_iters_remaining -= 1
+                else:
+                    dry_click_iters_remaining = 25  # Samples of silence before a click 'ends' and we listen for another
+
+            if len(dry_click_indices) != 2:
+                context.text_edit.append(
+                    f"Error: Failed to locate clicks in dry signal"
+                )
+                return
+
+            dry_click_delta = dry_click_indices[1] - dry_click_indices[0]
+            context.text_edit.append(f"Dry click delta: {dry_click_delta}")
 
     except zipfile.BadZipFile:
         context.text_edit.append("Error: File is not a valid zip archive")
