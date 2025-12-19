@@ -51,6 +51,26 @@ class TrainValidatePage(QtWidgets.QWizardPage):
         threading.Thread(target=thread_func).start()
 
 
+def _find_clicks(signal: np.ndarray, raw_noise_floor: int) -> list[int]:
+    click_threshold = raw_noise_floor * 3
+    silence_threshold = raw_noise_floor * 1.5
+    click_indices = []
+    silence_samples_remaining = 0
+    for i in range(len(signal)):
+        this_sample = signal[i]
+        if np.abs(this_sample) > click_threshold:
+            if silence_samples_remaining <= 0:
+                click_indices.append(i)
+
+        if np.abs(this_sample) < silence_threshold:
+            silence_samples_remaining -= 1
+        else:
+            silence_samples_remaining = (
+                25  # Samples of silence before a click 'ends' and we listen for another
+            )
+    return click_indices
+
+
 def _run_thread(context: _ValidateThreadContext, input_path: str):
     context.text_edit.append("Loading as zip archive...")
     try:
@@ -154,25 +174,11 @@ def _run_thread(context: _ValidateThreadContext, input_path: str):
             context.text_edit.append(f"Dry noise floor: {dry_noise_floor}")
 
             wet_silent = wet_signal[wet_sample_rate // 8 : 3 * wet_sample_rate // 8]
+            wet_clicks = wet_signal[3 * wet_sample_rate // 8 : wet_sample_rate]
             wet_noise_floor = np.max(np.abs(wet_silent))
             context.text_edit.append(f"Wet noise floor: {wet_noise_floor}")
 
-            # For both files, we want to find the first sample that exceeds 3x the noise floor
-            target_signal_strength = wet_noise_floor * 3
-
-            dry_click_indices = []
-            dry_click_iters_remaining = 0
-            for i in range(len(dry_clicks)):
-                this_sample = dry_clicks[i]
-                if np.abs(this_sample) > target_signal_strength:
-                    if dry_click_iters_remaining <= 0:
-                        dry_click_indices.append(i)
-
-                if np.abs(this_sample) < wet_noise_floor * 2:
-                    dry_click_iters_remaining -= 1
-                else:
-                    dry_click_iters_remaining = 25  # Samples of silence before a click 'ends' and we listen for another
-
+            dry_click_indices = _find_clicks(dry_clicks, wet_noise_floor)
             if len(dry_click_indices) != 2:
                 context.text_edit.append(
                     f"Error: Failed to locate clicks in dry signal"
@@ -181,6 +187,17 @@ def _run_thread(context: _ValidateThreadContext, input_path: str):
 
             dry_click_delta = dry_click_indices[1] - dry_click_indices[0]
             context.text_edit.append(f"Dry click delta: {dry_click_delta}")
+
+            wet_click_indices = _find_clicks(wet_clicks, wet_noise_floor)
+            if len(wet_click_indices) != 2:
+                print(wet_click_indices)
+                context.text_edit.append(
+                    f"Error: Failed to locate clicks in wet signal"
+                )
+                return
+
+            wet_click_delta = wet_click_indices[1] - wet_click_indices[0]
+            context.text_edit.append(f"Wet click delta: {wet_click_delta}")
 
     except zipfile.BadZipFile:
         context.text_edit.append("Error: File is not a valid zip archive")
