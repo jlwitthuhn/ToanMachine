@@ -5,7 +5,7 @@
 import threading
 import zipfile
 
-from PySide6 import QtWidgets
+from PySide6 import QtGui, QtWidgets
 
 from toan.gui.train import TrainingContext
 
@@ -26,7 +26,12 @@ class TrainValidatePage(QtWidgets.QWizardPage):
         self.setTitle("Checking Input")
         layout = QtWidgets.QVBoxLayout(self)
 
+        font = QtGui.QFont("Courier New")
+        font.setStyleHint(QtGui.QFont.StyleHint.Monospace)
+        font.setStyleHint(QtGui.QFont.StyleHint.TypeWriter)
+
         self.text_edit = QtWidgets.QTextEdit()
+        self.text_edit.setFont(font)
         self.text_edit.setReadOnly(True)
         layout.addWidget(self.text_edit)
 
