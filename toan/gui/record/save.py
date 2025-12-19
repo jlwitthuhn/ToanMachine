@@ -60,6 +60,8 @@ class RecordSavePage(QtWidgets.QWizardPage):
             "version": 0,
             "device_name": self.context.device_name,
             "sample_rate": self.context.sample_rate,
+            "dry_signal": "dry.wav",
+            "wet_signal": "wet.wav",
         }
 
         with zipfile.ZipFile(file_path, "w", zipfile.ZIP_DEFLATED) as zip:
