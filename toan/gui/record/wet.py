@@ -95,7 +95,6 @@ class RecordWetSignalPage(QtWidgets.QWizardPage):
     def _input_callback(
         self, indata: np.ndarray, frames: int, time, status: sd.CallbackFlags
     ) -> None:
-        print(indata.shape)
         self.recorded_samples.append(
             indata[:, self.context.input_channel.channel_index].copy()
         )
