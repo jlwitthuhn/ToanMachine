@@ -1,3 +1,4 @@
+mlx == 0.30.1
 numpy == 2.3.5
 pyside6-essentials == 6.10.1
 scipy == 1.16.3
