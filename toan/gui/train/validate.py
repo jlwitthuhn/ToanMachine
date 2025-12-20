@@ -29,6 +29,7 @@ class TrainValidatePage(QtWidgets.QWizardPage):
         super().__init__(parent)
         self.context = context
 
+        self.setCommitPage(True)
         self.setTitle("Checking Input")
         layout = QtWidgets.QVBoxLayout(self)
 
