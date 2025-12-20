@@ -100,7 +100,6 @@ def prepare_play_record(
 
         io_stream = sd.Stream(
             samplerate=sample_rate,
-            blocksize=1024,
             device=channel_in.device_index,
             callback=callback_io,
         )
@@ -108,13 +107,11 @@ def prepare_play_record(
     else:
         input_stream = sd.InputStream(
             samplerate=sample_rate,
-            blocksize=1024,
             device=channel_in.device_index,
             callback=callback_in,
         )
         output_stream = sd.OutputStream(
             samplerate=sample_rate,
-            blocksize=1024,
             device=channel_out.device_index,
             callback=callback_out,
         )
