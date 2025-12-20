@@ -51,23 +51,19 @@ class TrainValidatePage(QtWidgets.QWizardPage):
         threading.Thread(target=thread_func).start()
 
 
-def _find_clicks(signal: np.ndarray, raw_noise_floor: int) -> list[int]:
-    click_threshold = raw_noise_floor * 3
-    silence_threshold = raw_noise_floor * 1.5
+def _find_clicks(signal: np.ndarray, raw_noise_floor: float) -> list[int]:
+    noise_threshold = raw_noise_floor * 3.5
+    print("noise_threshold", noise_threshold)
     click_indices = []
     silence_samples_remaining = 0
     for i in range(len(signal)):
         this_sample = signal[i]
-        if np.abs(this_sample) > click_threshold:
+        if np.abs(this_sample) > noise_threshold:
             if silence_samples_remaining <= 0:
                 click_indices.append(i)
-
-        if np.abs(this_sample) < silence_threshold:
-            silence_samples_remaining -= 1
+            silence_samples_remaining = 100
         else:
-            silence_samples_remaining = (
-                25  # Samples of silence before a click 'ends' and we listen for another
-            )
+            silence_samples_remaining -= 1
     return click_indices
 
 
@@ -169,12 +165,12 @@ def _run_thread(context: _ValidateThreadContext, input_path: str):
 
             # Input file is half a second of silence, a click, quarter second silence, click, half second silence
             dry_silent = dry_signal[dry_sample_rate // 8 : 3 * dry_sample_rate // 8]
-            dry_clicks = dry_signal[3 * dry_sample_rate // 8 : dry_sample_rate]
+            dry_clicks = dry_signal[3 * dry_sample_rate // 8 : 5 * dry_sample_rate // 4]
             dry_noise_floor = np.max(np.abs(dry_silent))
             context.text_edit.append(f"Dry noise floor: {dry_noise_floor}")
 
             wet_silent = wet_signal[wet_sample_rate // 8 : 3 * wet_sample_rate // 8]
-            wet_clicks = wet_signal[3 * wet_sample_rate // 8 : wet_sample_rate]
+            wet_clicks = wet_signal[3 * wet_sample_rate // 8 : 5 * wet_sample_rate // 4]
             wet_noise_floor = np.max(np.abs(wet_silent))
             context.text_edit.append(f"Wet noise floor: {wet_noise_floor}")
 
@@ -185,19 +181,28 @@ def _run_thread(context: _ValidateThreadContext, input_path: str):
                 )
                 return
 
-            dry_click_delta = dry_click_indices[1] - dry_click_indices[0]
-            context.text_edit.append(f"Dry click delta: {dry_click_delta}")
-
             wet_click_indices = _find_clicks(wet_clicks, wet_noise_floor)
             if len(wet_click_indices) != 2:
-                print(wet_click_indices)
                 context.text_edit.append(
                     f"Error: Failed to locate clicks in wet signal"
                 )
                 return
 
+            # Click delta is the time between two clicks on a single track
+            # Click delta delta is the difference between the 'Click deltas' of the wet and dry tracks
+            dry_click_delta = dry_click_indices[1] - dry_click_indices[0]
             wet_click_delta = wet_click_indices[1] - wet_click_indices[0]
-            context.text_edit.append(f"Wet click delta: {wet_click_delta}")
+            click_delta_delta = abs(dry_click_delta - wet_click_delta)
+            context.text_edit.append(f"Click delta delta: {click_delta_delta}")
+
+            if click_delta_delta > 4:
+                context.text_edit.append("Error: Click delta delta is greater than 4")
+                return
+
+            latency_samples_a = wet_click_indices[0] - dry_click_indices[0]
+            latency_samples_b = wet_click_indices[1] - dry_click_indices[1]
+            latency_samples = min(latency_samples_a, latency_samples_b)
+            context.text_edit.append(f"Recording latency: {latency_samples} samples")
 
     except zipfile.BadZipFile:
         context.text_edit.append("Error: File is not a valid zip archive")
