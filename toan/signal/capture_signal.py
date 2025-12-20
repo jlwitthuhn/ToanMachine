@@ -109,6 +109,7 @@ def generate_capture_signal(sample_rate: int, amplitude: float) -> np.ndarray:
     return concat_signals(
         [
             signal_calibrate_latency,
+            silence_quarter,
             signal_train,
         ],
         0,
