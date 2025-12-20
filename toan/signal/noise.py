@@ -7,4 +7,4 @@ import numpy as np
 
 def generate_white_noise(samples: int) -> np.ndarray:
     result = np.random.normal(0, 0.40, samples)
-    return result
+    return np.clip(result, -1.0, 1.0)
