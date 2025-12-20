@@ -119,5 +119,5 @@ class RecordWetSignalPage(QtWidgets.QWizardPage):
 
     def _complete(self):
         self.io_controller.close()
-        self.context.signal_recorded = np.concat(self.recorded_samples)
+        self.context.signal_recorded = np.concat(self.recorded_samples).squeeze()
         self.completeChanged.emit()
