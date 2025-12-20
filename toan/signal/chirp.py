@@ -12,8 +12,7 @@ def generate_chirp(
     amplitude: float,
     duration: float,
 ) -> np.ndarray:
-    t = np.linspace(0, duration, int(duration * sample_rate), False)
-    f = begin_freq + (end_freq - begin_freq) * (t / duration)
+    f = np.linspace(begin_freq, end_freq, int(duration * sample_rate), False)
     f_rad = f * 2 * np.pi
     phase = np.cumsum(f_rad) / sample_rate
     return amplitude * np.sin(phase)
