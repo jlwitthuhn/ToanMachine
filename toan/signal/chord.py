@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
 import math
+from enum import Enum
 
 import numpy as np
 
@@ -12,6 +13,14 @@ from toan.signal.chirp import generate_chirp
 
 def _increase_semitones(frequency: float, semitones: int) -> float:
     return frequency * math.pow(2, semitones / 12)
+
+
+class ChordType(Enum):
+    Octave = 1
+    Tritone = 2
+    Major = 3
+    Minor = 4
+    Diminished = 5
 
 
 def generate_generic_chord_chirp(
@@ -48,7 +57,8 @@ def generate_generic_chord_chirp(
     return result
 
 
-def generate_major_chord_chirp(
+def generate_named_chord_chirp(
+    type: ChordType,
     sample_rate: int,
     begin_note: str,
     begin_octave: int,
@@ -57,30 +67,23 @@ def generate_major_chord_chirp(
     amplitude: float,
     duration: float,
 ) -> np.ndarray:
+    shape = None
+    match type:
+        case ChordType.Octave:
+            shape = [12]
+        case ChordType.Tritone:
+            shape = [6]
+        case ChordType.Major:
+            shape = [4, 7]
+        case ChordType.Minor:
+            shape = [3, 7]
+        case ChordType.Diminished:
+            shape = [3, 6]
+        case _:
+            assert False
     return generate_generic_chord_chirp(
         sample_rate,
-        [4, 7],
-        begin_note,
-        begin_octave,
-        end_note,
-        end_octave,
-        amplitude,
-        duration,
-    )
-
-
-def generate_tritone_chirp(
-    sample_rate: int,
-    begin_note: str,
-    begin_octave: int,
-    end_note: str,
-    end_octave: int,
-    amplitude: float,
-    duration: float,
-) -> np.ndarray:
-    return generate_generic_chord_chirp(
-        sample_rate,
-        [6],
+        shape,
         begin_note,
         begin_octave,
         end_note,
