@@ -31,7 +31,7 @@ class NamWaveNetConfig:
     head_scale: float = 0.02
 
 
-def DefaultConfig(self) -> NamWaveNetConfig:
+def DefaultConfig() -> NamWaveNetConfig:
     return NamWaveNetConfig(
         layers=[
             NameWaveNetLayerGroupConfig(
