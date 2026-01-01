@@ -152,6 +152,7 @@ def generate_capture_signal(sample_rate: int, amplitude: float) -> np.ndarray:
         [
             signal_calibrate_latency,
             silence_quarter,
+            silence_quarter,
             signal_train,
             silence_quarter,
             silence_quarter,
