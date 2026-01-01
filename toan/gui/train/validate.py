@@ -23,7 +23,6 @@ class TrainValidatePage(QtWidgets.QWizardPage):
     context: TrainingContext
     thread_context: _ValidateThreadContext | None = None
     text_edit: QtWidgets.QTextEdit
-    validated: bool = False
 
     def __init__(self, parent, context: TrainingContext):
         super().__init__(parent)
@@ -54,7 +53,9 @@ class TrainValidatePage(QtWidgets.QWizardPage):
         threading.Thread(target=thread_func).start()
 
     def isComplete(self):
-        return self.validated
+        return (
+            self.context.signal_dry is not None and self.context.signal_wet is not None
+        )
 
 
 def _find_clicks(signal: np.ndarray, raw_noise_floor: float) -> list[int]:
@@ -190,7 +191,19 @@ def _run_thread(context: _ValidateThreadContext, input_path: str):
             latency_samples = min(latency_samples_a, latency_samples_b)
             print_status(f"Recording latency: {latency_samples} samples")
 
-            context.page.validated = True
+            # Trim the first second off of the dry signal and the equivalent part from wet
+            dry_trimmed = dry_signal[dry_sample_rate:]
+            wet_trimmed = wet_signal[wet_sample_rate + latency_samples :]
+
+            # Now trim the end so both are the same size
+            trimmed_size = min(len(dry_trimmed), len(wet_trimmed))
+            dry_trimmed = dry_trimmed[:trimmed_size]
+            wet_trimmed = wet_trimmed[:trimmed_size]
+
+            assert len(dry_trimmed) == len(wet_trimmed)
+            context.page.context.signal_dry = dry_trimmed
+            context.page.context.signal_wet = wet_trimmed
+
             context.page.completeChanged.emit()
 
     except zipfile.BadZipFile:
