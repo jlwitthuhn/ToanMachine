@@ -4,6 +4,8 @@
 
 from PySide6 import QtWidgets
 
+from toan.model.nam_wavenet import DefaultWaveNetConfig, NamWaveNet
+
 TRAIN_TEXT = [
     "Your model is now training. After training has finished you will be asked to choose a location for the NAM file."
 ]
@@ -30,3 +32,12 @@ class TrainTrainPage(QtWidgets.QWizardPage):
 
         self.bar_progress = QtWidgets.QProgressBar(self)
         layout.addWidget(self.bar_progress)
+
+        _run_training()
+
+
+def _run_training():
+    model_config = DefaultWaveNetConfig()
+    model = NamWaveNet(model_config)
+    assert model is not None
+    print("TODO: Finish training")
