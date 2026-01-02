@@ -7,6 +7,7 @@ from PySide6 import QtCore, QtWidgets
 from toan.gui.playback.context import PlaybackContext
 from toan.gui.playback.input import PlaybackInputFilePage
 from toan.gui.playback.intro import PlaybackIntroPage
+from toan.gui.playback.validate import PlaybackValidatePage
 
 
 class PlaybackWizard(QtWidgets.QWizard):
@@ -14,10 +15,11 @@ class PlaybackWizard(QtWidgets.QWizard):
         super().__init__(parent)
         self.setAttribute(QtCore.Qt.WidgetAttribute.WA_DeleteOnClose)
 
-        context = PlaybackContext()
+        context: PlaybackContext = PlaybackContext()
 
         self.addPage(PlaybackIntroPage(self))
         self.addPage(PlaybackInputFilePage(self, context))
+        self.addPage(PlaybackValidatePage(self, context))
 
         self.setWindowTitle("Playback Wizard")
         self.setModal(True)
