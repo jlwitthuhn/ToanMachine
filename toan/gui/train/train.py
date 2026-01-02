@@ -40,4 +40,4 @@ def _run_training():
     model_config = DefaultWaveNetConfig()
     model = NamWaveNet(model_config)
     assert model is not None
-    print("TODO: Finish training")
+    print(f"input width: {model.receptive_field}")
