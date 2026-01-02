@@ -6,12 +6,16 @@ from pathlib import Path
 
 from PySide6 import QtWidgets
 
+from toan.gui.playback import PlaybackContext
+
 
 class PlaybackInputFilePage(QtWidgets.QWizardPage):
+    context: PlaybackContext
     file_edit: QtWidgets.QLineEdit
 
-    def __init__(self, parent):
+    def __init__(self, parent, context: PlaybackContext):
         super().__init__(parent)
+        self.context = context
 
         self.setTitle("Select NAM Model")
         layout = QtWidgets.QVBoxLayout(self)
@@ -42,7 +46,7 @@ class PlaybackInputFilePage(QtWidgets.QWizardPage):
         return Path(file_path).is_file()
 
     def validatePage(self):
-        # TODO: Store path
+        self.context.nam_model_path = self.file_edit.text()
         return True
 
     def _pressed_browse(self):
