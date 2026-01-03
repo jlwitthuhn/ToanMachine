@@ -20,7 +20,22 @@ def _get_activation(activation: str) -> nn.Module:
 # Specialization to support exporting/importing to a single huge array
 # Functionally the same as normal conv1d
 class _NamConv1dLayer(nn.Conv1d):
-    pass
+    def import_nam_linear_weights(self, weights: mx.array, i: int) -> int:
+        if self.weight is not None:
+            size = self.weight.size
+            my_slice = weights[i : i + size]
+            self.weight = my_slice.reshape(self.weight.shape)
+            i = i + size
+        try:
+            if self.bias is not None:
+                size = self.bias.size
+                my_slice = weights[i : i + size]
+                self.bias = my_slice.reshape(self.bias.shape)
+                i = i + size
+        except AttributeError:
+            # No `bias`
+            pass
+        return i
 
 
 class _NamWaveNetLayer(nn.Module):
@@ -70,6 +85,12 @@ class _NamWaveNetLayer(nn.Module):
             post_activation[:, :, -out_length:],
         )
 
+    def import_nam_linear_weights(self, weights: mx.array, i: int) -> int:
+        i = self.conv.import_nam_linear_weights(weights, i)
+        i = self.input_mixer.import_nam_linear_weights(weights, i)
+        i = self.conv1x1.import_nam_linear_weights(weights, i)
+        return i
+
 
 class _NamWaveNetLayerGroup(nn.Module):
     config: NameWaveNetLayerGroupConfig
@@ -112,6 +133,13 @@ class _NamWaveNetLayerGroup(nn.Module):
             )
         return self.head_rechannel(head_input), x
 
+    def import_nam_linear_weights(self, weights: mx.array, i: int) -> int:
+        i = self.rechannel.import_nam_linear_weights(weights, i)
+        for layer in self.layers:
+            i = layer.import_nam_linear_weights(weights, i)
+        i = self.head_rechannel.import_nam_linear_weights(weights, i)
+        return i
+
     @property
     def receptive_field(self) -> int:
         return 1 + (self.config.kernel_size - 1) * sum(self.config.dilations)
@@ -148,3 +176,10 @@ class NamWaveNet(nn.Module):
         y = self._forward(x)
         assert y.shape[1] == 1
         return y[:, 0, :]
+
+    def import_nam_linear_weights(self, weights: list[float]) -> int:
+        i = 0
+        weights_mx = mx.array(weights)
+        for group in self.layer_groups:
+            i = group.import_nam_linear_weights(weights_mx, i)
+        return i

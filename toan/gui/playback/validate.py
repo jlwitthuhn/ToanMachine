@@ -86,6 +86,13 @@ class PlaybackValidatePage(QtWidgets.QWizardPage):
 
         weights = nam_json["weights"]
         weight_count = len(weights)
-        self.text_edit.append(f"Loaded parameters: {weight_count}")
+        self.text_edit.append(f"Profile parameters: {weight_count}")
 
-        self.text_edit.append("Success")
+        model.import_nam_linear_weights(weights)
+        self.text_edit.append("Model successfully loaded")
+
+        self.context.nam_model = model
+        self.completeChanged.emit()
+
+    def isComplete(self):
+        return self.context.nam_model is not None
