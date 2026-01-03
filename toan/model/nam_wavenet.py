@@ -6,7 +6,7 @@
 # https://github.com/sdatkinson/neural-amp-modeler/blob/e054002e48cd102b0993811d69e8172db4a91597/nam/models/wavenet.py
 
 import mlx.core as mx
-from mlx import nn
+from mlx import nn, utils
 
 from toan.model.nam_wavenet_config import NameWaveNetLayerGroupConfig, NamWaveNetConfig
 
@@ -127,6 +127,10 @@ class NamWaveNet(nn.Module):
             _NamWaveNetLayerGroup(layer_config) for layer_config in config.layers
         ]
         assert config.head_config is None
+
+    @property
+    def parameter_count(self) -> int:
+        return sum(p.size for _, p in utils.tree_flatten(self.parameters()))
 
     @property
     def receptive_field(self) -> int:

@@ -77,5 +77,15 @@ class PlaybackValidatePage(QtWidgets.QWizardPage):
         self.text_edit.append("Creating model...")
 
         model = NamWaveNet(model_config)
+        model_params = model.parameter_count
+        self.text_edit.append(f"Model parameters: {model_params}")
+
+        if "weights" not in nam_json or not isinstance(nam_json["weights"], list):
+            self.text_edit.append("Error: Model weights are not specified")
+            return
+
+        weights = nam_json["weights"]
+        weight_count = len(weights)
+        self.text_edit.append(f"Loaded parameters: {weight_count}")
 
         self.text_edit.append("Success")
