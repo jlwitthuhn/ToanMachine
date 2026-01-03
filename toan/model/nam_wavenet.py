@@ -5,81 +5,10 @@
 # Based on code from Neural Amp Modeler
 # https://github.com/sdatkinson/neural-amp-modeler/blob/e054002e48cd102b0993811d69e8172db4a91597/nam/models/wavenet.py
 
-from dataclasses import dataclass
-
 import mlx.core as mx
 from mlx import nn
 
-
-@dataclass
-class NameWaveNetLayerGroupConfig:
-    input_size: int
-    condition_size: int
-    head_size: int
-    channels: int
-    kernel_size: int
-    dilations: list[int]
-    activation: str
-    gated: bool
-    head_bias: bool
-
-
-@dataclass
-class NamWaveNetConfig:
-    layers: list[NameWaveNetLayerGroupConfig]
-    head_config: None = None
-    head_scale: float = 0.02
-
-
-def DefaultWaveNetConfig() -> NamWaveNetConfig:
-    return NamWaveNetConfig(
-        layers=[
-            NameWaveNetLayerGroupConfig(
-                input_size=1,
-                condition_size=1,
-                head_size=8,
-                channels=16,
-                kernel_size=3,
-                dilations=[
-                    1,
-                    2,
-                    4,
-                    8,
-                    16,
-                    32,
-                    64,
-                    128,
-                    256,
-                    512,
-                ],
-                activation="Tanh",
-                gated=False,
-                head_bias=False,
-            ),
-            NameWaveNetLayerGroupConfig(
-                input_size=16,
-                condition_size=1,
-                head_size=1,
-                channels=8,
-                kernel_size=3,
-                dilations=[
-                    1,
-                    2,
-                    4,
-                    8,
-                    16,
-                    32,
-                    64,
-                    128,
-                    256,
-                    512,
-                ],
-                activation="Tanh",
-                gated=True,
-                head_bias=True,
-            ),
-        ]
-    )
+from toan.model.nam_wavenet_config import NameWaveNetLayerGroupConfig, NamWaveNetConfig
 
 
 def _get_activation(activation: str) -> nn.Module:

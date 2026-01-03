@@ -4,7 +4,8 @@
 
 from PySide6 import QtWidgets
 
-from toan.model.nam_wavenet import DefaultWaveNetConfig, NamWaveNet
+from toan.model.nam_wavenet import NamWaveNet
+from toan.model.nam_wavenet_config import default_wavenet_config
 
 TRAIN_TEXT = [
     "Your model is now training. After training has finished you will be asked to choose a location for the NAM file."
@@ -37,7 +38,7 @@ class TrainTrainPage(QtWidgets.QWizardPage):
 
 
 def _run_training():
-    model_config = DefaultWaveNetConfig()
+    model_config = default_wavenet_config()
     model = NamWaveNet(model_config)
     assert model is not None
     print(f"input width: {model.receptive_field}")
