@@ -7,6 +7,7 @@ import json
 from PySide6 import QtGui, QtWidgets
 
 from toan.gui.playback import PlaybackContext
+from toan.model.nam_wavenet_config import json_wavenet_config
 
 
 class PlaybackValidatePage(QtWidgets.QWizardPage):
@@ -64,42 +65,12 @@ class PlaybackValidatePage(QtWidgets.QWizardPage):
             self.text_edit.append("Error: Model config is not specified")
             return
 
-        model_config = nam_json["config"]
-        valid = _validate_wavenet_config(model_config)
-        if not valid:
+        try:
+            model_config = json_wavenet_config(nam_json["config"])
+        except:
             self.text_edit.append("Error: wavenet config is not valid")
             return
 
+        self.text_edit.append("Loaded config")
+
         self.text_edit.append("Success")
-
-
-def _validate_wavenet_config(config: dict) -> bool:
-    if "layers" not in config or not isinstance(config["layers"], list):
-        return False
-
-    layers = config["layers"]
-    for layer in layers:
-        if not isinstance(layer, dict):
-            return False
-        if "input_size" not in layer or not isinstance(layer["input_size"], int):
-            return False
-        if "condition_size" not in layer or not isinstance(
-            layer["condition_size"], int
-        ):
-            return False
-        if "head_size" not in layer or not isinstance(layer["head_size"], int):
-            return False
-        if "channels" not in layer or not isinstance(layer["channels"], int):
-            return False
-        if "kernel_size" not in layer or not isinstance(layer["kernel_size"], int):
-            return False
-        if "dilations" not in layer or not isinstance(layer["dilations"], list):
-            return False
-        if "activation" not in layer or not isinstance(layer["activation"], str):
-            return False
-        if "gated" not in layer or not isinstance(layer["gated"], bool):
-            return False
-        if "head_bias" not in layer or not isinstance(layer["head_bias"], bool):
-            return False
-
-    return True

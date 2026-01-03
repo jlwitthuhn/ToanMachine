@@ -74,3 +74,38 @@ def default_wavenet_config() -> NamWaveNetConfig:
             ),
         ]
     )
+
+
+def json_wavenet_config(config: dict) -> NamWaveNetConfig:
+    if "layers" not in config or not isinstance(config["layers"], list):
+        raise TypeError("root key 'layers' must be a list")
+
+    layers = config["layers"]
+    for layer in layers:
+        if not isinstance(layer, dict):
+            raise TypeError("layer object must be a list")
+
+        if "input_size" not in layer or not isinstance(layer["input_size"], int):
+            raise TypeError("layer key 'input_size' must be a int")
+        if "condition_size" not in layer or not isinstance(
+            layer["condition_size"], int
+        ):
+            raise TypeError("layer key 'condition_size' must be a int")
+        if "head_size" not in layer or not isinstance(layer["head_size"], int):
+            raise TypeError("layer key 'head_size' must be a int")
+        if "channels" not in layer or not isinstance(layer["channels"], int):
+            raise TypeError("layer key 'channels' must be a int")
+        if "kernel_size" not in layer or not isinstance(layer["kernel_size"], int):
+            raise TypeError("layer key 'kernel_size' must be a int")
+
+        if "dilations" not in layer or not isinstance(layer["dilations"], list):
+            raise TypeError("layer key 'dilations' must be a list")
+
+        if "activation" not in layer or not isinstance(layer["activation"], str):
+            raise TypeError("layer key 'activation' must be a string")
+        if "gated" not in layer or not isinstance(layer["gated"], bool):
+            raise TypeError("layer key 'gated' must be a bool")
+        if "head_bias" not in layer or not isinstance(layer["head_bias"], bool):
+            raise TypeError("layer key 'head_bias' must be a bool")
+
+    return default_wavenet_config()
