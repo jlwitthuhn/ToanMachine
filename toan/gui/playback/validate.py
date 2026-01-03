@@ -7,6 +7,7 @@ import json
 from PySide6 import QtGui, QtWidgets
 
 from toan.gui.playback import PlaybackContext
+from toan.model.nam_wavenet import NamWaveNet
 from toan.model.nam_wavenet_config import json_wavenet_config
 
 
@@ -65,12 +66,16 @@ class PlaybackValidatePage(QtWidgets.QWizardPage):
             self.text_edit.append("Error: Model config is not specified")
             return
 
+        self.text_edit.append("Loading config...")
+
         try:
             model_config = json_wavenet_config(nam_json["config"])
         except:
             self.text_edit.append("Error: wavenet config is not valid")
             return
 
-        self.text_edit.append("Loaded config")
+        self.text_edit.append("Creating model...")
+
+        model = NamWaveNet(model_config)
 
         self.text_edit.append("Success")
