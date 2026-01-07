@@ -35,9 +35,18 @@ class PlaybackListenPage(QtWidgets.QWizardPage):
         hline.setFrameShadow(QtWidgets.QFrame.Shadow.Sunken)
         layout.addWidget(hline)
 
-        self.play_button = QtWidgets.QPushButton("Play", self)
+        self.play_group = QtWidgets.QGroupBox("Playback", self)
+        play_group_layout = QtWidgets.QVBoxLayout(self.play_group)
+
+        self.play_button = QtWidgets.QPushButton("Play", self.play_group)
         self.play_button.clicked.connect(self._clicked_play)
-        layout.addWidget(self.play_button)
+        play_group_layout.addWidget(self.play_button)
+
+        self.stop_button = QtWidgets.QPushButton("Stop Audio", self.play_group)
+        self.stop_button.clicked.connect(self._clicked_stop)
+        play_group_layout.addWidget(self.stop_button)
+
+        layout.addWidget(self.play_group)
 
     def cleanupPage(self):
         sd.stop()
@@ -50,6 +59,9 @@ class PlaybackListenPage(QtWidgets.QWizardPage):
         raw_signal = generate_capture_signal(self.context.sample_rate, 0.8)
         signal = _convert_complete_signal(raw_signal, self.context.nam_model)
         sd.play(signal, self.context.sample_rate)
+
+    def _clicked_stop(self):
+        sd.stop()
 
 
 def _convert_complete_signal(raw_signal: np.ndarray, model: NamWaveNet) -> np.ndarray:
