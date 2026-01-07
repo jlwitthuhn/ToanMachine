@@ -8,3 +8,4 @@ from toan.model.nam_wavenet import NamWaveNet
 class PlaybackContext:
     nam_model_path: str | None = None
     nam_model: NamWaveNet | None = None
+    sample_rate: int = 0

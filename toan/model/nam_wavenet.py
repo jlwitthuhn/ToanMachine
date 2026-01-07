@@ -37,6 +37,13 @@ class _NamConv1dLayer(nn.Conv1d):
             pass
         return i
 
+    def __call__(self, x: mx.array) -> mx.array:
+        # Input is in the format (Batch, Channel, Sequence)
+        # MLX Wants channel last
+        x = x.transpose(0, 2, 1)
+        x = super().__call__(x)
+        return x.transpose(0, 2, 1)
+
 
 class _NamWaveNetLayer(nn.Module):
     channels: int
@@ -165,9 +172,9 @@ class NamWaveNet(nn.Module):
         return 1 + sum([(group.receptive_field - 1) for group in self.layer_groups])
 
     def _forward(self, x: mx.array) -> mx.array:
-        head_input, y = None, x
+        y, head_input = x, None
         for group in self.layer_groups:
-            head_input, y = group(x, y, head_input)
+            head_input, y = group(y, x, head_input)
         return head_input if self.head is None else self.head(head_input)
 
     def __call__(self, x: mx.array) -> mx.array:

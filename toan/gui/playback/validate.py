@@ -50,6 +50,13 @@ class PlaybackValidatePage(QtWidgets.QWizardPage):
             self.text_edit.append("Error: Root json object must be dict")
             return
 
+        if "sample_rate" not in nam_json or not isinstance(
+            nam_json["sample_rate"], int
+        ):
+            self.text_edit.append("Error: Root key 'sample_rate' must be int")
+            return
+        self.context.sample_rate = nam_json["sample_rate"]
+
         if "architecture" not in nam_json:
             self.text_edit.append("Error: Architecture is not specified")
             return
