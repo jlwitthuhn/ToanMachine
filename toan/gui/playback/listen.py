@@ -12,7 +12,7 @@ from toan.model.nam_wavenet import NamWaveNet
 from toan.signal import generate_capture_signal
 
 LISTEN_TEXT = [
-    "This page allows you to listen to the test signal passed through the loaded model.",
+    "This page allows you to asynchronously record a signal, then listen to how the model responds to that signal.",
 ]
 
 
@@ -35,6 +35,15 @@ class PlaybackListenPage(QtWidgets.QWizardPage):
         hline.setFrameShadow(QtWidgets.QFrame.Shadow.Sunken)
         layout.addWidget(hline)
 
+        self.record_group = QtWidgets.QGroupBox("Record", self)
+        record_group_layout = QtWidgets.QFormLayout(self.record_group)
+
+        device_combo = QtWidgets.QComboBox(self.record_group)
+        record_group_layout.addRow("Device:", device_combo)
+
+        record_button = QtWidgets.QPushButton("Record", self.record_group)
+        record_group_layout.addRow("", record_button)
+
         self.play_group = QtWidgets.QGroupBox("Playback", self)
         play_group_layout = QtWidgets.QVBoxLayout(self.play_group)
 
@@ -46,6 +55,7 @@ class PlaybackListenPage(QtWidgets.QWizardPage):
         self.stop_button.clicked.connect(self._clicked_stop)
         play_group_layout.addWidget(self.stop_button)
 
+        layout.addWidget(self.record_group)
         layout.addWidget(self.play_group)
 
     def cleanupPage(self):
