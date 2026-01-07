@@ -10,6 +10,7 @@ from PySide6 import QtWidgets
 from toan.gui.playback import PlaybackContext
 from toan.model.nam_wavenet import NamWaveNet
 from toan.signal import generate_capture_signal
+from toan.soundio import SdChannel, generate_descriptions, get_input_devices
 
 LISTEN_TEXT = [
     "This page allows you to asynchronously record a signal, then listen to how the model responds to that signal.",
@@ -18,6 +19,8 @@ LISTEN_TEXT = [
 
 class PlaybackListenPage(QtWidgets.QWizardPage):
     context: PlaybackContext
+    indev_desc_map: dict[str, SdChannel]
+    indev_combo: QtWidgets.QComboBox
 
     def __init__(self, parent, context: PlaybackContext):
         super().__init__(parent)
@@ -38,10 +41,17 @@ class PlaybackListenPage(QtWidgets.QWizardPage):
         self.record_group = QtWidgets.QGroupBox("Record", self)
         record_group_layout = QtWidgets.QFormLayout(self.record_group)
 
-        device_combo = QtWidgets.QComboBox(self.record_group)
-        record_group_layout.addRow("Device:", device_combo)
+        input_devices = get_input_devices()
+        descriptions, self.indev_desc_map = generate_descriptions(
+            input_devices, include_out=False
+        )
 
-        record_button = QtWidgets.QPushButton("Record", self.record_group)
+        self.indev_combo = QtWidgets.QComboBox(self.record_group)
+        self.indev_combo.addItems(descriptions)
+        record_group_layout.addRow("Device:", self.indev_combo)
+
+        record_button = QtWidgets.QPushButton("Start Recording", self.record_group)
+        record_button.clicked.connect(self._clicked_record)
         record_group_layout.addRow("", record_button)
 
         self.play_group = QtWidgets.QGroupBox("Playback", self)
@@ -69,6 +79,13 @@ class PlaybackListenPage(QtWidgets.QWizardPage):
         raw_signal = generate_capture_signal(self.context.sample_rate, 0.8)
         signal = _convert_complete_signal(raw_signal, self.context.nam_model)
         sd.play(signal, self.context.sample_rate)
+
+    def _clicked_record(self):
+        desc = self.indev_combo.currentText()
+        if desc not in self.indev_desc_map:
+            return
+        channel = self.indev_desc_map[desc]
+        print("Selected: ", channel)
 
     def _clicked_stop(self):
         self._stop_all()
