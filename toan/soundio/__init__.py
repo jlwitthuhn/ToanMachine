@@ -34,7 +34,7 @@ class SdPlayrecController:
         *,
         stream_in: sd.InputStream | None = None,
         stream_out: sd.OutputStream | None = None,
-        stream_io: sd.Stream | None = None
+        stream_io: sd.Stream | None = None,
     ):
         self.stream_in = stream_in
         self.stream_out = stream_out
@@ -124,3 +124,26 @@ def get_input_devices() -> list[SdDevice]:
 
 def get_output_devices() -> list[SdDevice]:
     return _get_devices(include_input=False, include_output=True)
+
+
+def generate_descriptions(
+    device_list: list[SdDevice], include_in: bool = True, include_out: bool = True
+) -> tuple[list[str], dict[str, SdChannel]]:
+    out_descs = []
+    out_map = {}
+
+    for device in device_list:
+        if include_in:
+            for chan in range(device.channels_in):
+                chan += 1  # 1-indexed
+                label = f"Input: {device.name}: Device {device.index} Channel {chan}"
+                out_descs.append(label)
+                out_map[label] = SdChannel(device.index, chan)
+        if include_out:
+            for chan in range(device.channels_out):
+                chan += 1  # 1-indexed
+                label = f"Output: {device.name}: Device {device.index} Channel {chan}"
+                out_descs.append(label)
+                out_map[label] = SdChannel(device.index, chan)
+
+    return out_descs, out_map

@@ -5,34 +5,16 @@
 from PySide6 import QtWidgets
 
 from toan.gui.record import RecordingContext
-from toan.soundio import SdChannel, SdDevice, get_input_devices, get_output_devices
+from toan.soundio import (
+    SdChannel,
+    generate_descriptions,
+    get_input_devices,
+    get_output_devices,
+)
 
 DEVICE_TEXT = [
     "Choose both the output device that will send a signal to your pedal as well as the input device that will record the signal coming back from your pedal."
 ]
-
-
-def _extract_lists(
-    device_list: list[SdDevice], include_in: bool = True, include_out: bool = True
-) -> tuple[list[str], dict[str, SdChannel]]:
-    out_labels = []
-    out_data = {}
-
-    for device in device_list:
-        if include_in:
-            for chan in range(device.channels_in):
-                chan += 1  # 1-indexed
-                label = f"Input: {device.name}: Device {device.index} Channel {chan}"
-                out_labels.append(label)
-                out_data[label] = SdChannel(device.index, chan)
-        if include_out:
-            for chan in range(device.channels_out):
-                chan += 1  # 1-indexed
-                label = f"Output: {device.name}: Device {device.index} Channel {chan}"
-                out_labels.append(label)
-                out_data[label] = SdChannel(device.index, chan)
-
-    return out_labels, out_data
 
 
 class RecordDevicePage(QtWidgets.QWizardPage):
@@ -65,7 +47,7 @@ class RecordDevicePage(QtWidgets.QWizardPage):
         def create_output_combo():
             result = QtWidgets.QComboBox(self)
             output_devices = get_output_devices()
-            label_list, self.output_channels = _extract_lists(
+            label_list, self.output_channels = generate_descriptions(
                 output_devices, include_in=False, include_out=True
             )
             result.addItems(label_list)
@@ -80,7 +62,7 @@ class RecordDevicePage(QtWidgets.QWizardPage):
         def create_input_combo():
             result = QtWidgets.QComboBox(self)
             input_devices = get_input_devices()
-            label_list, self.input_channels = _extract_lists(
+            label_list, self.input_channels = generate_descriptions(
                 input_devices, include_in=True, include_out=False
             )
             result.addItems(label_list)

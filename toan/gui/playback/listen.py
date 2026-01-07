@@ -59,7 +59,7 @@ class PlaybackListenPage(QtWidgets.QWizardPage):
         layout.addWidget(self.play_group)
 
     def cleanupPage(self):
-        sd.stop()
+        self._stop_all()
 
     def validatePage(self):
         self.cleanupPage()
@@ -71,6 +71,9 @@ class PlaybackListenPage(QtWidgets.QWizardPage):
         sd.play(signal, self.context.sample_rate)
 
     def _clicked_stop(self):
+        self._stop_all()
+
+    def _stop_all(self):
         sd.stop()
 
 
