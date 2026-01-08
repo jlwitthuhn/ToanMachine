@@ -62,12 +62,18 @@ class TrainTrainPage(QtWidgets.QWizardPage):
 
         threading.Thread(target=thread_func).start()
 
+    def isComplete(self):
+        return self.context.training_complete
+
     def refresh_page(self):
         with self.context.progress_lock:
             self.progress_bar.setMaximum(self.context.progress_iters_total)
             self.progress_bar.setValue(self.context.progress_iters_done)
             self.progress_bar.repaint()
             self.progress_desc.setText(f"Loss: {self.context.progress_loss:.4f}")
+            if self.context.training_complete:
+                self.refresh_timer.stop()
+                self.completeChanged.emit()
 
 
 @dataclass
@@ -129,3 +135,5 @@ def _run_training(context: TrainingContext, config: _TrainingConfig):
             context.progress_iters_done = i
             if i > 0 and i % 10 == 0:
                 context.progress_loss = loss_buffer.mean().item()
+
+    context.training_complete = True
