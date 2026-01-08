@@ -1,13 +1,13 @@
 # This file is part of Toan Machine and is licensed under the GPLv3
 # https://www.gnu.org/licenses/gpl-3.0.en.html
 # SPDX-License-Identifier: GPL-3.0-only
-
+import threading
 from dataclasses import dataclass
 
 import mlx.core as mx
 import mlx.nn as nn
 import mlx.optimizers as optimizers
-from PySide6 import QtWidgets
+from PySide6 import QtCore, QtWidgets
 
 from toan.gui.train import TrainingContext
 from toan.model.nam_wavenet import NamWaveNet
@@ -20,10 +20,20 @@ TRAIN_TEXT = [
 
 class TrainTrainPage(QtWidgets.QWizardPage):
     context: TrainingContext
+    refresh_timer: QtCore.QTimer
+
+    progress_bar: QtWidgets.QProgressBar
+    progress_desc: QtWidgets.QLabel
 
     def __init__(self, parent, context: TrainingContext):
         super().__init__(parent)
         self.context = context
+        self.context.progress_lock = threading.Lock()
+        self.refresh_timer = QtCore.QTimer()
+        self.refresh_timer.setInterval(100)
+        self.refresh_timer.setSingleShot(False)
+        self.refresh_timer.timeout.connect(self.refresh_page)
+        self.refresh_timer.start()
 
         self.setTitle("Train")
         layout = QtWidgets.QVBoxLayout(self)
@@ -40,11 +50,24 @@ class TrainTrainPage(QtWidgets.QWizardPage):
         label_progress = QtWidgets.QLabel("Progress:", self)
         layout.addWidget(label_progress)
 
-        self.bar_progress = QtWidgets.QProgressBar(self)
-        layout.addWidget(self.bar_progress)
+        self.progress_bar = QtWidgets.QProgressBar(self)
+        layout.addWidget(self.progress_bar)
+
+        self.progress_desc = QtWidgets.QLabel("Loss:", self)
+        layout.addWidget(self.progress_desc)
 
     def initializePage(self):
-        _run_training(self.context, _TrainingConfig())
+        def thread_func():
+            _run_training(self.context, _TrainingConfig())
+
+        threading.Thread(target=thread_func).start()
+
+    def refresh_page(self):
+        with self.context.progress_lock:
+            self.progress_bar.setMaximum(self.context.progress_iters_total)
+            self.progress_bar.setValue(self.context.progress_iters_done)
+            self.progress_bar.repaint()
+            self.progress_desc.setText(f"Loss: {self.context.progress_loss:.4f}")
 
 
 @dataclass
@@ -84,9 +107,10 @@ def _run_training(context: TrainingContext, config: _TrainingConfig):
     print(f"input width: {model.receptive_field}")
     print(f"params: {model.parameter_count}")
 
-    context.progress_iters_done = 0
-    context.progress_iters_total = config.num_steps
-    context.progress_loss = 1.0
+    with context.progress_lock:
+        context.progress_iters_done = 0
+        context.progress_iters_total = config.num_steps
+        context.progress_loss = 1.0
 
     loss_buffer = mx.ones(18)
     loss_buffer_sz = len(loss_buffer)
@@ -99,5 +123,9 @@ def _run_training(context: TrainingContext, config: _TrainingConfig):
         loss, grads = loss_and_grad_fn(model, batch_in, batch_out)
         optimizer.update(model, grads)
         loss_buffer[i % loss_buffer_sz] = loss
-        if i > 0 and i % 25 == 0:
-            print(f"{i} loss: {loss_buffer.mean()}")
+        mx.eval(model.parameters())
+
+        with context.progress_lock:
+            context.progress_iters_done = i
+            if i > 0 and i % 10 == 0:
+                context.progress_loss = loss_buffer.mean().item()
