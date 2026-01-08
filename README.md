@@ -1,12 +1,23 @@
 # Toan Machine
 
-Toan Machine is a tool to assist with training a model for use with [Neural Amp Modeler](https://www.neuralampmodeler.com/).
+Toan Machine is a tool to assist with training a model for use with [Neural Amp Modeler](https://www.neuralampmodeler.com/). All code is licensed under the terms of the [GPLv3](./LICENSE).
 
-It will provide users with a simple step-by-step process to both record a pedal and train a model based on that recording.
+This utility allows a user to:
+* Record a test signal passing through some piece of equipment (pedal, amp, etc.)
+* From a recorded signal, train a NAM neural net to replicate that equipment.
+* Load an existing NAM file to hear how it sounds.
 
-Initially this will be Mac-exclusive as it will use Apple's MLX library for the neural net training. Support for other platforms may come eventually.
+Toan Machine is currently built on MLX and will only work on Apple-Silicon-based Macs.
 
-All code is licensed under the terms of the [GPLv3](./LICENSE).
+# Installation
+
+To install and run Toan Machine you will need to:
+* Clone this git repo
+* Create a python virtual environment for Toan Machine
+* Inside your virtual environment, install the packages listed in [requirements.txt][./requirements.txt]
+* From the root of this repo, run `python3 gui.py`
+
+Once the application is running the wizards will guide you through the recording and training process.
 
 # Acknowledgements
 
