@@ -9,7 +9,6 @@ from PySide6 import QtWidgets
 
 from toan.gui.playback import PlaybackContext
 from toan.model.nam_wavenet import NamWaveNet
-from toan.signal import generate_capture_signal
 from toan.soundio import SdChannel, generate_descriptions, get_input_devices
 
 LISTEN_TEXT = [
@@ -21,6 +20,16 @@ class PlaybackListenPage(QtWidgets.QWizardPage):
     context: PlaybackContext
     indev_desc_map: dict[str, SdChannel]
     indev_combo: QtWidgets.QComboBox
+
+    recorded_samples_label: QtWidgets.QLabel
+    record_button: QtWidgets.QPushButton
+
+    record_active: bool = False
+    record_channel: SdChannel | None = None
+    record_stream: sd.InputStream | None = None
+    recorded_samples: list[np.ndarray]
+
+    wet_signal: np.ndarray | None = None
 
     def __init__(self, parent, context: PlaybackContext):
         super().__init__(parent)
@@ -50,9 +59,12 @@ class PlaybackListenPage(QtWidgets.QWizardPage):
         self.indev_combo.addItems(descriptions)
         record_group_layout.addRow("Device:", self.indev_combo)
 
-        record_button = QtWidgets.QPushButton("Start Recording", self.record_group)
-        record_button.clicked.connect(self._clicked_record)
-        record_group_layout.addRow("", record_button)
+        self.recorded_samples_label = QtWidgets.QLabel("0", self.record_group)
+        record_group_layout.addRow("Recorded Samples:", self.recorded_samples_label)
+
+        self.record_button = QtWidgets.QPushButton("Start Recording", self.record_group)
+        self.record_button.clicked.connect(self._clicked_record)
+        record_group_layout.addRow("", self.record_button)
 
         self.play_group = QtWidgets.QGroupBox("Playback", self)
         play_group_layout = QtWidgets.QVBoxLayout(self.play_group)
@@ -76,22 +88,47 @@ class PlaybackListenPage(QtWidgets.QWizardPage):
         return True
 
     def _clicked_play(self):
-        raw_signal = generate_capture_signal(self.context.sample_rate, 0.8)
-        signal = _convert_complete_signal(raw_signal, self.context.nam_model)
+        if self.wet_signal is None or len(self.wet_signal) == 0:
+            return
+        signal = _convert_complete_signal(self.wet_signal, self.context.nam_model)
         sd.play(signal, self.context.sample_rate)
 
     def _clicked_record(self):
-        desc = self.indev_combo.currentText()
-        if desc not in self.indev_desc_map:
-            return
-        channel = self.indev_desc_map[desc]
-        print("Selected: ", channel)
+        if not self.record_active:
+            desc = self.indev_combo.currentText()
+            if desc not in self.indev_desc_map:
+                return
+            self.record_active = True
+            self.record_channel = self.indev_desc_map[desc]
+            self.recorded_samples = []
+            self.record_button.setText("Stop Recording")
+            self.record_stream = sd.InputStream(
+                samplerate=self.context.sample_rate,
+                device=self.record_channel.device_index,
+                callback=self._record_input_callback,
+            )
+            self.record_stream.start()
+        else:
+            self.wet_signal = np.concat(self.recorded_samples).squeeze()
+            self.recorded_samples_label.setText(f"{len(self.wet_signal)}")
+            self._stop_all()
+            self.record_active = False
+            self.record_button.setText("Start Recording")
 
     def _clicked_stop(self):
         self._stop_all()
 
     def _stop_all(self):
+        if self.record_active:
+            self.record_stream.stop()
         sd.stop()
+
+    def _record_input_callback(
+        self, indata: np.ndarray, frames: int, time, status: sd.CallbackFlags
+    ) -> None:
+        self.recorded_samples.append(
+            indata[:, self.record_channel.channel_index - 1].copy()
+        )
 
 
 def _convert_complete_signal(raw_signal: np.ndarray, model: NamWaveNet) -> np.ndarray:
