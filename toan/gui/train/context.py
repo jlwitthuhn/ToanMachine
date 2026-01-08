@@ -9,3 +9,6 @@ class TrainingContext:
     input_path: str
     signal_dry: np.ndarray | None = None
     signal_wet: np.ndarray | None = None
+    progress_iters_done: int = 0
+    progress_iters_total: int = 1
+    progress_loss: float = 1.0

@@ -52,7 +52,7 @@ class _TrainingConfig:
     num_steps: int = 500
     warmup_steps: int = 100
     batch_size: int = 48
-    learn_rate_hi: float = 3.0e-4
+    learn_rate_hi: float = 2.0e-4
 
 
 def _generate_batch(
@@ -84,11 +84,20 @@ def _run_training(context: TrainingContext, config: _TrainingConfig):
     print(f"input width: {model.receptive_field}")
     print(f"params: {model.parameter_count}")
 
+    context.progress_iters_done = 0
+    context.progress_iters_total = config.num_steps
+    context.progress_loss = 1.0
+
+    loss_buffer = mx.ones(18)
+    loss_buffer_sz = len(loss_buffer)
+
     for i in range(config.num_steps):
         model.train(True)
         batch_in, batch_out = _generate_batch(
             context, model.receptive_field, config.batch_size, 8192
         )
         loss, grads = loss_and_grad_fn(model, batch_in, batch_out)
-        print("loss: ", loss)
         optimizer.update(model, grads)
+        loss_buffer[i % loss_buffer_sz] = loss
+        if i > 0 and i % 25 == 0:
+            print(f"{i} loss: {loss_buffer.mean()}")
