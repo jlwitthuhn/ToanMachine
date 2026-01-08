@@ -79,10 +79,11 @@ class TrainTrainPage(QtWidgets.QWizardPage):
 
 @dataclass
 class _TrainingConfig:
-    num_steps: int = 400
+    num_steps: int = 500
     warmup_steps: int = 50
     batch_size: int = 48
-    learn_rate_hi: float = 1.0e-4
+    learn_rate_hi: float = 3.0e-4
+    learn_rate_lo: float = 7.0e-5
 
 
 def _generate_batch(
@@ -107,8 +108,23 @@ def _run_training(context: TrainingContext, config: _TrainingConfig):
     model = NamWaveNet(model_config)
     assert model is not None
     mx.eval(model.parameters())
+
+    normal_steps = config.num_steps - config.warmup_steps
+    decay_lr = optimizers.cosine_decay(
+        config.learn_rate_hi, normal_steps, config.learn_rate_lo
+    )
+    if config.warmup_steps > 0:
+        warmup_lr = optimizers.linear_schedule(
+            config.learn_rate_hi / 100.0, config.learn_rate_hi, config.warmup_steps
+        )
+        learn_rate = optimizers.join_schedules(
+            [warmup_lr, decay_lr], [config.warmup_steps]
+        )
+    else:
+        learn_rate = decay_lr
+
     loss_and_grad_fn = nn.value_and_grad(model, NamWaveNet.loss_fn)
-    optimizer = optimizers.AdamW(learning_rate=config.learn_rate_hi)
+    optimizer = optimizers.AdamW(learning_rate=learn_rate)
 
     print("Beginning training...")
     print(f"input width: {model.receptive_field}")
