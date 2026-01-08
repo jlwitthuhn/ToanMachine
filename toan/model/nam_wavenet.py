@@ -18,8 +18,17 @@ def _get_activation(activation: str) -> nn.Module:
 
 
 # Specialization to support exporting/importing to a single huge array
+# And also to transpose inputs to play nice with MLX dimension ordering
 # Functionally the same as normal conv1d
 class _NamConv1dLayer(nn.Conv1d):
+    def export_nam_linear_weights(self) -> list[float]:
+        result = []
+        if self.weight is not None:
+            result.extend(self.weight.flatten())
+        if self.bias is not None:
+            result.extend(self.bias.flatten())
+        return result
+
     def import_nam_linear_weights(self, weights: mx.array, i: int) -> int:
         if self.weight is not None:
             size = self.weight.size
@@ -92,6 +101,13 @@ class _NamWaveNetLayer(nn.Module):
             post_activation[:, :, -out_length:],
         )
 
+    def export_nam_linear_weights(self) -> list[float]:
+        result = []
+        result.extend(self.conv.export_nam_linear_weights())
+        result.extend(self.input_mixer.export_nam_linear_weights())
+        result.extend(self.conv1x1.export_nam_linear_weights())
+        return result
+
     def import_nam_linear_weights(self, weights: mx.array, i: int) -> int:
         i = self.conv.import_nam_linear_weights(weights, i)
         i = self.input_mixer.import_nam_linear_weights(weights, i)
@@ -139,6 +155,14 @@ class _NamWaveNetLayerGroup(nn.Module):
                 else head_input[:, :, -out_length:] + head_term
             )
         return self.head_rechannel(head_input), x
+
+    def export_nam_linear_weights(self) -> list[float]:
+        result = []
+        result.extend(self.rechannel.export_nam_linear_weights())
+        for layer in self.layers:
+            result.extend(layer.export_nam_linear_weights())
+        result.extend(self.head_rechannel.export_nam_linear_weights())
+        return result
 
     def import_nam_linear_weights(self, weights: mx.array, i: int) -> int:
         i = self.rechannel.import_nam_linear_weights(weights, i)
@@ -190,6 +214,17 @@ class NamWaveNet(nn.Module):
         y = self._forward(x)
         assert y.shape[1] == 1
         return y[:, 0, :]
+
+    def export_nam_linear_weights(self) -> list[float]:
+        result = []
+        for group in self.layer_groups:
+            group_weights: list[float] = group.export_nam_linear_weights()
+            result.extend(group_weights)
+        assert self.head is None
+        result.append(
+            1.0
+        )  # head_scale, not actually used but we need to export something
+        return result
 
     def import_nam_linear_weights(self, weights: list[float]) -> int:
         i = 0
