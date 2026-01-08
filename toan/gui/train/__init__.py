@@ -22,7 +22,7 @@ class TrainingWizard(QtWidgets.QWizard):
         self.addPage(TrainIntroPage(self))
         self.addPage(TrainInputFilePage(self, self.context))
         self.addPage(TrainValidatePage(self, self.context))
-        self.addPage(TrainTrainPage(self))
+        self.addPage(TrainTrainPage(self, self.context))
 
         self.setWindowTitle("Training Wizard")
         self.setModal(True)

@@ -156,6 +156,13 @@ class NamWaveNet(nn.Module):
     layer_groups: list[_NamWaveNetLayerGroup]
     head: None = None
 
+    def loss_fn(self, inputs: mx.array, targets: mx.array) -> mx.array:
+        outputs = self(inputs)
+        delta = targets - outputs
+        delta2 = delta**2
+        ms = delta2.mean()
+        return mx.sqrt(ms)
+
     def __init__(self, config: NamWaveNetConfig):
         super().__init__()
         self.layer_groups = [
