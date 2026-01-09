@@ -226,6 +226,9 @@ class NamWaveNet(nn.Module):
         )  # head_scale, not actually used but we need to export something
         return result
 
+    def export_nam_json_str(self) -> str:
+        return "{}"
+
     def import_nam_linear_weights(self, weights: list[float]) -> int:
         i = 0
         weights_mx = mx.array(weights)

@@ -64,7 +64,21 @@ class TrainTrainPage(QtWidgets.QWizardPage):
         threading.Thread(target=thread_func).start()
 
     def isComplete(self):
-        return self.context.training_complete
+        return self.context.model is not None
+
+    def validatePage(self) -> bool:
+        if self.context.model is None:
+            return False
+
+        file_path, _ = QtWidgets.QFileDialog.getSaveFileName(filter="Nam Files (*.nam)")
+
+        if file_path == "":
+            return False
+
+        with open(file_path, "w") as file:
+            file.write(self.context.model.export_nam())
+
+        return True
 
     def refresh_page(self):
         with self.context.progress_lock:
@@ -72,7 +86,7 @@ class TrainTrainPage(QtWidgets.QWizardPage):
             self.progress_bar.setValue(self.context.progress_iters_done)
             self.progress_bar.repaint()
             self.progress_desc.setText(f"Loss: {self.context.progress_loss:.4f}")
-            if self.context.training_complete:
+            if self.context.model is not None:
                 self.refresh_timer.stop()
                 self.completeChanged.emit()
 
@@ -83,7 +97,7 @@ class _TrainingConfig:
     warmup_steps: int = 50
     batch_size: int = 48
     learn_rate_hi: float = 3.0e-4
-    learn_rate_lo: float = 7.0e-5
+    learn_rate_lo: float = 6.0e-5
 
 
 def _generate_batch(
@@ -153,4 +167,4 @@ def _run_training(context: TrainingContext, config: _TrainingConfig):
             if i > 0 and i % 10 == 0:
                 context.progress_loss = loss_buffer.mean().item()
 
-    context.training_complete = True
+    context.model = model

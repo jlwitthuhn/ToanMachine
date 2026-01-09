@@ -5,6 +5,8 @@ import threading
 
 import numpy as np
 
+from toan.model.nam_wavenet import NamWaveNet
+
 
 class TrainingContext:
     input_path: str
@@ -14,4 +16,4 @@ class TrainingContext:
     progress_iters_done: int = 0
     progress_iters_total: int = 1
     progress_loss: float = 1.0
-    training_complete: bool = False
+    model: NamWaveNet | None = None
