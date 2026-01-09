@@ -119,7 +119,7 @@ def _generate_batch(
 
 def _run_training(context: TrainingContext, config: _TrainingConfig):
     model_config = default_wavenet_config()
-    model = NamWaveNet(model_config)
+    model = NamWaveNet(model_config, context.sample_rate)
     assert model is not None
     mx.eval(model.parameters())
 
@@ -139,10 +139,6 @@ def _run_training(context: TrainingContext, config: _TrainingConfig):
 
     loss_and_grad_fn = nn.value_and_grad(model, NamWaveNet.loss_fn)
     optimizer = optimizers.AdamW(learning_rate=learn_rate)
-
-    print("Beginning training...")
-    print(f"input width: {model.receptive_field}")
-    print(f"params: {model.parameter_count}")
 
     with context.progress_lock:
         context.progress_iters_done = 0

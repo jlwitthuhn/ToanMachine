@@ -10,6 +10,7 @@ from toan.model.nam_wavenet import NamWaveNet
 
 class TrainingContext:
     input_path: str
+    sample_rate: int = 0
     signal_dry: np.ndarray | None = None
     signal_wet: np.ndarray | None = None
     progress_lock: threading.Lock

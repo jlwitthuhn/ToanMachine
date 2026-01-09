@@ -205,6 +205,8 @@ def _run_thread(context: _ValidateThreadContext, input_path: str):
             context.page.context.signal_dry = dry_trimmed
             context.page.context.signal_wet = wet_trimmed
 
+            context.page.context.sample_rate = config_json["sample_rate"]
+
             context.page.completeChanged.emit()
 
     except zipfile.BadZipFile:

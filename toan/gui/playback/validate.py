@@ -83,7 +83,7 @@ class PlaybackValidatePage(QtWidgets.QWizardPage):
 
         self.text_edit.append("Creating model...")
 
-        model = NamWaveNet(model_config)
+        model = NamWaveNet(model_config, self.context.sample_rate)
         model_params = model.parameter_count
         self.text_edit.append(f"Model parameters: {model_params}")
 

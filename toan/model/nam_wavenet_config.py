@@ -1,7 +1,7 @@
 # This file is part of Toan Machine and is licensed under the GPLv3
 # https://www.gnu.org/licenses/gpl-3.0.en.html
 # SPDX-License-Identifier: GPL-3.0-only
-
+import dataclasses
 from dataclasses import dataclass, field
 
 
@@ -17,12 +17,29 @@ class NameWaveNetLayerGroupConfig:
     gated: bool
     head_bias: bool
 
+    def export_dict(self) -> dict:
+        result = dataclasses.asdict(self)
+        return result
+
 
 @dataclass
 class NamWaveNetConfig:
     layers: list[NameWaveNetLayerGroupConfig] = field(default_factory=list)
     head_config: None = None
     head_scale: float = 0.02
+
+    def export_dict(self) -> dict:
+        result = dataclasses.asdict(self)
+
+        del result["head_config"]
+        result["head"] = None
+
+        layer_list: list[dict] = []
+        for layer in self.layers:
+            layer_list.append(layer.export_dict())
+        result["layers"] = layer_list
+
+        return result
 
 
 def default_wavenet_config() -> NamWaveNetConfig:

@@ -185,6 +185,9 @@ class NamWaveNet(nn.Module):
     layer_groups: list[_NamWaveNetLayerGroup]
     head: None = None
 
+    config: NamWaveNetConfig
+    sample_rate: int = 0
+
     def loss_fn(self, inputs: mx.array, targets: mx.array) -> mx.array:
         outputs = self(inputs)
         delta = targets - outputs
@@ -192,8 +195,10 @@ class NamWaveNet(nn.Module):
         ms = delta2.mean()
         return mx.sqrt(ms)
 
-    def __init__(self, config: NamWaveNetConfig):
+    def __init__(self, config: NamWaveNetConfig, sample_rate: int):
         super().__init__()
+        self.config = config
+        self.sample_rate = sample_rate
         self.layer_groups = [
             _NamWaveNetLayerGroup(layer_config) for layer_config in config.layers
         ]
@@ -232,10 +237,13 @@ class NamWaveNet(nn.Module):
         return result
 
     def export_nam_json_str(self) -> str:
-        root = {}
-        root["version"] = "0.5.4"
-        root["architecture"] = "WaveNet"
-        root["weights"] = self.export_nam_linear_weights()
+        root = {
+            "version": "0.5.4",
+            "architecture": "WaveNet",
+            "config": self.config.export_dict(),
+            "weights": self.export_nam_linear_weights(),
+            "sample_rate": self.sample_rate,
+        }
         return json.dumps(root)
 
     def import_nam_linear_weights(self, weights: list[float]) -> int:
