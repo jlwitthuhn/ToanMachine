@@ -1,14 +1,15 @@
 # This file is part of Toan Machine and is licensed under the GPLv3
 # https://www.gnu.org/licenses/gpl-3.0.en.html
 # SPDX-License-Identifier: GPL-3.0-only
-
-# Based on code from Neural Amp Modeler
-# https://github.com/sdatkinson/neural-amp-modeler/blob/e054002e48cd102b0993811d69e8172db4a91597/nam/models/wavenet.py
+import json
 
 import mlx.core as mx
 from mlx import nn, utils
 
 from toan.model.nam_wavenet_config import NameWaveNetLayerGroupConfig, NamWaveNetConfig
+
+# Based on code from Neural Amp Modeler
+# https://github.com/sdatkinson/neural-amp-modeler/blob/e054002e48cd102b0993811d69e8172db4a91597/nam/models/wavenet.py
 
 
 def _get_activation(activation: str) -> nn.Module:
@@ -24,9 +25,13 @@ class _NamConv1dLayer(nn.Conv1d):
     def export_nam_linear_weights(self) -> list[float]:
         result = []
         if self.weight is not None:
-            result.extend(self.weight.flatten())
-        if self.bias is not None:
-            result.extend(self.bias.flatten())
+            result.extend(self.weight.flatten().tolist())
+        try:
+            if self.bias is not None:
+                result.extend(self.bias.flatten().tolist())
+        except AttributeError:
+            # No 'bias'
+            pass
         return result
 
     def import_nam_linear_weights(self, weights: mx.array, i: int) -> int:
@@ -227,7 +232,11 @@ class NamWaveNet(nn.Module):
         return result
 
     def export_nam_json_str(self) -> str:
-        return "{}"
+        root = {}
+        root["version"] = "0.5.4"
+        root["architecture"] = "WaveNet"
+        root["weights"] = self.export_nam_linear_weights()
+        return json.dumps(root)
 
     def import_nam_linear_weights(self, weights: list[float]) -> int:
         i = 0

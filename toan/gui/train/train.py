@@ -76,7 +76,7 @@ class TrainTrainPage(QtWidgets.QWizardPage):
             return False
 
         with open(file_path, "w") as file:
-            file.write(self.context.model.export_nam())
+            file.write(self.context.model.export_nam_json_str())
 
         return True
 
@@ -93,11 +93,11 @@ class TrainTrainPage(QtWidgets.QWizardPage):
 
 @dataclass
 class _TrainingConfig:
-    num_steps: int = 500
+    num_steps: int = 400
     warmup_steps: int = 50
     batch_size: int = 48
     learn_rate_hi: float = 3.0e-4
-    learn_rate_lo: float = 6.0e-5
+    learn_rate_lo: float = 6.5e-5
 
 
 def _generate_batch(
