@@ -55,7 +55,7 @@ class TrainTrainPage(QtWidgets.QWizardPage):
         self.progress_bar = QtWidgets.QProgressBar(self)
         layout.addWidget(self.progress_bar)
 
-        self.progress_desc = QtWidgets.QLabel("Loss:", self)
+        self.progress_desc = QtWidgets.QLabel("Loss estimate:", self)
         layout.addWidget(self.progress_desc)
 
     def initializePage(self):
@@ -86,7 +86,9 @@ class TrainTrainPage(QtWidgets.QWizardPage):
             self.progress_bar.setMaximum(self.context.progress_iters_total)
             self.progress_bar.setValue(self.context.progress_iters_done)
             self.progress_bar.repaint()
-            self.progress_desc.setText(f"Loss: {self.context.progress_loss:.4f}")
+            self.progress_desc.setText(
+                f"Loss estimate: {self.context.progress_loss:.4f}"
+            )
             if self.context.model is not None:
                 self.refresh_timer.stop()
                 self.completeChanged.emit()
@@ -94,11 +96,12 @@ class TrainTrainPage(QtWidgets.QWizardPage):
 
 @dataclass
 class _TrainingConfig:
-    num_steps: int = 400
-    warmup_steps: int = 100
+    num_steps: int = 300
+    warmup_steps: int = 50
     batch_size: int = 48
-    learn_rate_hi: float = 3.0e-4
-    learn_rate_lo: float = 6.5e-5
+    learn_rate_hi: float = 2.0e-4
+    learn_rate_lo: float = 2.5e-5
+    weight_decay: float = 8.0e-3
 
 
 def _generate_batch(
@@ -119,6 +122,7 @@ def _generate_batch(
 
 
 def _run_training(context: TrainingContext, config: _TrainingConfig):
+    mx.random.seed(0o35)
     model_config = default_wavenet_config()
     model = NamWaveNet(model_config, context.sample_rate)
     assert model is not None
@@ -141,7 +145,9 @@ def _run_training(context: TrainingContext, config: _TrainingConfig):
         learn_rate = decay_lr
 
     loss_and_grad_fn = nn.value_and_grad(model, NamWaveNet.loss_fn)
-    optimizer = optimizers.Muon(learning_rate=learn_rate)
+    optimizer = optimizers.AdamW(
+        learning_rate=learn_rate, weight_decay=config.weight_decay
+    )
 
     with context.progress_lock:
         context.progress_iters_done = 0
