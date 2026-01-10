@@ -12,6 +12,7 @@ from PySide6 import QtGui, QtWidgets
 from scipy.io import wavfile
 
 from toan.gui.train import TrainingContext
+from toan.model.metadata import ModelMetadata
 
 
 class _ValidateThreadContext:
@@ -212,6 +213,12 @@ def _run_thread(context: _ValidateThreadContext, input_path: str):
             print_status(f"Matched samples available: {len(dry_trimmed)}")
             context.page.context.signal_dry = dry_trimmed
             context.page.context.signal_wet = wet_trimmed
+
+            context.page.context.loaded_metadata = ModelMetadata(
+                name="Toan Model",
+                gear_make=config_json["device_make"],
+                gear_model=config_json["device_model"],
+            )
 
             context.page.context.sample_rate = config_json["sample_rate"]
 

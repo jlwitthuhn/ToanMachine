@@ -6,12 +6,14 @@ import threading
 
 import numpy as np
 
+from toan.model.metadata import ModelMetadata
 from toan.model.nam_wavenet import NamWaveNet
 from toan.training import TrainingSummary
 
 
 class TrainingContext:
     input_path: str
+    loaded_metadata: ModelMetadata | None = None
     sample_rate: int = 0
     signal_dry: np.ndarray | None = None
     signal_wet: np.ndarray | None = None

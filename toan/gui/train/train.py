@@ -11,6 +11,7 @@ import mlx.optimizers as optimizers
 from PySide6 import QtCore, QtWidgets
 
 from toan.gui.train import TrainingContext
+from toan.model.metadata import ModelMetadata
 from toan.model.nam_wavenet import NamWaveNet
 from toan.model.nam_wavenet_config import default_wavenet_config
 from toan.training import TrainingSummary
@@ -114,7 +115,7 @@ def _generate_batch(
 def _run_training(context: TrainingContext, config: _TrainingConfig):
     mx.random.seed(0o35)
     model_config = default_wavenet_config()
-    model = NamWaveNet(model_config, context.sample_rate)
+    model = NamWaveNet(model_config, context.loaded_metadata, context.sample_rate)
     assert model is not None
     mx.eval(model.parameters())
 

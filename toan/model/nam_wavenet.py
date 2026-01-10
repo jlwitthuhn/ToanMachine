@@ -8,6 +8,7 @@ import json
 import mlx.core as mx
 from mlx import nn, utils
 
+from toan.model.metadata import ModelMetadata
 from toan.model.nam_wavenet_config import NameWaveNetLayerGroupConfig, NamWaveNetConfig
 
 # Based on code from Neural Amp Modeler
@@ -188,6 +189,7 @@ class NamWaveNet(nn.Module):
     head: None = None
 
     config: NamWaveNetConfig
+    metadata: ModelMetadata
     sample_rate: int = 0
 
     def loss_fn(self, inputs: mx.array, targets: mx.array) -> mx.array:
@@ -197,9 +199,12 @@ class NamWaveNet(nn.Module):
         ms = delta2.mean()
         return mx.sqrt(ms)
 
-    def __init__(self, config: NamWaveNetConfig, sample_rate: int):
+    def __init__(
+        self, config: NamWaveNetConfig, metadata: ModelMetadata, sample_rate: int
+    ):
         super().__init__()
         self.config = config
+        self.metadata = metadata
         self.sample_rate = sample_rate
         self.layer_groups = [
             _NamWaveNetLayerGroup(layer_config) for layer_config in config.layers

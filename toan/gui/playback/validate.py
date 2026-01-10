@@ -7,6 +7,7 @@ import json
 from PySide6 import QtGui, QtWidgets
 
 from toan.gui.playback import PlaybackContext
+from toan.model.metadata import ModelMetadata
 from toan.model.nam_wavenet import NamWaveNet
 from toan.model.nam_wavenet_config import json_wavenet_config
 
@@ -83,7 +84,11 @@ class PlaybackValidatePage(QtWidgets.QWizardPage):
 
         self.text_edit.append("Creating model...")
 
-        model = NamWaveNet(model_config, self.context.sample_rate)
+        metadata = ModelMetadata(
+            "Playback NAM model", "Playback make", "Playback model"
+        )
+
+        model = NamWaveNet(model_config, metadata, self.context.sample_rate)
         model_params = model.parameter_count
         self.text_edit.append(f"Model parameters: {model_params}")
 
