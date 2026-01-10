@@ -19,9 +19,9 @@ class TrainingSummary:
 
         np_losses = np.array(self.losses)
         smooth_losses = np.convolve(
-            np_losses, np.ones((smooth_factor,)) / smooth_factor, mode="same"
+            np_losses, np.ones((smooth_factor,)) / smooth_factor, mode="valid"
         ).tolist()
-        eval_points = np.arange(len(smooth_losses))
+        eval_points = np.arange(len(smooth_losses)) + smooth_factor // 2
 
         ax.plot(eval_points, smooth_losses, label="loss")
         ax.legend()

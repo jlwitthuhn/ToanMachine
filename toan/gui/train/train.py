@@ -141,7 +141,7 @@ def _run_training(context: TrainingContext, config: _TrainingConfig):
         learn_rate = decay_lr
 
     loss_and_grad_fn = nn.value_and_grad(model, NamWaveNet.loss_fn)
-    optimizer = optimizers.AdamW(learning_rate=learn_rate)
+    optimizer = optimizers.Muon(learning_rate=learn_rate)
 
     with context.progress_lock:
         context.progress_iters_done = 0
