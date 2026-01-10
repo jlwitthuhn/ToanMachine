@@ -24,6 +24,6 @@ class TrainingSummary:
         eval_points = np.arange(len(smooth_losses)) + smooth_factor // 2
 
         ax.plot(eval_points, smooth_losses, label="loss")
-        ax.legend()
+        ax.grid(True)
 
         return fig
