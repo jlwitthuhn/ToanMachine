@@ -88,11 +88,11 @@ class TrainTrainPage(QtWidgets.QWizardPage):
 @dataclass
 class _TrainingConfig:
     num_steps: int = 300
-    warmup_steps: int = 50
+    warmup_steps: int = 40
     batch_size: int = 48
-    learn_rate_hi: float = 2.0e-4
-    learn_rate_lo: float = 2.5e-5
-    weight_decay: float = 8.0e-3
+    learn_rate_hi: float = 1.5e-4
+    learn_rate_lo: float = 1.0e-5
+    weight_decay: float = 7.5e-3
 
 
 def _generate_batch(
