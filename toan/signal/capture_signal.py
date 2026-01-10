@@ -13,7 +13,7 @@ from toan.signal.noise import generate_white_noise
 from toan.signal.scale import generate_chromatic_scale
 from toan.signal.trig import generate_cosine_wave, generate_sine_wave
 
-SEGMENT_DURATION = 8.0
+SEGMENT_DURATION = 9.0
 
 
 def generate_capture_signal(sample_rate: int, amplitude: float) -> np.ndarray:
