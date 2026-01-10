@@ -19,3 +19,6 @@ class TrainGraphPage(QtWidgets.QWizardPage):
 
         label = QtWidgets.QLabel("Training Loss")
         layout.addWidget(label)
+
+    def initializePage(self):
+        self.context.training_summary.generate_loss_graph(7)
