@@ -10,6 +10,8 @@ from toan.gui.record import RecordWizard
 from toan.gui.train import TrainingWizard
 from toan.signal import generate_capture_signal
 
+INCLUDE_DEBUG_PANEL = False
+
 
 def _clicked_play_training_signal():
     playback_sample_rate = 44100
@@ -42,17 +44,18 @@ class MainWindow(QtWidgets.QWidget):
         create_group_box.setLayout(create_layout)
         layout.addWidget(create_group_box)
 
-        debug_group_box = QtWidgets.QGroupBox("Debug", self)
-        debug_layout = QtWidgets.QVBoxLayout()
+        if INCLUDE_DEBUG_PANEL:
+            debug_group_box = QtWidgets.QGroupBox("Debug", self)
+            debug_layout = QtWidgets.QVBoxLayout()
 
-        play_training_signal_button = QtWidgets.QPushButton(
-            "Play Training Signal", self
-        )
-        play_training_signal_button.clicked.connect(_clicked_play_training_signal)
-        debug_layout.addWidget(play_training_signal_button)
+            play_training_signal_button = QtWidgets.QPushButton(
+                "Play Training Signal", self
+            )
+            play_training_signal_button.clicked.connect(_clicked_play_training_signal)
+            debug_layout.addWidget(play_training_signal_button)
 
-        debug_group_box.setLayout(debug_layout)
-        layout.addWidget(debug_group_box)
+            debug_group_box.setLayout(debug_layout)
+            layout.addWidget(debug_group_box)
 
         self.setLayout(layout)
 
