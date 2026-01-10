@@ -6,13 +6,14 @@ from dataclasses import dataclass, field
 
 import numpy as np
 from matplotlib import pyplot as plt
+from matplotlib.figure import Figure
 
 
 @dataclass
 class TrainingSummary:
     losses: list[float] = field(default_factory=list)
 
-    def generate_loss_graph(self, smooth_factor: int):
+    def generate_loss_graph(self, smooth_factor: int) -> Figure:
         fig, ax = plt.subplots()
         ax.set_title("Training Loss")
 
@@ -25,4 +26,4 @@ class TrainingSummary:
         ax.plot(eval_points, smooth_losses, label="loss")
         ax.legend()
 
-        fig.savefig("./training_loss.png")
+        return fig
