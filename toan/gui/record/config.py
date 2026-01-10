@@ -9,7 +9,8 @@ from toan.gui.record.context import RecordingContext
 
 class RecordConfigPage(QtWidgets.QWizardPage):
     context: RecordingContext
-    device_name_edit: QtWidgets.QLineEdit
+    device_make_edit: QtWidgets.QLineEdit
+    device_model_edit: QtWidgets.QLineEdit
     radio_option_441: QtWidgets.QRadioButton
     radio_option_480: QtWidgets.QRadioButton
 
@@ -24,8 +25,11 @@ class RecordConfigPage(QtWidgets.QWizardPage):
             form_panel = QtWidgets.QWidget(self)
             form_layout = QtWidgets.QFormLayout(form_panel)
 
-            self.device_name_edit = QtWidgets.QLineEdit(form_panel)
-            self.device_name_edit.setMinimumWidth(250)
+            self.device_make_edit = QtWidgets.QLineEdit(form_panel)
+            self.device_make_edit.setMinimumWidth(250)
+
+            self.device_model_edit = QtWidgets.QLineEdit(form_panel)
+            self.device_model_edit.setMinimumWidth(250)
 
             radio_widget = QtWidgets.QWidget(form_panel)
             radio_layout = QtWidgets.QVBoxLayout(radio_widget)
@@ -36,7 +40,8 @@ class RecordConfigPage(QtWidgets.QWizardPage):
             self.radio_option_480 = QtWidgets.QRadioButton("48 kHz", radio_widget)
             radio_layout.addWidget(self.radio_option_480)
 
-            form_layout.addRow("Device Name:", self.device_name_edit)
+            form_layout.addRow("Device Manufacturer:", self.device_make_edit)
+            form_layout.addRow("Device Model:", self.device_model_edit)
             form_layout.addRow("Sample Rate:", radio_widget)
             return form_panel
 
@@ -48,14 +53,16 @@ class RecordConfigPage(QtWidgets.QWizardPage):
         layout.addStretch(1)
 
     def initializePage(self):
-        self.device_name_edit.setText(self.context.device_name)
+        self.device_make_edit.setText(self.context.device_make)
+        self.device_model_edit.setText(self.context.device_model)
         if self.context.sample_rate == 44100:
             self.radio_option_441.setChecked(True)
         elif self.context.sample_rate == 48000:
             self.radio_option_480.setChecked(True)
 
     def validatePage(self):
-        self.context.device_name = self.device_name_edit.text()
+        self.context.device_make = self.device_make_edit.text()
+        self.context.device_model = self.device_model_edit.text()
         if self.radio_option_441.isChecked():
             self.context.sample_rate = 44100
         elif self.radio_option_480.isChecked():

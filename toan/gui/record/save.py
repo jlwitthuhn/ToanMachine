@@ -58,7 +58,8 @@ class RecordSavePage(QtWidgets.QWizardPage):
 
         metadata = {
             "version": 0,
-            "device_name": self.context.device_name,
+            "device_make": self.context.device_make,
+            "device_model": self.context.device_model,
             "sample_rate": self.context.sample_rate,
             "dry_signal": "dry.wav",
             "wet_signal": "wet.wav",

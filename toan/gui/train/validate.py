@@ -99,13 +99,21 @@ def _run_thread(context: _ValidateThreadContext, input_path: str):
                 print_status("Error: config.json has unknown version")
                 return
 
-            if "device_name" not in config_json or not isinstance(
-                config_json["device_name"], str
+            if "device_make" not in config_json or not isinstance(
+                config_json["device_make"], str
             ):
-                print_status("Error: config.json does not contain key 'device_name'")
+                print_status("Error: config.json does not contain key 'device_make'")
                 return
 
-            print_status(f"Device name: {config_json["device_name"]}")
+            print_status(f"Device make: {config_json["device_make"]}")
+
+            if "device_model" not in config_json or not isinstance(
+                config_json["device_model"], str
+            ):
+                print_status("Error: config.json does not contain key 'device_model'")
+                return
+
+            print_status(f"Device model: {config_json["device_model"]}")
 
             if "sample_rate" not in config_json or not isinstance(
                 config_json["sample_rate"], int

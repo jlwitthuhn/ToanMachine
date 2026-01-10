@@ -8,7 +8,8 @@ from toan.soundio import SdChannel
 
 
 class RecordingContext:
-    device_name: str = "Toan Device"
+    device_make: str = "The Toan Zoan"
+    device_model: str = "Toan Device"
     sample_rate: int = 44100
     input_channel: SdChannel
     output_channel: SdChannel
