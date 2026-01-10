@@ -37,6 +37,7 @@ class TrainTrainPage(QtWidgets.QWizardPage):
         self.refresh_timer.timeout.connect(self.refresh_page)
         self.refresh_timer.start()
 
+        self.setCommitPage(True)
         self.setTitle("Train")
         layout = QtWidgets.QVBoxLayout(self)
 
@@ -64,22 +65,11 @@ class TrainTrainPage(QtWidgets.QWizardPage):
 
         threading.Thread(target=thread_func).start()
 
-    def isComplete(self):
+    def isComplete(self) -> bool:
         return self.context.model is not None
 
     def validatePage(self) -> bool:
-        if self.context.model is None:
-            return False
-
-        file_path, _ = QtWidgets.QFileDialog.getSaveFileName(filter="Nam Files (*.nam)")
-
-        if file_path == "":
-            return False
-
-        with open(file_path, "w") as file:
-            file.write(self.context.model.export_nam_json_str())
-
-        return True
+        return self.context.model is not None
 
     def refresh_page(self):
         with self.context.progress_lock:

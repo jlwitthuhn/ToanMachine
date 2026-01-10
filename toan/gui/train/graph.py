@@ -26,3 +26,14 @@ class TrainGraphPage(QtWidgets.QWizardPage):
     def initializePage(self):
         figure = self.context.training_summary.generate_loss_graph(5)
         self.graph.figure = figure
+
+    def validatePage(self) -> bool:
+        file_path, _ = QtWidgets.QFileDialog.getSaveFileName(filter="Nam Files (*.nam)")
+
+        if file_path == "":
+            return False
+
+        with open(file_path, "w") as file:
+            file.write(self.context.model.export_nam_json_str())
+
+        return True
