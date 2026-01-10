@@ -13,6 +13,7 @@ from PySide6 import QtCore, QtWidgets
 from toan.gui.train import TrainingContext
 from toan.model.nam_wavenet import NamWaveNet
 from toan.model.nam_wavenet_config import default_wavenet_config
+from toan.training import TrainingSummary
 
 TRAIN_TEXT = [
     "Your model is now training. After training has finished you will be asked to choose a location for the NAM file."
@@ -123,6 +124,8 @@ def _run_training(context: TrainingContext, config: _TrainingConfig):
     assert model is not None
     mx.eval(model.parameters())
 
+    summary = TrainingSummary()
+
     normal_steps = config.num_steps - config.warmup_steps
     decay_lr = optimizers.cosine_decay(
         config.learn_rate_hi, normal_steps, config.learn_rate_lo
@@ -145,7 +148,7 @@ def _run_training(context: TrainingContext, config: _TrainingConfig):
         context.progress_iters_total = config.num_steps
         context.progress_loss = 1.0
 
-    loss_buffer = mx.ones(18)
+    loss_buffer = mx.ones(16)
     loss_buffer_sz = len(loss_buffer)
 
     for i in range(config.num_steps):
@@ -158,9 +161,12 @@ def _run_training(context: TrainingContext, config: _TrainingConfig):
         loss_buffer[i % loss_buffer_sz] = loss
         mx.eval(model.parameters())
 
+        summary.losses.append(loss.item())
+
         with context.progress_lock:
             context.progress_iters_done = i
             if i > 0 and i % 10 == 0:
                 context.progress_loss = loss_buffer.mean().item()
 
     context.model = model
+    context.training_summary = summary
