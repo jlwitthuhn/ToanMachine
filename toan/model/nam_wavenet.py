@@ -2,7 +2,6 @@
 # https://www.gnu.org/licenses/gpl-3.0.en.html
 # SPDX-License-Identifier: GPL-3.0-only
 
-import datetime
 import json
 
 import mlx.core as mx
@@ -244,20 +243,9 @@ class NamWaveNet(nn.Module):
         return result
 
     def export_nam_json_str(self) -> str:
-        current_date = datetime.datetime.now()
         root = {
             "version": "0.5.4",
-            "metadata": {
-                "date": {
-                    "year": current_date.year,
-                    "month": current_date.month,
-                    "day": current_date.day,
-                    "hour": current_date.hour,
-                    "minute": current_date.minute,
-                    "second": current_date.second,
-                },
-                "name": "Toan Device",
-            },
+            "metadata": self.metadata.export_dict(),
             "architecture": "WaveNet",
             "config": self.config.export_dict(),
             "weights": self.export_nam_linear_weights(),
