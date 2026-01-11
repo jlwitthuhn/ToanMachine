@@ -9,16 +9,16 @@ import sounddevice as sd
 from PySide6 import QtCore, QtWidgets
 
 from toan.gui.record import RecordingContext
-from toan.signal import generate_tone
+from toan.mix import concat_signals
+from toan.signal import generate_chirp, generate_tone
 from toan.soundio import SdPlayrecController, prepare_play_record
 
 VOLUME_TEXT = [
     "Set the input gain on your interface so that you are able to record to full range of your pedal's output without clipping.",
-    "With the audio signal running through your pedal, press 'Play Test Tone' below and adjust your input gain so that no clipping occurs.",
+    "With the audio signal running through your pedal, press 'Play Test Sound' below and adjust your input gain so that the volume is around 95.",
 ]
 
 BAR_PRECISION = 1000
-VOLUME_SAMPLE_COUNT = 5
 
 
 class RecordVolumePage(QtWidgets.QWizardPage):
@@ -27,8 +27,8 @@ class RecordVolumePage(QtWidgets.QWizardPage):
     play_button: QtWidgets.QPushButton
     play_active: bool = False
 
-    output_callback_tone: np.ndarray
-    output_callback_tone_index: int = 0
+    output_callback_signal: np.ndarray
+    output_callback_signal_index: int = 0
 
     bar_input_level: QtWidgets.QProgressBar
     bar_progress: int = 0
@@ -37,16 +37,17 @@ class RecordVolumePage(QtWidgets.QWizardPage):
 
     io_controller: SdPlayrecController | None = None
     volume_samples: np.ndarray
-    volume_samples_index: int = 0
 
     def __init__(self, parent, context: RecordingContext):
         super().__init__(parent)
         self.context = context
-        self.volume_samples = np.zeros(VOLUME_SAMPLE_COUNT)
 
-        self.output_callback_tone = generate_tone(
-            context.sample_rate, 440.0, 0.8, 20.0, True
-        )
+        single_sweep = generate_chirp(context.sample_rate, 18, 22000, 1.0, 0.8)
+        single_sweep_samples = len(single_sweep)
+        volume_buffer_samples = math.floor(single_sweep_samples * 1.10)
+        self.volume_samples = np.zeros(volume_buffer_samples)
+
+        self.output_callback_signal = concat_signals([single_sweep] * 30, 0)
 
         self.bar_update_timer = QtCore.QTimer()
         self.bar_update_timer.setInterval(50)
@@ -94,7 +95,7 @@ class RecordVolumePage(QtWidgets.QWizardPage):
     def _clicked_play_test(self):
         if self.play_active:
             self.play_active = False
-            self.play_button.setText("Play Test Tone")
+            self.play_button.setText("Play Test Sound")
             self.bar_update_timer.stop()
             if self.io_controller is not None:
                 self.io_controller.close()
@@ -103,7 +104,7 @@ class RecordVolumePage(QtWidgets.QWizardPage):
             self._update_status()
             return
         self.play_active = True
-        self.play_button.setText("Stop Test Tone")
+        self.play_button.setText("Stop Test Sound")
         self.bar_update_timer.start()
         self._setup_io_streams()
 
@@ -124,11 +125,8 @@ class RecordVolumePage(QtWidgets.QWizardPage):
     def _input_callback(
         self, indata: np.ndarray, frames: int, time, status: sd.CallbackFlags
     ) -> None:
-        sample = np.abs(indata).max()
-        self.volume_samples[self.volume_samples_index] = sample
-        self.volume_samples_index = (
-            self.volume_samples_index + 1
-        ) % VOLUME_SAMPLE_COUNT
+        buffer_length = len(self.volume_samples)
+        self.volume_samples = np.append(self.volume_samples, indata)[-buffer_length:]
         out_val = self.volume_samples.max()
         self.bar_progress = min(BAR_PRECISION, math.floor(out_val * 1000))
 
@@ -137,12 +135,15 @@ class RecordVolumePage(QtWidgets.QWizardPage):
     ) -> None:
         outdata.fill(0)
 
-        if self.output_callback_tone_index + frames >= len(self.output_callback_tone):
-            self.output_callback_tone_index = 0
-        segment = self.output_callback_tone[
-            self.output_callback_tone_index : self.output_callback_tone_index + frames
+        if self.output_callback_signal_index + frames >= len(
+            self.output_callback_signal
+        ):
+            self.output_callback_signal_index = 0
+        segment = self.output_callback_signal[
+            self.output_callback_signal_index : self.output_callback_signal_index
+            + frames
         ]
-        self.output_callback_tone_index += frames
+        self.output_callback_signal_index += frames
 
         channel = self.context.output_channel.channel_index - 1
         outdata[:, channel] = segment
