@@ -114,8 +114,9 @@ def _generate_batch(
 
 def _run_training(context: TrainingContext, config: _TrainingConfig):
     mx.random.seed(0o35)
-    model_config = get_wavenet_config(ModelSizePreset.NAM_STANDARD)
-    model = NamWaveNet(model_config, context.loaded_metadata, context.sample_rate)
+    model = NamWaveNet(
+        context.model_config, context.loaded_metadata, context.sample_rate
+    )
     assert model is not None
     mx.eval(model.parameters())
 

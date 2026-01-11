@@ -8,6 +8,7 @@ import numpy as np
 
 from toan.model.metadata import ModelMetadata
 from toan.model.nam_wavenet import NamWaveNet
+from toan.model.nam_wavenet_config import NamWaveNetConfig
 from toan.training import TrainingSummary
 
 
@@ -15,8 +16,11 @@ class TrainingContext:
     input_path: str
     loaded_metadata: ModelMetadata | None = None
     sample_rate: int = 0
+    model_config: NamWaveNetConfig | None = None
+
     signal_dry: np.ndarray | None = None
     signal_wet: np.ndarray | None = None
+
     progress_lock: threading.Lock
     progress_iters_done: int = 0
     progress_iters_total: int = 1
