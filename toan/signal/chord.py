@@ -64,7 +64,7 @@ def generate_generic_chord_pluck_scale(
         plucks = plucks / np.abs(plucks).max()
         chord_list.append(plucks)
 
-    return concat_signals(chord_list, sample_rate // 10)
+    return concat_signals(chord_list, sample_rate // 12)
 
 
 def generate_named_chord_pluck_scale(
