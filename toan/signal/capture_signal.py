@@ -7,13 +7,12 @@ import numpy as np
 from toan.mix import concat_signals
 from toan.music import get_note_frequency_by_name, get_note_index_by_name
 from toan.signal.chirp import generate_chirp
-from toan.signal.chord import ChordType, generate_named_chord_chirp
 from toan.signal.gaussian import generate_gaussian_pulse
 from toan.signal.noise import generate_white_noise
 from toan.signal.scale import ScaleSound, generate_chromatic_scale
 from toan.signal.trig import generate_cosine_wave, generate_sine_wave
 
-SWEEP_DURATION = 9.0
+SWEEP_DURATION = 12.0
 NOTE_DURATION = 0.6
 
 
@@ -31,12 +30,20 @@ def generate_capture_signal(sample_rate: int) -> np.ndarray:
     impulse0 = np.ones(1)
     impulse1 = generate_gaussian_pulse(sample_rate // 4000)
     impulse2 = generate_gaussian_pulse(sample_rate // 3000)
-    impulse3 = generate_gaussian_pulse(sample_rate // 2000)
-    impulse4 = generate_gaussian_pulse(sample_rate // 1500)
-    impulse5 = generate_gaussian_pulse(sample_rate // 1200)
+    impulse3 = generate_gaussian_pulse(sample_rate // 2500)
+    impulse4 = generate_gaussian_pulse(sample_rate // 2000)
+    impulse5 = generate_gaussian_pulse(sample_rate // 1600)
+    impulse6 = generate_gaussian_pulse(sample_rate // 1400)
+    impulse7 = generate_gaussian_pulse(sample_rate // 1200)
 
     # Sweep of audible frequencies
     sweep_up = generate_chirp(sample_rate, 20.0, 20000.0, SWEEP_DURATION)
+
+    cosine_multiplier = generate_cosine_wave(len(sweep_up), sample_rate // 5, 0.08, 1.0)
+    sine_multiplier = generate_sine_wave(len(sweep_up), sample_rate // 5, 0.08, 1.0)
+
+    sweep_up_cos = sweep_up * cosine_multiplier
+    sweep_up_sin = sweep_up * sine_multiplier
 
     # Lowest bass guitar note is E1
     scale_lo = get_note_frequency_by_name("E", 1, 440)
@@ -48,47 +55,6 @@ def generate_capture_signal(sample_rate: int) -> np.ndarray:
         sample_rate, scale_lo, scale_steps, NOTE_DURATION, ScaleSound.PLUCK
     )
     scale = concat_signals(scale_list)
-
-    sweep_octave = generate_named_chord_chirp(
-        ChordType.Octave, sample_rate, "E", 1, "E", 7, SWEEP_DURATION
-    )
-    sweep_tritone = generate_named_chord_chirp(
-        ChordType.Tritone,
-        sample_rate,
-        "E",
-        1,
-        "E",
-        7,
-        SWEEP_DURATION,
-    )
-    sweep_major_chord = generate_named_chord_chirp(
-        ChordType.Major, sample_rate, "E", 1, "E", 7, SWEEP_DURATION
-    )
-    sweep_minor_chord = generate_named_chord_chirp(
-        ChordType.Minor, sample_rate, "E", 1, "E", 7, SWEEP_DURATION
-    )
-    sweep_dim_chord = generate_named_chord_chirp(
-        ChordType.Diminished, sample_rate, "E", 1, "E", 7, SWEEP_DURATION
-    )
-    assert len(sweep_major_chord) == len(sweep_tritone)
-
-    cosine_multiplier = generate_cosine_wave(
-        len(sweep_major_chord), sample_rate // 4, 0.1, 1.0
-    )
-    sine_multiplier = generate_sine_wave(
-        len(sweep_major_chord), sample_rate // 4, 0.1, 1.0
-    )
-
-    sweep_octave_cosine = sweep_octave * cosine_multiplier
-    sweep_octave_sine = sweep_octave * sine_multiplier
-    sweep_tritone_cosine = sweep_tritone * cosine_multiplier
-    sweep_tritone_sine = sweep_tritone * sine_multiplier
-    sweep_major_chord_cosine = sweep_major_chord * cosine_multiplier
-    sweep_major_chord_sine = sweep_major_chord * sine_multiplier
-    sweep_minor_chord_cosine = sweep_minor_chord * cosine_multiplier
-    sweep_minor_chord_sine = sweep_minor_chord * sine_multiplier
-    sweep_dim_chord_cosine = sweep_dim_chord * cosine_multiplier
-    sweep_dim_chord_sine = sweep_dim_chord * sine_multiplier
 
     white_noise_full = generate_white_noise(sample_rate)
     white_noise_half = white_noise_full * 0.5
@@ -110,34 +76,22 @@ def generate_capture_signal(sample_rate: int) -> np.ndarray:
 
     signal_train = concat_signals(
         [
-            scale,
             impulse0,
             impulse1,
             impulse2,
             impulse3,
             impulse4,
             impulse5,
+            impulse6,
+            impulse7,
             white_noise_full,
             white_noise_half,
             white_noise_quarter,
             white_noise_gaussian,
             sweep_up,
+            sweep_up_cos,
+            sweep_up_sin,
             scale,
-            sweep_octave,
-            sweep_octave_cosine,
-            sweep_octave_sine,
-            sweep_tritone,
-            sweep_tritone_cosine,
-            sweep_tritone_sine,
-            sweep_major_chord,
-            sweep_major_chord_cosine,
-            sweep_major_chord_sine,
-            sweep_minor_chord,
-            sweep_minor_chord_cosine,
-            sweep_minor_chord_sine,
-            sweep_dim_chord,
-            sweep_dim_chord_cosine,
-            sweep_dim_chord_sine,
         ],
         quarter_second_samples,
     )
