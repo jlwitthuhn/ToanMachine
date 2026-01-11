@@ -12,8 +12,6 @@ from PySide6 import QtCore, QtWidgets
 
 from toan.gui.train import TrainingContext
 from toan.model.nam_wavenet import NamWaveNet
-from toan.model.nam_wavenet_presets import get_wavenet_config
-from toan.model.size_presets import ModelSizePreset
 from toan.training import TrainingSummary
 
 TRAIN_TEXT = [
