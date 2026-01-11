@@ -14,7 +14,7 @@ from toan.signal.scale import ScaleSound, generate_chromatic_scale
 from toan.signal.trig import generate_cosine_wave, generate_sine_wave
 
 SWEEP_DURATION = 12.0
-NOTE_DURATION = 0.72
+NOTE_DURATION = 0.75
 
 
 def generate_capture_signal(sample_rate: int) -> np.ndarray:
