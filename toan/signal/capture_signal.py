@@ -14,6 +14,7 @@ from toan.signal.scale import ScaleSound, generate_chromatic_scale
 from toan.signal.trig import generate_cosine_wave, generate_sine_wave
 
 SWEEP_DURATION = 9.0
+NOTE_DURATION = 0.6
 
 
 def generate_capture_signal(sample_rate: int) -> np.ndarray:
@@ -44,13 +45,8 @@ def generate_capture_signal(sample_rate: int) -> np.ndarray:
     index_hi = get_note_index_by_name("E", 6)
     scale_steps = index_hi - index_lo
     scale_list = generate_chromatic_scale(
-        sample_rate, scale_lo, scale_steps, 0.4, ScaleSound.PLUCK
+        sample_rate, scale_lo, scale_steps, NOTE_DURATION, ScaleSound.PLUCK
     )
-    scale_step_samples = len(scale_list[0])
-    scale_step_gaussian = generate_gaussian_pulse(scale_step_samples)
-    for scale_step in scale_list:
-        scale_step *= scale_step_gaussian
-        pass
     scale = concat_signals(scale_list)
 
     sweep_octave = generate_named_chord_chirp(

@@ -42,7 +42,9 @@ def generate_chromatic_scale(
                 this_tone = generate_tone(sample_rate, freq, note_duration, True)
                 result.append(this_tone)
             case ScaleSound.PLUCK:
-                this_pluck = generate_pluck(sample_rate, freq, note_duration, 0.99)
+                this_pluck = generate_pluck(sample_rate, freq, note_duration, 0.98)
                 this_pluck = this_pluck / np.abs(this_pluck).max()
                 result.append(this_pluck)
+            case _:
+                assert False
     return result

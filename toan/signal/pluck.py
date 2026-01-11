@@ -4,6 +4,10 @@
 
 import numpy as np
 
+# Control how agressive the low-pass filter is
+# Numbers closer to 0.5 will filter the most
+SPLIT_A = 0.52
+
 
 # Generate a pluck using a Karplus-Strong filter over random noise
 def generate_pluck(
@@ -13,13 +17,14 @@ def generate_pluck(
     result = np.zeros(out_sample_count)
 
     buffer_width = int(sample_rate / frequency)
+
     buffer = np.random.choice([-1.0, 1.0], size=buffer_width)
 
     previous: float = 0.0
 
     for i in range(out_sample_count):
         buffer_index = i % buffer_width
-        value = decay * (buffer[buffer_index] + previous) / 2.0
+        value = decay * (buffer[buffer_index] * SPLIT_A + previous * (1.0 - SPLIT_A))
         buffer[buffer_index] = value
         result[i] = value
         previous = value
