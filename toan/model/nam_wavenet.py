@@ -27,7 +27,9 @@ class _NamConv1dLayer(nn.Conv1d):
     def export_nam_linear_weights(self) -> list[float]:
         result = []
         if self.weight is not None:
-            result.extend(self.weight.flatten().tolist())
+            # Like below, we need to transpose before flattening
+            torch_weights = self.weight.transpose(0, 2, 1)
+            result.extend(torch_weights.flatten().tolist())
         try:
             if self.bias is not None:
                 result.extend(self.bias.flatten().tolist())
