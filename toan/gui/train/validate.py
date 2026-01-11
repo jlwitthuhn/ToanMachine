@@ -29,7 +29,6 @@ class TrainValidatePage(QtWidgets.QWizardPage):
         super().__init__(parent)
         self.context = context
 
-        self.setCommitPage(True)
         self.setTitle("Checking Input")
         layout = QtWidgets.QVBoxLayout(self)
 
@@ -214,10 +213,12 @@ def _run_thread(context: _ValidateThreadContext, input_path: str):
             context.page.context.signal_dry = dry_trimmed
             context.page.context.signal_wet = wet_trimmed
 
+            gear_make = config_json["device_make"]
+            gear_model = config_json["device_model"]
             context.page.context.loaded_metadata = ModelMetadata(
-                name="Toan Model",
-                gear_make=config_json["device_make"],
-                gear_model=config_json["device_model"],
+                name=f"{gear_make} -- {gear_model}",
+                gear_make=gear_make,
+                gear_model=gear_model,
             )
 
             context.page.context.sample_rate = config_json["sample_rate"]
