@@ -114,6 +114,7 @@ def generate_capture_signal(sample_rate: int) -> np.ndarray:
 
     signal_train = concat_signals(
         [
+            scale,
             impulse0,
             impulse1,
             impulse2,
