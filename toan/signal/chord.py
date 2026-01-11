@@ -38,8 +38,6 @@ def generate_generic_chord_chirp(
     semitone_count = end_index - begin_index - semitone_width
     assert 0 < semitone_width <= semitone_count
 
-    note_count = len(shape) + 1
-
     root_begin: float = get_note_frequency_by_name(begin_note, begin_octave, 440.0)
     root_end: float = _increase_semitones(root_begin, semitone_count)
     result = generate_chirp(sample_rate, root_begin, root_end, duration)
@@ -48,6 +46,9 @@ def generate_generic_chord_chirp(
         note_begin: float = _increase_semitones(root_begin, this_note_offset)
         note_end: float = _increase_semitones(note_begin, semitone_count)
         result += generate_chirp(sample_rate, note_begin, note_end, duration)
+
+    # Scale to [-1.0, 1.0]
+    result = result / (np.abs(result).max())
 
     return result
 
