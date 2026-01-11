@@ -10,3 +10,16 @@ class ModelSizePreset(Enum):
     NAM_LITE = 1
     NAM_FEATHER = 2
     NAM_NANO = 3
+
+    def get_label(self) -> str:
+        match self:
+            case ModelSizePreset.NAM_STANDARD:
+                return "NAM Standard"
+            case ModelSizePreset.NAM_LITE:
+                return "NAM Lite"
+            case ModelSizePreset.NAM_FEATHER:
+                return "NAM Feather"
+            case ModelSizePreset.NAM_NANO:
+                return "NAM Nano"
+            case _:
+                assert False

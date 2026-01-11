@@ -5,6 +5,7 @@
 from PySide6 import QtWidgets
 
 from toan.gui.train.context import TrainingContext
+from toan.model.size_presets import ModelSizePreset
 
 
 class TrainConfigPage(QtWidgets.QWizardPage):
@@ -14,6 +15,7 @@ class TrainConfigPage(QtWidgets.QWizardPage):
     edit_device_make: QtWidgets.QLineEdit
     edit_device_model: QtWidgets.QLineEdit
     edit_sample_rate: QtWidgets.QLineEdit
+    combo_size: QtWidgets.QComboBox
 
     def __init__(self, parent, context: TrainingContext):
         super().__init__(parent)
@@ -39,6 +41,12 @@ class TrainConfigPage(QtWidgets.QWizardPage):
         self.edit_sample_rate.setMinimumWidth(250)
         self.edit_sample_rate.setReadOnly(True)
         layout.addRow("Sample rate:", self.edit_sample_rate)
+
+        self.combo_size = QtWidgets.QComboBox(self)
+        for allowed_model in [ModelSizePreset.NAM_STANDARD]:
+            label = allowed_model.get_label()
+            self.combo_size.addItem(label, allowed_model.value)
+        layout.addRow("Model size:", self.combo_size)
 
     def initializePage(self):
         self.edit_model_name.setText(self.context.loaded_metadata.name)
