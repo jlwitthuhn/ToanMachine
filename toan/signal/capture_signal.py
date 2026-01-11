@@ -7,13 +7,14 @@ import numpy as np
 from toan.mix import concat_signals
 from toan.music import get_note_frequency_by_name, get_note_index_by_name
 from toan.signal.chirp import generate_chirp
+from toan.signal.chord import ChordType, generate_named_chord_pluck_scale
 from toan.signal.gaussian import generate_gaussian_pulse
 from toan.signal.noise import generate_white_noise
 from toan.signal.scale import ScaleSound, generate_chromatic_scale
 from toan.signal.trig import generate_cosine_wave, generate_sine_wave
 
 SWEEP_DURATION = 12.0
-NOTE_DURATION = 0.6
+NOTE_DURATION = 0.70
 
 
 def generate_capture_signal(sample_rate: int) -> np.ndarray:
@@ -34,13 +35,13 @@ def generate_capture_signal(sample_rate: int) -> np.ndarray:
     impulse4 = generate_gaussian_pulse(sample_rate // 2000)
     impulse5 = generate_gaussian_pulse(sample_rate // 1600)
     impulse6 = generate_gaussian_pulse(sample_rate // 1400)
-    impulse7 = generate_gaussian_pulse(sample_rate // 1200)
+    impulse7 = generate_gaussian_pulse(sample_rate // 1300)
 
     # Sweep of audible frequencies
-    sweep_up = generate_chirp(sample_rate, 20.0, 20000.0, SWEEP_DURATION)
+    sweep_up = generate_chirp(sample_rate, 18.0, 21000.0, SWEEP_DURATION)
 
-    cosine_multiplier = generate_cosine_wave(len(sweep_up), sample_rate // 5, 0.08, 1.0)
-    sine_multiplier = generate_sine_wave(len(sweep_up), sample_rate // 5, 0.08, 1.0)
+    cosine_multiplier = generate_cosine_wave(len(sweep_up), sample_rate // 4, 0.08, 1.0)
+    sine_multiplier = generate_sine_wave(len(sweep_up), sample_rate // 4, 0.08, 1.0)
 
     sweep_up_cos = sweep_up * cosine_multiplier
     sweep_up_sin = sweep_up * sine_multiplier
@@ -48,13 +49,63 @@ def generate_capture_signal(sample_rate: int) -> np.ndarray:
     # Lowest bass guitar note is E1
     scale_lo = get_note_frequency_by_name("E", 1, 440)
     index_lo = get_note_index_by_name("E", 1)
-    # Guitar high E string played at the 24th fret is E6
-    index_hi = get_note_index_by_name("E", 6)
+    # Guitar high E string played at the 24th fret is E6, so go up to G6 i guess
+    index_hi = get_note_index_by_name("G", 6)
     scale_steps = index_hi - index_lo
     scale_list = generate_chromatic_scale(
         sample_rate, scale_lo, scale_steps, NOTE_DURATION, ScaleSound.PLUCK
     )
     scale = concat_signals(scale_list)
+
+    scale_tritone_chord = generate_named_chord_pluck_scale(
+        ChordType.Tritone,
+        sample_rate,
+        "E",
+        1,
+        "G",
+        6,
+        NOTE_DURATION,
+    )
+
+    scale_major_chord = generate_named_chord_pluck_scale(
+        ChordType.Major,
+        sample_rate,
+        "E",
+        1,
+        "G",
+        6,
+        NOTE_DURATION,
+    )
+
+    scale_minor_chord = generate_named_chord_pluck_scale(
+        ChordType.Minor,
+        sample_rate,
+        "E",
+        1,
+        "G",
+        6,
+        NOTE_DURATION,
+    )
+
+    scale_minor_ninth_chord = generate_named_chord_pluck_scale(
+        ChordType.MinorNinth,
+        sample_rate,
+        "E",
+        1,
+        "G",
+        6,
+        NOTE_DURATION,
+    )
+
+    scale_guitar_chord = generate_named_chord_pluck_scale(
+        ChordType.GuitarStrings,
+        sample_rate,
+        "E",
+        1,
+        "G",
+        6,
+        NOTE_DURATION,
+    )
 
     white_noise_full = generate_white_noise(sample_rate)
     white_noise_half = white_noise_full * 0.5
@@ -84,14 +135,19 @@ def generate_capture_signal(sample_rate: int) -> np.ndarray:
             impulse5,
             impulse6,
             impulse7,
-            white_noise_full,
-            white_noise_half,
-            white_noise_quarter,
-            white_noise_gaussian,
             sweep_up,
             sweep_up_cos,
             sweep_up_sin,
             scale,
+            scale_tritone_chord,
+            scale_major_chord,
+            scale_minor_chord,
+            scale_minor_ninth_chord,
+            scale_guitar_chord,
+            white_noise_full,
+            white_noise_half,
+            white_noise_quarter,
+            white_noise_gaussian,
         ],
         quarter_second_samples,
     )
