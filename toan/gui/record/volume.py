@@ -42,7 +42,7 @@ class RecordVolumePage(QtWidgets.QWizardPage):
         super().__init__(parent)
         self.context = context
 
-        single_sweep = generate_chirp(context.sample_rate, 18, 22000, 1.0, 0.8)
+        single_sweep = generate_chirp(context.sample_rate, 18, 22000, 0.8)
         single_sweep_samples = len(single_sweep)
         volume_buffer_samples = math.floor(single_sweep_samples * 1.10)
         self.volume_samples = np.zeros(volume_buffer_samples)

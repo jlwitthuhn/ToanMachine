@@ -30,7 +30,6 @@ def generate_generic_chord_chirp(
     begin_octave: int,
     end_note: str,
     end_octave: int,
-    amplitude: float,
     duration: float,
 ) -> np.ndarray:
     begin_index = get_note_index_by_name(begin_note, begin_octave)
@@ -43,16 +42,12 @@ def generate_generic_chord_chirp(
 
     root_begin: float = get_note_frequency_by_name(begin_note, begin_octave, 440.0)
     root_end: float = _increase_semitones(root_begin, semitone_count)
-    result = generate_chirp(
-        sample_rate, root_begin, root_end, amplitude / note_count, duration
-    )
+    result = generate_chirp(sample_rate, root_begin, root_end, duration)
 
     for this_note_offset in shape:
         note_begin: float = _increase_semitones(root_begin, this_note_offset)
         note_end: float = _increase_semitones(note_begin, semitone_count)
-        result += generate_chirp(
-            sample_rate, note_begin, note_end, amplitude / note_count, duration
-        )
+        result += generate_chirp(sample_rate, note_begin, note_end, duration)
 
     return result
 
@@ -64,7 +59,6 @@ def generate_named_chord_chirp(
     begin_octave: int,
     end_note: str,
     end_octave: int,
-    amplitude: float,
     duration: float,
 ) -> np.ndarray:
     shape = None
@@ -88,6 +82,5 @@ def generate_named_chord_chirp(
         begin_octave,
         end_note,
         end_octave,
-        amplitude,
         duration,
     )

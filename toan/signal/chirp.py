@@ -9,7 +9,6 @@ def generate_chirp(
     sample_rate: float,
     begin_freq: float,
     end_freq: float,
-    amplitude: float,
     duration: float,
 ) -> np.ndarray:
     f = np.logspace(
@@ -17,4 +16,4 @@ def generate_chirp(
     )
     f_rad = f * 2 * np.pi
     phase = np.cumsum(f_rad) / sample_rate
-    return amplitude * np.sin(phase)
+    return np.sin(phase)

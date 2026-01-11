@@ -24,12 +24,11 @@ def generate_chromatic_scale(
     sample_rate: int,
     low_freq: float,
     steps: int,
-    amplitude: float,
     note_duration: float,
 ) -> list[np.ndarray]:
     freqs = _generate_semitone_scale_frequencies(low_freq, steps - 1)
     result = []
     for freq in freqs:
-        this_tone = generate_tone(sample_rate, freq, amplitude, note_duration, True)
+        this_tone = generate_tone(sample_rate, freq, note_duration, True)
         result.append(this_tone)
     return result
