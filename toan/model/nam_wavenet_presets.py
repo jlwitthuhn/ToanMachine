@@ -52,7 +52,56 @@ def get_wavenet_config(size_preset: ModelSizePreset) -> NamWaveNetConfig:
                             512,
                         ],
                         activation="Tanh",
-                        gated=True,
+                        gated=False,
+                        head_bias=True,
+                    ),
+                ]
+            )
+        case ModelSizePreset.NAM_LITE:
+            return NamWaveNetConfig(
+                layers=[
+                    NameWaveNetLayerGroupConfig(
+                        input_size=1,
+                        condition_size=1,
+                        head_size=6,
+                        channels=12,
+                        kernel_size=3,
+                        dilations=[
+                            1,
+                            2,
+                            4,
+                            8,
+                            16,
+                            32,
+                            64,
+                        ],
+                        activation="Tanh",
+                        gated=False,
+                        head_bias=False,
+                    ),
+                    NameWaveNetLayerGroupConfig(
+                        input_size=12,
+                        condition_size=1,
+                        head_size=1,
+                        channels=6,
+                        kernel_size=3,
+                        dilations=[
+                            128,
+                            256,
+                            512,
+                            1,
+                            2,
+                            4,
+                            8,
+                            16,
+                            32,
+                            64,
+                            128,
+                            256,
+                            512,
+                        ],
+                        activation="Tanh",
+                        gated=False,
                         head_bias=True,
                     ),
                 ]

@@ -14,9 +14,9 @@ class ModelSizePreset(Enum):
     def get_label(self) -> str:
         match self:
             case ModelSizePreset.NAM_STANDARD:
-                return "NAM Standard"
+                return "NAM Standard - 13801p"
             case ModelSizePreset.NAM_LITE:
-                return "NAM Lite"
+                return "NAM Lite - 6553p"
             case ModelSizePreset.NAM_FEATHER:
                 return "NAM Feather"
             case ModelSizePreset.NAM_NANO:

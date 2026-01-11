@@ -117,6 +117,7 @@ def _run_training(context: TrainingContext, config: _TrainingConfig):
     model = NamWaveNet(
         context.model_config, context.loaded_metadata, context.sample_rate
     )
+    print(f"Params: {model.parameter_count}")
     assert model is not None
     mx.eval(model.parameters())
 
