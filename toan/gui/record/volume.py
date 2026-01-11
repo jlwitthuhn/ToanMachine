@@ -15,7 +15,7 @@ from toan.soundio import SdPlayrecController, prepare_play_record
 
 VOLUME_TEXT = [
     "Set the input gain on your interface so that you are able to record to full range of your pedal's output without clipping.",
-    "With the audio signal running through your pedal, press 'Play Test Sound' below and adjust your input gain so that the volume is around 95.",
+    "With the audio signal running through your pedal, press 'Play Test Sound' below and adjust your input gain so that the volume is around 95. If the volume reads 100 then you are clipping.",
 ]
 
 BAR_PRECISION = 1000
