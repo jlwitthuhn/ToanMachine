@@ -40,7 +40,14 @@ class _NamConv1dLayer(nn.Conv1d):
         if self.weight is not None:
             size = self.weight.size
             my_slice = weights[i : i + size]
-            self.weight = my_slice.reshape(self.weight.shape)
+
+            # MLX uses dimensions arranged as (X, Y, Z)
+            # Torch instead uses (X, Z, Y)
+            # So we create weights in the torch shape then transpose axes
+            assert self.weight.ndim == 3
+            x, y, z = self.weight.shape
+            torch_weights = my_slice.reshape((x, z, y))
+            self.weight = torch_weights.transpose(0, 2, 1)
             i = i + size
         try:
             if self.bias is not None:
