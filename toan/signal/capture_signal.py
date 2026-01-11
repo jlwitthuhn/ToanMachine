@@ -10,10 +10,10 @@ from toan.signal.chirp import generate_chirp
 from toan.signal.chord import ChordType, generate_named_chord_chirp
 from toan.signal.gaussian import generate_gaussian_pulse
 from toan.signal.noise import generate_white_noise
-from toan.signal.scale import generate_chromatic_scale
+from toan.signal.scale import ScaleSound, generate_chromatic_scale
 from toan.signal.trig import generate_cosine_wave, generate_sine_wave
 
-SEGMENT_DURATION = 9.0
+SWEEP_DURATION = 9.0
 
 
 def generate_capture_signal(sample_rate: int) -> np.ndarray:
@@ -35,15 +35,17 @@ def generate_capture_signal(sample_rate: int) -> np.ndarray:
     impulse5 = generate_gaussian_pulse(sample_rate // 1200)
 
     # Sweep of audible frequencies
-    sweep_up = generate_chirp(sample_rate, 20.0, 20000.0, SEGMENT_DURATION)
+    sweep_up = generate_chirp(sample_rate, 20.0, 20000.0, SWEEP_DURATION)
 
     # Lowest bass guitar note is E1
     scale_lo = get_note_frequency_by_name("E", 1, 440)
     index_lo = get_note_index_by_name("E", 1)
-    # Guitar high E string played at the 24th fret is E6, add one octave to be safe
-    index_hi = get_note_index_by_name("E", 7)
+    # Guitar high E string played at the 24th fret is E6
+    index_hi = get_note_index_by_name("E", 6)
     scale_steps = index_hi - index_lo
-    scale_list = generate_chromatic_scale(sample_rate, scale_lo, scale_steps, 0.25)
+    scale_list = generate_chromatic_scale(
+        sample_rate, scale_lo, scale_steps, 0.4, ScaleSound.PLUCK
+    )
     scale_step_samples = len(scale_list[0])
     scale_step_gaussian = generate_gaussian_pulse(scale_step_samples)
     for scale_step in scale_list:
@@ -52,7 +54,7 @@ def generate_capture_signal(sample_rate: int) -> np.ndarray:
     scale = concat_signals(scale_list)
 
     sweep_octave = generate_named_chord_chirp(
-        ChordType.Octave, sample_rate, "E", 1, "E", 7, SEGMENT_DURATION
+        ChordType.Octave, sample_rate, "E", 1, "E", 7, SWEEP_DURATION
     )
     sweep_tritone = generate_named_chord_chirp(
         ChordType.Tritone,
@@ -61,16 +63,16 @@ def generate_capture_signal(sample_rate: int) -> np.ndarray:
         1,
         "E",
         7,
-        SEGMENT_DURATION,
+        SWEEP_DURATION,
     )
     sweep_major_chord = generate_named_chord_chirp(
-        ChordType.Major, sample_rate, "E", 1, "E", 7, SEGMENT_DURATION
+        ChordType.Major, sample_rate, "E", 1, "E", 7, SWEEP_DURATION
     )
     sweep_minor_chord = generate_named_chord_chirp(
-        ChordType.Minor, sample_rate, "E", 1, "E", 7, SEGMENT_DURATION
+        ChordType.Minor, sample_rate, "E", 1, "E", 7, SWEEP_DURATION
     )
     sweep_dim_chord = generate_named_chord_chirp(
-        ChordType.Diminished, sample_rate, "E", 1, "E", 7, SEGMENT_DURATION
+        ChordType.Diminished, sample_rate, "E", 1, "E", 7, SWEEP_DURATION
     )
     assert len(sweep_major_chord) == len(sweep_tritone)
 

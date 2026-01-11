@@ -3,9 +3,11 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
 import math
+from enum import Enum
 
 import numpy as np
 
+from toan.signal.pluck import generate_pluck
 from toan.signal.tone import generate_tone
 
 
@@ -20,15 +22,27 @@ def _generate_semitone_scale_frequencies(
     return result
 
 
+class ScaleSound(Enum):
+    TONE = 1
+    PLUCK = 2
+
+
 def generate_chromatic_scale(
     sample_rate: int,
     low_freq: float,
     steps: int,
     note_duration: float,
+    sound_type: ScaleSound,
 ) -> list[np.ndarray]:
     freqs = _generate_semitone_scale_frequencies(low_freq, steps - 1)
     result = []
     for freq in freqs:
-        this_tone = generate_tone(sample_rate, freq, note_duration, True)
-        result.append(this_tone)
+        match sound_type:
+            case ScaleSound.TONE:
+                this_tone = generate_tone(sample_rate, freq, note_duration, True)
+                result.append(this_tone)
+            case ScaleSound.PLUCK:
+                this_pluck = generate_pluck(sample_rate, freq, note_duration, 0.98)
+                this_pluck = this_pluck / np.abs(this_pluck).max()
+                result.append(this_pluck)
     return result

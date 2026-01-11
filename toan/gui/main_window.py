@@ -10,12 +10,12 @@ from toan.gui.record import RecordWizard
 from toan.gui.train import TrainingWizard
 from toan.signal import generate_capture_signal
 
-INCLUDE_DEBUG_PANEL = False
+INCLUDE_DEBUG_PANEL = True
 
 
 def _clicked_play_training_signal():
     playback_sample_rate = 44100
-    signal = generate_capture_signal(playback_sample_rate, 0.5)
+    signal = generate_capture_signal(playback_sample_rate)
     sd.play(signal, playback_sample_rate)
 
 
