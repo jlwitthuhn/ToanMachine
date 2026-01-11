@@ -6,12 +6,12 @@ import numpy as np
 
 # Control how aggressive the low-pass filter is
 # Numbers closer to 0.5 will filter the most
-SPLIT_A = 0.54
+SPLIT_A = 0.55
 
 
 # Generate a pluck using a Karplus-Strong filter over random noise
 def generate_pluck(
-    sample_rate: int, frequency: float, duration: float, decay: float = 0.993
+    sample_rate: int, frequency: float, duration: float, decay: float = 0.99
 ) -> np.ndarray:
     out_sample_count = int(duration * sample_rate)
     result = np.zeros(out_sample_count)
