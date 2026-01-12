@@ -14,6 +14,8 @@ from toan.signal.scale import ScaleSound, generate_chromatic_scale
 from toan.signal.trig import generate_cosine_wave, generate_sine_wave
 
 SWEEP_DURATION = 12.0
+NOISE_SHORT_DURATION = 1.2
+NOISE_LONG_DURATION = 2.5
 NOTE_DURATION = 0.75
 
 
@@ -107,10 +109,11 @@ def generate_capture_signal(sample_rate: int) -> np.ndarray:
         NOTE_DURATION,
     )
 
-    white_noise_full = generate_white_noise(sample_rate)
+    noise_samples_short = int(sample_rate * NOISE_SHORT_DURATION)
+    white_noise_full = generate_white_noise(noise_samples_short)
     white_noise_half = white_noise_full * 0.5
     white_noise_quarter = white_noise_half * 0.5
-    gaussian_samples = sample_rate * 2
+    gaussian_samples = int(sample_rate * NOISE_LONG_DURATION)
     white_noise_gaussian = generate_white_noise(
         gaussian_samples
     ) * generate_gaussian_pulse(gaussian_samples)
