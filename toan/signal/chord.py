@@ -35,15 +35,21 @@ def generate_generic_chord_pluck(
     shape: list[int],
     root_frequency: float,
     duration: float,
+    offset_duration: float = 1.8e-3,
 ) -> np.ndarray:
     frequencies: list[float] = [root_frequency]
     for extra_semitones in shape:
         frequencies.append(_increase_semitones(root_frequency, extra_semitones))
 
     pluck_list: list[np.ndarray] = []
-    for frequency in frequencies:
-        pluck = generate_pluck(sample_rate, frequency, duration)
-        pluck_list.append(pluck)
+    for idx, frequency in enumerate(frequencies):
+        offset = int(idx * offset_duration * sample_rate)
+        pluck_raw = generate_pluck(sample_rate, frequency, duration)
+        if offset == 0:
+            pluck_list.append(pluck_raw)
+        else:
+            offset_buffer = np.zeros(offset)
+            pluck_list.append(np.concatenate((offset_buffer, pluck_raw[:-offset])))
 
     chord = np.add.reduce(pluck_list)
     chord = chord / np.abs(chord).max()
@@ -58,6 +64,7 @@ def generate_generic_chord_pluck_scale(
     end_note: str,
     end_octave: int,
     single_duration: float,
+    offset_duration: float = 1.8e-3,
 ) -> np.ndarray:
     begin_index = get_note_index_by_name(begin_note, begin_octave)
     end_index = get_note_index_by_name(end_note, end_octave)
@@ -72,7 +79,7 @@ def generate_generic_chord_pluck_scale(
         )
         root_frequency = _increase_semitones(root_frequency, i)
         this_chord = generate_generic_chord_pluck(
-            sample_rate, shape, root_frequency, single_duration
+            sample_rate, shape, root_frequency, single_duration, offset_duration
         )
         chord_list.append(this_chord)
 
@@ -87,6 +94,7 @@ def generate_named_chord_pluck_scale(
     end_note: str,
     end_octave: int,
     single_duration: float,
+    offset_duration: float = 1.8e-3,
 ) -> np.ndarray:
     shape = None
     match type:
@@ -114,4 +122,5 @@ def generate_named_chord_pluck_scale(
         end_note,
         end_octave,
         single_duration,
+        offset_duration,
     )
