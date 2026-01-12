@@ -59,55 +59,22 @@ def generate_capture_signal(sample_rate: int) -> np.ndarray:
     )
     scale = concat_signals(scale_list)
 
-    scale_tritone_chord = generate_named_chord_pluck_scale(
-        ChordType.Tritone,
-        sample_rate,
-        "E",
-        1,
-        "G",
-        6,
-        NOTE_DURATION,
-    )
+    def generate_plucked_scale(shape: ChordType):
+        return generate_named_chord_pluck_scale(
+            shape,
+            sample_rate,
+            "E",
+            1,
+            "G",
+            6,
+            NOTE_DURATION,
+        )
 
-    scale_major_chord = generate_named_chord_pluck_scale(
-        ChordType.Major,
-        sample_rate,
-        "E",
-        1,
-        "G",
-        6,
-        NOTE_DURATION,
-    )
-
-    scale_minor_chord = generate_named_chord_pluck_scale(
-        ChordType.Minor,
-        sample_rate,
-        "E",
-        1,
-        "G",
-        6,
-        NOTE_DURATION,
-    )
-
-    scale_minor_ninth_chord = generate_named_chord_pluck_scale(
-        ChordType.MinorNinth,
-        sample_rate,
-        "E",
-        1,
-        "G",
-        6,
-        NOTE_DURATION,
-    )
-
-    scale_guitar_chord = generate_named_chord_pluck_scale(
-        ChordType.GuitarStrings,
-        sample_rate,
-        "E",
-        1,
-        "G",
-        6,
-        NOTE_DURATION,
-    )
+    scale_tritone_chord = generate_plucked_scale(ChordType.Tritone)
+    scale_major_chord = generate_plucked_scale(ChordType.Major)
+    scale_minor_chord = generate_plucked_scale(ChordType.Minor)
+    scale_minor_ninth_chord = generate_plucked_scale(ChordType.MinorNinth)
+    scale_guitar_chord = generate_plucked_scale(ChordType.GuitarStrings)
 
     noise_samples_short = int(sample_rate * NOISE_SHORT_DURATION)
     white_noise_full = generate_white_noise(noise_samples_short)
