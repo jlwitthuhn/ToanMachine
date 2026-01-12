@@ -30,6 +30,26 @@ class ChordType(Enum):
     GuitarStrings = 7
 
 
+def generate_generic_chord_pluck(
+    sample_rate: int,
+    shape: list[int],
+    root_frequency: float,
+    duration: float,
+) -> np.ndarray:
+    frequencies: list[float] = [root_frequency]
+    for extra_semitones in shape:
+        frequencies.append(_increase_semitones(root_frequency, extra_semitones))
+
+    pluck_list: list[np.ndarray] = []
+    for frequency in frequencies:
+        pluck = generate_pluck(sample_rate, frequency, duration)
+        pluck_list.append(pluck)
+
+    chord = np.add.reduce(pluck_list)
+    chord = chord / np.abs(chord).max()
+    return chord
+
+
 def generate_generic_chord_pluck_scale(
     sample_rate: int,
     shape: list[int],
@@ -51,18 +71,10 @@ def generate_generic_chord_pluck_scale(
             begin_note, begin_octave, 440.0
         )
         root_frequency = _increase_semitones(root_frequency, i)
-        frequencies: list[float] = [root_frequency]
-        for extra_semitones in shape:
-            frequencies.append(_increase_semitones(root_frequency, extra_semitones))
-
-        pluck_list: list[np.ndarray] = []
-        for frequency in frequencies:
-            pluck = generate_pluck(sample_rate, frequency, single_duration)
-            pluck_list.append(pluck)
-
-        plucks = np.add.reduce(pluck_list)
-        plucks = plucks / np.abs(plucks).max()
-        chord_list.append(plucks)
+        this_chord = generate_generic_chord_pluck(
+            sample_rate, shape, root_frequency, single_duration
+        )
+        chord_list.append(this_chord)
 
     return concat_signals(chord_list, sample_rate // 12)
 
