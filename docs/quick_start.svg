@@ -1,0 +1,754 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="11in"
+   height="8.5in"
+   viewBox="0 0 1056 816"
+   version="1.1"
+   id="svg1"
+   inkscape:version="1.4.3 (0d15f75, 2025-12-25)"
+   sodipodi:docname="quick_start.svg"
+   inkscape:export-filename="quick_start.png"
+   inkscape:export-xdpi="192"
+   inkscape:export-ydpi="192"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="in"
+     showguides="false"
+     inkscape:zoom="1.4301471"
+     inkscape:cx="357.65553"
+     inkscape:cy="156.97686"
+     inkscape:window-width="2560"
+     inkscape:window-height="1369"
+     inkscape:window-x="1912"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="g21">
+    <inkscape:page
+       x="0"
+       y="0"
+       width="1056"
+       height="816"
+       id="page1"
+       margin="72"
+       bleed="0" />
+  </sodipodi:namedview>
+  <defs
+     id="defs1">
+    <rect
+       x="127.95887"
+       y="234.24165"
+       width="303.33068"
+       height="522.3239"
+       id="rect9" />
+    <rect
+       x="101.38817"
+       y="210.46787"
+       width="262.91003"
+       height="250.32391"
+       id="rect8" />
+    <rect
+       x="153.13111"
+       y="228.64781"
+       width="144.74036"
+       height="162.92031"
+       id="rect7" />
+    <rect
+       x="122.36504"
+       y="239.13625"
+       width="153.13111"
+       height="232.14396"
+       id="rect6" />
+    <rect
+       x="116.07198"
+       y="237.73779"
+       width="230.7455"
+       height="275.49614"
+       id="rect5" />
+    <rect
+       x="95.794344"
+       y="236.33933"
+       width="277.59383"
+       height="290.17995"
+       id="rect4" />
+    <rect
+       x="142.21593"
+       y="269.90231"
+       width="182.92546"
+       height="262.91003"
+       id="rect3" />
+  </defs>
+  <g
+     inkscape:groupmode="layer"
+     id="layer8"
+     inkscape:label="Receive Cable">
+    <path
+       style="fill:none;fill-opacity:1;stroke:#000000;stroke-width:3.84;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+       d="m 556.76685,617.22556 -85.43765,-10e-6 v -39.66258 h 118.01244 v -20.64384"
+       id="path42" />
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer7"
+     inkscape:label="Send Cable">
+    <path
+       style="fill:none;fill-opacity:1;stroke:#000000;stroke-width:3.84;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+       d="m 889.34164,328.91919 v 109.14528 h 60.45728 v 178.34682 l -36.79441,0"
+       id="path30"
+       sodipodi:nodetypes="ccccc"
+       inkscape:label="Cable" />
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer4"
+     inkscape:label="USB Cable"
+     transform="matrix(0.6629258,0,0,0.31559845,243.07672,191.67256)"
+     style="fill:#808080;fill-opacity:1;stroke:none;stroke-opacity:1">
+    <rect
+       style="fill:#808080;fill-opacity:1;stroke:none;stroke-width:0.96;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+       id="rect14"
+       width="41.953728"
+       height="76.215935"
+       x="702.72491"
+       y="211.51672"
+       ry="2.5476205"
+       inkscape:label="Just the tip" />
+    <rect
+       style="fill:#000000;fill-opacity:1;stroke:none;stroke-width:2.50607;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+       id="rect15"
+       width="65.203491"
+       height="107.94574"
+       x="691.10004"
+       y="261.76349"
+       ry="0"
+       inkscape:label="Plug" />
+    <path
+       style="fill:none;fill-opacity:1;stroke:#000000;stroke-width:8.39521;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+       d="M 723.70174,369.70924 V 481.61958 H 444.43919 l 0,-446.436281"
+       id="path15"
+       sodipodi:nodetypes="cccc"
+       inkscape:label="Wire" />
+    <text
+       xml:space="preserve"
+       style="font-size:46.64px;writing-mode:lr-tb;direction:ltr;fill:#000000;fill-opacity:1;stroke:none;stroke-width:8.39521;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+       x="595.98199"
+       y="-11.136423"
+       id="text15"
+       transform="scale(0.68997755,1.4493225)"
+       inkscape:label="Mac Text"><tspan
+         sodipodi:role="line"
+         id="tspan15"
+         style="font-size:46.64px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:8.39521"
+         x="595.98199"
+         y="-11.136423">Mac</tspan></text>
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="g29"
+     inkscape:label="TS Pedal In">
+    <rect
+       style="fill:#808080;fill-opacity:1;stroke:none;stroke-width:3.84;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+       id="rect26"
+       width="15.32736"
+       height="44.745033"
+       x="-624.3222"
+       y="854.51465"
+       inkscape:label="Shaft"
+       transform="rotate(-90)" />
+    <rect
+       style="fill:#808080;fill-opacity:1;stroke:none;stroke-width:3.92856;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+       id="rect27"
+       width="11.947042"
+       height="12.055642"
+       x="2.0495436"
+       y="1040.8192"
+       transform="matrix(0.8047512,-0.59361225,0.8047512,0.59361225,0,0)"
+       inkscape:label="Tip" />
+    <rect
+       style="fill:#000000;fill-opacity:1;stroke:none;stroke-width:3.84;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+       id="rect28"
+       width="15.32736"
+       height="3.0707803"
+       x="-624.3222"
+       y="856.41882"
+       inkscape:label="Insulator"
+       transform="rotate(-90)" />
+    <rect
+       style="fill:#000000;fill-opacity:1;stroke:none;stroke-width:3.84;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+       id="rect29"
+       width="23.732588"
+       height="27.317217"
+       x="-628.27759"
+       y="885.68732"
+       inkscape:label="Plastic Bit"
+       transform="rotate(-90)" />
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="g42"
+     inkscape:label="TS Pedal In copy">
+    <rect
+       style="fill:#808080;fill-opacity:1;stroke:none;stroke-width:3.84;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+       id="rect39"
+       width="15.32736"
+       height="44.745033"
+       x="609.31464"
+       y="-615.25671"
+       inkscape:label="Shaft"
+       transform="rotate(90)" />
+    <rect
+       style="fill:#808080;fill-opacity:1;stroke:none;stroke-width:3.92856;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+       id="rect40"
+       width="11.947042"
+       height="12.055642"
+       x="127.9589"
+       y="-911.45734"
+       transform="matrix(-0.8047512,0.59361225,-0.8047512,-0.59361225,0,0)"
+       inkscape:label="Tip" />
+    <rect
+       style="fill:#000000;fill-opacity:1;stroke:none;stroke-width:3.84;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+       id="rect41"
+       width="15.32736"
+       height="3.0707803"
+       x="609.31464"
+       y="-613.35254"
+       inkscape:label="Insulator"
+       transform="rotate(90)" />
+    <rect
+       style="fill:#000000;fill-opacity:1;stroke:none;stroke-width:3.84;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+       id="rect42"
+       width="23.732588"
+       height="27.317217"
+       x="605.35925"
+       y="-584.08405"
+       inkscape:label="Plastic Bit"
+       transform="rotate(90)" />
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="g38"
+     inkscape:label="TS Interface Send">
+    <rect
+       style="fill:#808080;fill-opacity:1;stroke:none;stroke-width:3.84;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+       id="rect35"
+       width="15.32736"
+       height="44.745033"
+       x="881.43073"
+       y="270.4292"
+       inkscape:label="Shaft" />
+    <rect
+       style="fill:#808080;fill-opacity:1;stroke:none;stroke-width:3.92856;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+       id="rect36"
+       width="11.947042"
+       height="12.055642"
+       x="907.44824"
+       y="-590.37573"
+       transform="matrix(0.59361225,0.8047512,-0.59361225,0.8047512,0,0)"
+       inkscape:label="Tip" />
+    <rect
+       style="fill:#000000;fill-opacity:1;stroke:none;stroke-width:3.84;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+       id="rect37"
+       width="15.32736"
+       height="3.0707803"
+       x="881.43073"
+       y="272.33344"
+       inkscape:label="Insulator" />
+    <rect
+       style="fill:#000000;fill-opacity:1;stroke:none;stroke-width:3.84;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+       id="rect38"
+       width="23.732588"
+       height="27.317217"
+       x="877.47534"
+       y="301.60196"
+       inkscape:label="Plastic Bit" />
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer5"
+     inkscape:label="TS Interface Receive">
+    <rect
+       style="fill:#808080;fill-opacity:1;stroke:none;stroke-width:3.84;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+       id="rect21"
+       width="15.32736"
+       height="44.745033"
+       x="581.43073"
+       y="498.4292"
+       inkscape:label="Shaft" />
+    <rect
+       style="fill:#808080;fill-opacity:1;stroke:none;stroke-width:3.92856;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+       id="rect22"
+       width="11.947042"
+       height="12.055642"
+       x="796.4118"
+       y="-196.02704"
+       transform="matrix(0.59361225,0.8047512,-0.59361225,0.8047512,0,0)"
+       inkscape:label="Tip" />
+    <rect
+       style="fill:#000000;fill-opacity:1;stroke:none;stroke-width:3.84;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+       id="rect23"
+       width="15.32736"
+       height="3.0707803"
+       x="581.43073"
+       y="500.33344"
+       inkscape:label="Insulator" />
+    <rect
+       style="fill:#000000;fill-opacity:1;stroke:none;stroke-width:3.84;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+       id="rect24"
+       width="23.732588"
+       height="27.317217"
+       x="577.47534"
+       y="529.60193"
+       inkscape:label="Plastic Bit" />
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer6"
+     inkscape:label="Pedal">
+    <rect
+       style="fill:#ffa700;fill-opacity:1;stroke:none;stroke-width:3.84;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+       id="rect25"
+       width="199.81436"
+       height="231.44472"
+       x="635.29114"
+       y="512.5553"
+       inkscape:label="Background"
+       ry="7.9429898"
+       rx="7.9429898" />
+    <rect
+       style="fill:#000000;fill-opacity:1;stroke:none;stroke-width:3.84;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+       id="rect25-2"
+       width="171.13741"
+       height="92.015541"
+       x="649.62964"
+       y="640.19666"
+       inkscape:label="Rubber"
+       ry="7.9429898"
+       rx="7.9429898" />
+    <text
+       xml:space="preserve"
+       style="font-size:21.3333px;writing-mode:lr-tb;direction:ltr;fill:#000000;fill-opacity:1;stroke:none;stroke-width:3.84;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+       x="798.00909"
+       y="624.41382"
+       id="text30"
+       inkscape:label="In Label"><tspan
+         sodipodi:role="line"
+         id="tspan30"
+         x="798.00909"
+         y="624.41382">In</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:21.3333px;writing-mode:lr-tb;direction:ltr;fill:#000000;fill-opacity:1;stroke:none;stroke-width:3.84;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+       x="649.88879"
+       y="624.41382"
+       id="text30-5"
+       inkscape:label="Out Label"><tspan
+         sodipodi:role="line"
+         id="tspan30-7"
+         x="649.88879"
+         y="624.41382">Out</tspan></text>
+    <path
+       style="fill:none;fill-opacity:1;stroke:#000000;stroke-width:1.152;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+       d="M 635.29114,589.65165 H 835.1055"
+       id="path31"
+       inkscape:label="Line" />
+    <ellipse
+       style="fill:#000000;fill-opacity:1;stroke:none;stroke-width:1.152;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+       id="path32"
+       cx="694.14294"
+       cy="549.41901"
+       rx="28.298389"
+       ry="28.143959"
+       inkscape:label="Left Knob" />
+    <ellipse
+       style="fill:#000000;fill-opacity:1;stroke:none;stroke-width:1.152;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+       id="path32-2"
+       cx="776.25366"
+       cy="549.41901"
+       rx="28.298389"
+       ry="28.143959"
+       inkscape:label="Right Knob" />
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="g21"
+     inkscape:label="Front View">
+    <rect
+       style="fill:#000000;fill-opacity:1;stroke:#ff0000;stroke-width:6.0877;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+       id="rect16"
+       width="325.52032"
+       height="97.989571"
+       x="448.53094"
+       y="372.60416"
+       ry="11.142145"
+       inkscape:label="Border"
+       rx="11.142145" />
+    <rect
+       style="fill:#999999;fill-opacity:1;stroke:none;stroke-width:1.152;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+       id="rect32"
+       width="2.9665661"
+       height="49.442944"
+       x="651.18799"
+       y="383.65149"
+       rx="0"
+       ry="0"
+       inkscape:label="Line" />
+    <circle
+       style="fill:#404040;fill-opacity:1;stroke:none;stroke-width:1.152;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+       id="path33"
+       cx="703.23669"
+       cy="421.99548"
+       r="31.396265"
+       inkscape:label="Big Knob" />
+    <circle
+       style="fill:#404040;fill-opacity:1;stroke:none;stroke-width:1.152;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+       id="path33-6"
+       cx="486.07224"
+       cy="421.99548"
+       r="23.23818"
+       inkscape:label="XLR Outline" />
+    <circle
+       style="fill:#000000;fill-opacity:1;stroke:none;stroke-width:1.152;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+       id="path35-6-0"
+       cx="486.07224"
+       cy="434.63025"
+       r="2.6575582"
+       inkscape:label="XLR Hole Bottom" />
+    <circle
+       style="fill:#000000;fill-opacity:1;stroke:none;stroke-width:1.152;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+       id="path35"
+       cx="497.99176"
+       cy="419.99548"
+       r="2.6575582"
+       inkscape:label="XLR Hole Right" />
+    <circle
+       style="fill:#000000;fill-opacity:1;stroke:none;stroke-width:1.152;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+       id="path35-6"
+       cx="473.98676"
+       cy="419.99548"
+       r="2.6575582"
+       inkscape:label="XLR Hole Left" />
+    <circle
+       style="fill:#404040;fill-opacity:1;stroke:none;stroke-width:1.152;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+       id="path34"
+       cx="752.89368"
+       cy="397.79077"
+       r="6.8671732"
+       inkscape:label="Monitor Button" />
+    <circle
+       style="fill:#404040;fill-opacity:1;stroke:none;stroke-width:1.152;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+       id="path34-4"
+       cx="623.56384"
+       cy="450.12167"
+       r="6.8671732"
+       inkscape:label="Inst Button" />
+    <circle
+       style="fill:#404040;fill-opacity:1;stroke:none;stroke-width:1.152;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+       id="path34-4-9"
+       cx="553.27521"
+       cy="450.2489"
+       r="6.8671732"
+       inkscape:label="Air Button" />
+    <circle
+       style="fill:#404040;fill-opacity:1;stroke:none;stroke-width:1.152;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+       id="path34-4-9-6"
+       cx="519.86719"
+       cy="449.99445"
+       r="6.8671732"
+       inkscape:label="48v Button" />
+    <circle
+       style="fill:none;fill-opacity:1;stroke:#bfbfbf;stroke-width:1.152;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+       id="path12-3"
+       cx="752.89368"
+       cy="444.51321"
+       r="9.6595745"
+       inkscape:label="Headphone Out Circle" />
+    <circle
+       style="fill:none;fill-opacity:1;stroke:#bfbfbf;stroke-width:1.152;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+       id="path12-3-7"
+       cx="589.31525"
+       cy="444.51321"
+       r="9.6595745"
+       inkscape:label="TS In Circle" />
+    <path
+       style="fill:none;fill-opacity:1;stroke:#ffffff;stroke-width:1.92;stroke-linecap:butt;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+       d="m 537.40521,397.05673 v -9.50917"
+       id="path44-0"
+       inkscape:label="Gain 1 Line" />
+    <circle
+       style="fill:none;fill-opacity:1;stroke:#404040;stroke-width:3.84;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+       id="path43-9"
+       cx="537.40521"
+       cy="397.05673"
+       inkscape:label="Gain 1"
+       r="11.485239" />
+    <text
+       xml:space="preserve"
+       style="font-size:16px;writing-mode:lr-tb;direction:ltr;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:1.92;stroke-linecap:butt;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+       x="508.49625"
+       y="392.99338"
+       id="text44"
+       inkscape:label="Channel 1"><tspan
+         sodipodi:role="line"
+         id="tspan44"
+         x="508.49625"
+         y="392.99338">1</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:16px;writing-mode:lr-tb;direction:ltr;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:1.92;stroke-linecap:butt;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+       x="593.36499"
+       y="392.99338"
+       id="text44-4"
+       inkscape:label="Channel 1"><tspan
+         sodipodi:role="line"
+         x="593.36499"
+         y="392.99338"
+         id="tspan45">2</tspan></text>
+    <path
+       style="fill:none;fill-opacity:1;stroke:#ffffff;stroke-width:1.92;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1;stroke-linecap:butt"
+       d="m 623.19958,397.05673 v -9.50917"
+       id="path44"
+       inkscape:label="Gain 2 Line" />
+    <circle
+       style="fill:none;fill-opacity:1;stroke:#404040;stroke-width:3.84;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+       id="path43"
+       cx="623.19958"
+       cy="397.05673"
+       inkscape:label="Gain 2"
+       r="11.485239" />
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer3"
+     inkscape:label="Back View">
+    <rect
+       style="fill:#000000;fill-opacity:1;stroke:#ff0000;stroke-width:6.0877;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+       id="rect10"
+       width="325.52032"
+       height="97.989571"
+       x="655.43585"
+       y="142.38957"
+       ry="11.142145"
+       inkscape:label="Border" />
+    <rect
+       style="fill:none;fill-opacity:1;stroke:#ffffff;stroke-width:1.152;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+       id="rect11"
+       width="26.852213"
+       height="7.7603388"
+       x="709.41119"
+       y="216.1713"
+       ry="2.5476205"
+       inkscape:label="USB Rect" />
+    <text
+       xml:space="preserve"
+       style="font-size:10.6667px;writing-mode:lr-tb;direction:ltr;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0.96;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+       x="711.37897"
+       y="212.91516"
+       id="text12"
+       inkscape:label="USB Text"><tspan
+         sodipodi:role="line"
+         id="tspan12"
+         x="711.37897"
+         y="212.91516">USB</tspan></text>
+    <circle
+       style="fill:none;fill-opacity:1;stroke:#ffffff;stroke-width:1.152;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+       id="path12"
+       cx="829.24939"
+       cy="205.59689"
+       r="9.6595745"
+       inkscape:label="Right Out Circle" />
+    <circle
+       style="fill:none;fill-opacity:1;stroke:#ffffff;stroke-width:1.152;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+       id="path12-8"
+       cx="889.09442"
+       cy="205.59689"
+       r="9.6595745"
+       inkscape:label="Left Out Circle" />
+    <text
+       xml:space="preserve"
+       style="font-size:10.6667px;writing-mode:lr-tb;direction:ltr;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0.96;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+       x="824.91522"
+       y="173.95374"
+       id="text13"
+       inkscape:label="Line Outputs Text"><tspan
+         sodipodi:role="line"
+         id="tspan13"
+         x="824.91522"
+         y="173.95374">Line Outputs</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:10.6667px;writing-mode:lr-tb;direction:ltr;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0.96;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+       x="814.86652"
+       y="188.75157"
+       id="text13-1"
+       inkscape:label="Right Text"><tspan
+         sodipodi:role="line"
+         id="tspan13-7"
+         x="814.86652"
+         y="188.75157">Right</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:10.6667px;writing-mode:lr-tb;direction:ltr;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0.96;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+       x="878.56055"
+       y="188.80365"
+       id="text13-1-7"
+       inkscape:label="Right Text"><tspan
+         sodipodi:role="line"
+         id="tspan13-7-6"
+         x="878.56055"
+         y="188.80365">Left</tspan><tspan
+         sodipodi:role="line"
+         x="878.56055"
+         y="202.13702"
+         id="tspan14" /></text>
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer2"
+     inkscape:label="Instructions">
+    <text
+       xml:space="preserve"
+       id="text8"
+       style="font-size:16px;writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect9);display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:3.84;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+       transform="translate(-27.954666,-38.457584)"
+       inkscape:label="Instructions Text"><tspan
+         x="127.95898"
+         y="248.83947"
+         id="tspan3">Requirements:
+</tspan><tspan
+         x="127.95898"
+         y="268.83947"
+         id="tspan4">• Mac with Apple Silicon processor
+</tspan><tspan
+         x="127.95898"
+         y="288.83947"
+         id="tspan5">• USB audio interface
+</tspan><tspan
+         x="127.95898"
+         y="308.83947"
+         id="tspan6">• Pedal to capture
+</tspan><tspan
+         x="127.95898"
+         y="328.83947"
+         id="tspan7">
+</tspan><tspan
+         x="127.95898"
+         y="348.83947"
+         id="tspan8">For this illustration a Focusrite </tspan><tspan
+         x="127.95898"
+         y="368.83947"
+         id="tspan10">Scarlett Solo will be used but any </tspan><tspan
+         x="127.95898"
+         y="388.83947"
+         id="tspan11">interface that can both play and </tspan><tspan
+         x="127.95898"
+         y="408.83947"
+         id="tspan16">record audio through a 1/4&quot; TS cable </tspan><tspan
+         x="127.95898"
+         y="428.83947"
+         id="tspan17">will work.
+</tspan><tspan
+         x="127.95898"
+         y="448.83947"
+         id="tspan18">
+</tspan><tspan
+         x="127.95898"
+         y="468.83947"
+         id="tspan19">Step 1: Connect the left 'Line Out' </tspan><tspan
+         x="127.95898"
+         y="488.83947"
+         id="tspan20">audio channel from your interface to </tspan><tspan
+         x="127.95898"
+         y="508.83947"
+         id="tspan21">your pedal's input jack.
+</tspan><tspan
+         x="127.95898"
+         y="528.83947"
+         id="tspan22">
+</tspan><tspan
+         x="127.95898"
+         y="548.83947"
+         id="tspan23">Step 2: Connect your pedal's output </tspan><tspan
+         x="127.95898"
+         y="568.83947"
+         id="tspan24">to your interface's 1/4&quot; TS input </tspan><tspan
+         x="127.95898"
+         y="588.83947"
+         id="tspan25">jack.
+</tspan><tspan
+         x="127.95898"
+         y="608.83947"
+         id="tspan26">
+</tspan><tspan
+         x="127.95898"
+         y="628.83947"
+         id="tspan27">Step 3: Run Toan Machine and follow </tspan><tspan
+         x="127.95898"
+         y="648.83947"
+         id="tspan28">the instructions to first record your </tspan><tspan
+         x="127.95898"
+         y="668.83947"
+         id="tspan29">pedal and then train a model from </tspan><tspan
+         x="127.95898"
+         y="688.83947"
+         id="tspan31">that recording.
+</tspan><tspan
+         x="127.95898"
+         y="708.83947"
+         id="tspan32">
+</tspan><tspan
+         x="127.95898"
+         y="728.83947"
+         id="tspan33">Do not touch any settings on your </tspan><tspan
+         x="127.95898"
+         y="748.83947"
+         id="tspan34">pedal while recording is in progress.</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:21.3333px;writing-mode:lr-tb;direction:ltr;fill:#000000;fill-opacity:1;stroke:none;stroke-width:3.84;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+       x="150.25969"
+       y="176.90489"
+       id="text2"
+       inkscape:label="Instructions Title"><tspan
+         sodipodi:role="line"
+         id="tspan2"
+         x="150.25969"
+         y="176.90489">Setup Instructions</tspan></text>
+    <rect
+       style="fill:none;stroke:#000000;stroke-width:2.88;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+       id="rect1"
+       width="349.91641"
+       height="600.2403"
+       x="74.327362"
+       y="141.43236"
+       inkscape:label="Instructions Box" />
+  </g>
+  <g
+     inkscape:label="Title"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <text
+       xml:space="preserve"
+       style="font-size:42.6667px;writing-mode:lr-tb;direction:ltr;fill:#000000"
+       x="185.16641"
+       y="104.41669"
+       id="text1"
+       inkscape:label="Title"><tspan
+         sodipodi:role="line"
+         id="tspan1"
+         x="185.16641"
+         y="104.41669"
+         style="font-size:42.6667px">Toan Machine Setup Quick Start</tspan></text>
+  </g>
+</svg>

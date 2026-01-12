@@ -14,10 +14,14 @@ Toan Machine is currently built on MLX and will only work on Apple-Silicon-based
 To install and run Toan Machine you will need to:
 * Clone this git repo
 * Create a python virtual environment for Toan Machine
-* Inside your virtual environment, install the packages listed in [requirements.txt][./requirements.txt]
+* Inside your virtual environment, install the packages listed in [requirements.txt](./requirements.txt)
 * From the root of this repo, run `python3 gui.py`
 
 Once the application is running the wizards will guide you through the recording and training process.
+
+# Usage
+
+For information about how to connect your pedal for capture see the [Quick Start Guide](./docs/quick_start.pdf).
 
 # Acknowledgements
 
