@@ -10,7 +10,7 @@ from PySide6 import QtCore, QtWidgets
 
 from toan.gui.record import RecordingContext
 from toan.mix import concat_signals
-from toan.signal import generate_chirp, generate_tone
+from toan.signal import generate_chirp
 from toan.soundio import SdPlayrecController, prepare_play_record
 
 VOLUME_TEXT = [
@@ -42,9 +42,9 @@ class RecordVolumePage(QtWidgets.QWizardPage):
         super().__init__(parent)
         self.context = context
 
-        single_sweep = generate_chirp(context.sample_rate, 18, 22000, 0.8)
+        single_sweep = generate_chirp(context.sample_rate, 18, 22000, 0.75)
         single_sweep_samples = len(single_sweep)
-        volume_buffer_samples = math.floor(single_sweep_samples * 1.10)
+        volume_buffer_samples = math.floor(single_sweep_samples * 1.1)
         self.volume_samples = np.zeros(volume_buffer_samples)
 
         self.output_callback_signal = concat_signals([single_sweep] * 30, 0)
@@ -126,7 +126,12 @@ class RecordVolumePage(QtWidgets.QWizardPage):
         self, indata: np.ndarray, frames: int, time, status: sd.CallbackFlags
     ) -> None:
         buffer_length = len(self.volume_samples)
-        self.volume_samples = np.append(self.volume_samples, indata)[-buffer_length:]
+        self.volume_samples = np.concat(
+            (
+                self.volume_samples,
+                indata[:, self.context.input_channel.channel_index - 1],
+            )
+        )[-buffer_length:]
         out_val = self.volume_samples.max()
         self.bar_progress = min(BAR_PRECISION, math.floor(out_val * 1000))
 
