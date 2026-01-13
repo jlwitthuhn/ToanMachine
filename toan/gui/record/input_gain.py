@@ -14,14 +14,15 @@ from toan.signal import generate_chirp
 from toan.soundio import SdPlayrecController, prepare_play_record
 
 VOLUME_TEXT = [
-    "Set the input gain on your interface so that you are able to record to full range of your pedal's output without clipping.",
-    "With the audio signal running through your pedal, press 'Play Test Sound' below and adjust your input gain so that the volume is around 95. If the volume reads 100 then you are clipping.",
+    "In this section you will set the input gain on your interface. You want the audio signal to be captured as loudly as possible without clipping.",
+    "Press 'Play Test Sound' below and adjust your input gain so that the volume is around 95. If the volume reads 100 then you are clipping and should reduce your gain.",
+    "If you do not see any volume, go back and ensure you have selected the correct input and output devices.",
 ]
 
 BAR_PRECISION = 1000
 
 
-class RecordVolumePage(QtWidgets.QWizardPage):
+class RecordInputGainPage(QtWidgets.QWizardPage):
     context: RecordingContext
 
     play_button: QtWidgets.QPushButton
@@ -54,7 +55,7 @@ class RecordVolumePage(QtWidgets.QWizardPage):
         self.bar_update_timer.setSingleShot(False)
         self.bar_update_timer.timeout.connect(self._update_status)
 
-        self.setTitle("Set Volume")
+        self.setTitle("Input Gain")
         layout = QtWidgets.QVBoxLayout(self)
 
         label = QtWidgets.QLabel("\n\n".join(VOLUME_TEXT), self)
@@ -66,11 +67,11 @@ class RecordVolumePage(QtWidgets.QWizardPage):
         hline.setFrameShadow(QtWidgets.QFrame.Shadow.Sunken)
         layout.addWidget(hline)
 
-        self.play_button = QtWidgets.QPushButton("Play Test Tone", self)
+        self.play_button = QtWidgets.QPushButton("Play Test Sound", self)
         self.play_button.clicked.connect(self._clicked_play_test)
         layout.addWidget(self.play_button)
 
-        label_input_level = QtWidgets.QLabel("Input Level:", self)
+        label_input_level = QtWidgets.QLabel("Volume:", self)
         layout.addWidget(label_input_level)
 
         self.bar_input_level = QtWidgets.QProgressBar(self)
