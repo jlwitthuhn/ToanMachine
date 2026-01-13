@@ -2,6 +2,7 @@
 # https://www.gnu.org/licenses/gpl-3.0.en.html
 # SPDX-License-Identifier: GPL-3.0-only
 
+import numpy as np
 from PySide6 import QtWidgets
 
 from toan.gui.record import RecordingContext
@@ -15,6 +16,12 @@ OUTPUT_LEVEL_TEXT = [
 
 class RecordOutputLevelPage(QtWidgets.QWizardPage):
     context: RecordingContext
+
+    button_record: QtWidgets.QPushButton
+    button_play: QtWidgets.QPushButton
+
+    recorded_buffer: np.ndarray | None = None
+    recording: bool = False
 
     def __init__(self, parent, context: RecordingContext):
         super().__init__(parent)
@@ -35,13 +42,38 @@ class RecordOutputLevelPage(QtWidgets.QWizardPage):
         button_panel_layout = QtWidgets.QHBoxLayout(button_panel)
         button_panel_layout.setContentsMargins(0, 0, 0, 0)
 
-        button_record = QtWidgets.QPushButton("Record", button_panel)
-        button_panel_layout.addWidget(button_record)
+        self.button_record = QtWidgets.QPushButton("Record", button_panel)
+        self.button_record.clicked.connect(self._pressed_record)
+        button_panel_layout.addWidget(self.button_record)
 
-        button_play = QtWidgets.QPushButton("Play", button_panel)
-        button_panel_layout.addWidget(button_play)
+        self.button_play = QtWidgets.QPushButton("Play", button_panel)
+        button_panel_layout.addWidget(self.button_play)
 
         layout.addWidget(button_panel)
 
         progress_bar = QtWidgets.QProgressBar(self)
         layout.addWidget(progress_bar)
+
+        self._refresh_buttons()
+
+    def _pressed_record(self):
+        if self.recording:
+            return
+
+        self.recording = True
+        self.recorded_buffer = None
+        self._refresh_buttons()
+
+    def _refresh_buttons(self):
+        play_enabled = True
+        record_enabled = True
+
+        if self.recording:
+            play_enabled = False
+            record_enabled = False
+
+        if self.recorded_buffer is None:
+            play_enabled = False
+
+        self.button_play.setEnabled(play_enabled)
+        self.button_record.setEnabled(record_enabled)
