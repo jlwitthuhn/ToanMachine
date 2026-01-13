@@ -34,6 +34,7 @@ class RecordOutputLevelPage(QtWidgets.QWizardPage):
 
     def __init__(self, parent, context: RecordingContext):
         super().__init__(parent)
+        self.context = context
 
         self.setTitle("Output Level")
         layout = QtWidgets.QVBoxLayout(self)
