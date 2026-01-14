@@ -35,10 +35,10 @@ def generate_capture_signal(sample_rate: int) -> np.ndarray:
     impulse1 = generate_gaussian_pulse(sample_rate // 4000)
     impulse2 = generate_gaussian_pulse(sample_rate // 3000)
     impulse3 = generate_gaussian_pulse(sample_rate // 2500)
-    impulse4 = generate_gaussian_pulse(sample_rate // 2000)
-    impulse5 = generate_gaussian_pulse(sample_rate // 1600)
-    impulse6 = generate_gaussian_pulse(sample_rate // 1400)
-    impulse7 = generate_gaussian_pulse(sample_rate // 1300)
+    impulse4 = generate_gaussian_pulse(sample_rate // 2100)
+    impulse5 = generate_gaussian_pulse(sample_rate // 1800)
+    impulse6 = generate_gaussian_pulse(sample_rate // 1500)
+    impulse7 = generate_gaussian_pulse(sample_rate // 1350)
 
     # Sweep of audible frequencies
     sweep_up = generate_chirp(sample_rate, 18.0, 21000.0, SWEEP_DURATION)
