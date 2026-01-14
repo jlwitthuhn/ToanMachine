@@ -32,8 +32,10 @@ class RecordOutputLevelPage(QtWidgets.QWizardPage):
 
     recorded_buffer: np.ndarray | None = None
     recorded_buffer_partial: np.ndarray | None = None
+    recorded_playback_index: int = 0
 
-    io_controller: SdPlayrecController | None = None
+    record_controller: SdPlayrecController | None = None
+    play_controller: sd.OutputStream | None = None
 
     def __init__(self, parent, context: RecordingContext):
         super().__init__(parent)
@@ -65,6 +67,7 @@ class RecordOutputLevelPage(QtWidgets.QWizardPage):
         button_panel_layout.addWidget(self.button_record)
 
         self.button_play = QtWidgets.QPushButton("Play", button_panel)
+        self.button_play.clicked.connect(self._pressed_play)
         button_panel_layout.addWidget(self.button_play)
 
         layout.addWidget(button_panel)
@@ -74,8 +77,28 @@ class RecordOutputLevelPage(QtWidgets.QWizardPage):
 
         self._refresh_buttons()
 
+    def _pressed_play(self):
+        if self.recorded_buffer is None:
+            return
+        if self.record_controller is not None:
+            return
+        if self.play_controller is not None:
+            return
+
+        self.recorded_playback_index = 0
+        self.play_controller = sd.OutputStream(
+            samplerate=self.context.sample_rate,
+            device=self.context.output_channel.device_index,
+            callback=self._play_output_callback,
+        )
+        self.play_controller.start()
+
     def _pressed_record(self):
         if self.recorded_buffer_partial is not None:
+            return
+        if self.record_controller is not None:
+            return
+        if self.play_controller is not None:
             return
 
         self.recorded_buffer = None
@@ -91,6 +114,7 @@ class RecordOutputLevelPage(QtWidgets.QWizardPage):
             d_chord_3 = d_chord_2 * 0.80
             self.generated_chords = np.concat(
                 (
+                    np.zeros(self.context.sample_rate // 2),
                     d_chord_3,
                     d_chord_2,
                     d_chord_raw,
@@ -99,14 +123,27 @@ class RecordOutputLevelPage(QtWidgets.QWizardPage):
             )
         self.generated_chord_index = 0
 
-        self.io_controller = prepare_play_record(
+        self.record_controller = prepare_play_record(
             self.context.sample_rate,
             self.context.input_channel,
             self.context.output_channel,
             self._record_input_callback,
             self._record_output_callback,
         )
-        self.io_controller.start()
+        self.record_controller.start()
+
+    def _play_output_callback(
+        self, data: np.ndarray, frames: int, time, status: sd.CallbackFlags
+    ):
+        channel = self.context.output_channel.channel_index - 1
+        data.fill(0)
+        if self.recorded_playback_index >= len(self.recorded_buffer):
+            return
+        segment = self.recorded_buffer[
+            self.recorded_playback_index : self.recorded_playback_index + frames
+        ]
+        self.recorded_playback_index += frames
+        data[0 : len(segment), channel] = segment
 
     def _record_input_callback(
         self, data: np.ndarray, frames: int, time, status: sd.CallbackFlags
@@ -144,15 +181,24 @@ class RecordOutputLevelPage(QtWidgets.QWizardPage):
             self.progress_bar.setMaximum(len(self.generated_chords))
             if self.recorded_buffer_partial is not None:
                 self.progress_bar.setValue(len(self.recorded_buffer_partial))
+            else:
+                self.progress_bar.setValue(0)
 
         if (
             self.recorded_buffer_partial is None
             and self.recorded_buffer is not None
-            and self.io_controller is not None
+            and self.record_controller is not None
         ):
             # Recording has ended, kill the stream
-            self.io_controller.close()
-            self.io_controller = None
+            self.record_controller.close()
+            self.record_controller = None
+
+        if self.play_controller is not None and self.recorded_playback_index >= len(
+            self.recorded_buffer
+        ):
+            # Playback has ended, kill the stream
+            self.play_controller.close()
+            self.play_controller = None
 
         self._refresh_buttons()
 
