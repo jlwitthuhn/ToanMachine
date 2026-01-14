@@ -24,10 +24,12 @@ class ChordType(Enum):
     Major = 3
     Minor = 4
     Diminished = 5
+    # 4 notes
+    MajorSeventh = 6
     # 5 notes
-    MinorNinth = 6
+    MinorNinth = 7
     # 6 notes
-    GuitarStrings = 7
+    GuitarStrings = 8
 
 
 def generate_generic_chord_pluck(
@@ -111,6 +113,8 @@ def generate_named_chord_pluck_scale(
             shape = [3, 7]
         case ChordType.Diminished:
             shape = [3, 6]
+        case ChordType.MajorSeventh:
+            shape = [4, 7, 11]
         case ChordType.MinorNinth:
             shape = [3, 7, 10, 14]
         case ChordType.GuitarStrings:

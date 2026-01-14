@@ -76,8 +76,9 @@ def generate_capture_signal(sample_rate: int) -> np.ndarray:
     scale_tritone_chord = generate_plucked_scale(ChordType.Tritone, 1.8e-3)
     scale_major_chord = generate_plucked_scale(ChordType.Major, 2.2e-3)
     scale_minor_chord = generate_plucked_scale(ChordType.Minor, 2.6e-3)
-    scale_minor_ninth_chord = generate_plucked_scale(ChordType.MinorNinth, 3.0e-3)
-    scale_guitar_chord = generate_plucked_scale(ChordType.GuitarStrings, 3.5e-3)
+    scale_major_seventh_chord = generate_plucked_scale(ChordType.MajorSeventh, 3.0e-3)
+    scale_minor_ninth_chord = generate_plucked_scale(ChordType.MinorNinth, 3.4e-3)
+    scale_guitar_chord = generate_plucked_scale(ChordType.GuitarStrings, 3.8e-3)
 
     noise_samples_short = int(sample_rate * NOISE_SHORT_DURATION)
     white_noise_full = generate_white_noise(noise_samples_short)
@@ -115,6 +116,7 @@ def generate_capture_signal(sample_rate: int) -> np.ndarray:
             scale_tritone_chord,
             scale_major_chord,
             scale_minor_chord,
+            scale_major_seventh_chord,
             scale_minor_ninth_chord,
             scale_guitar_chord,
             white_noise_full,
