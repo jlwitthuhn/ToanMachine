@@ -17,6 +17,7 @@ SWEEP_DURATION = 12.0
 NOISE_SHORT_DURATION = 1.2
 NOISE_LONG_DURATION = 2.5
 NOTE_DURATION = 0.75
+PLUCK_DECAY = 0.986
 
 
 def generate_capture_signal(sample_rate: int) -> np.ndarray:
@@ -68,6 +69,7 @@ def generate_capture_signal(sample_rate: int) -> np.ndarray:
             "G",
             6,
             NOTE_DURATION,
+            PLUCK_DECAY,
         )
 
     scale_tritone_chord = generate_plucked_scale(ChordType.Tritone)
