@@ -84,11 +84,18 @@ class RecordOutputLevelPage(QtWidgets.QWizardPage):
 
         if self.generated_chords is None:
             d_root = get_note_frequency_by_name("D", 3, 440.0)
-            raw_signal = generate_generic_chord_pluck(
-                self.context.sample_rate, [4, 7], d_root, 2.0
+            d_chord_raw = generate_generic_chord_pluck(
+                self.context.sample_rate, [4, 7], d_root, 0.9
             )
+            d_chord_2 = d_chord_raw * 0.80
+            d_chord_3 = d_chord_2 * 0.80
             self.generated_chords = np.concat(
-                (raw_signal, np.zeros(self.context.sample_rate // 2))
+                (
+                    d_chord_3,
+                    d_chord_2,
+                    d_chord_raw,
+                    np.zeros(self.context.sample_rate // 2),
+                )
             )
         self.generated_chord_index = 0
 
