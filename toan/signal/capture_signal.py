@@ -13,9 +13,9 @@ from toan.signal.noise import generate_white_noise
 from toan.signal.scale import ScaleSound, generate_chromatic_scale
 from toan.signal.trig import generate_cosine_wave, generate_sine_wave
 
-SWEEP_DURATION = 12.0
-NOISE_SHORT_DURATION = 1.2
-NOISE_LONG_DURATION = 2.5
+SWEEP_DURATION = 12.5
+NOISE_SHORT_DURATION = 1.25
+NOISE_LONG_DURATION = 3.0
 NOTE_DURATION = 0.75
 PLUCK_DECAY = 0.986
 
