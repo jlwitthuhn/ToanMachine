@@ -69,6 +69,7 @@ def generate_capture_signal(sample_rate: int) -> np.ndarray:
             "G",
             6,
             NOTE_DURATION,
+            1.8e-3,
             PLUCK_DECAY,
         )
 
