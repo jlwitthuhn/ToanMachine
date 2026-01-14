@@ -88,8 +88,8 @@ class _TrainingConfig:
     num_steps: int = 300
     warmup_steps: int = 40
     batch_size: int = 48
-    learn_rate_hi: float = 1.5e-4
-    learn_rate_lo: float = 1.0e-5
+    learn_rate_hi: float = 9.0e-4
+    learn_rate_lo: float = 9.0e-5
     weight_decay: float = 7.5e-3
 
 
@@ -150,7 +150,7 @@ def _run_training(context: TrainingContext, config: _TrainingConfig):
     for i in range(config.num_steps):
         model.train(True)
         batch_in, batch_out = _generate_batch(
-            context, model.receptive_field, config.batch_size, 8192
+            context, model.receptive_field, config.batch_size, 8192 + 2048
         )
         loss, grads = loss_and_grad_fn(model, batch_in, batch_out)
         optimizer.update(model, grads)
