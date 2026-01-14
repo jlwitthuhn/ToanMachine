@@ -4,7 +4,7 @@
 
 import numpy as np
 import sounddevice as sd
-from PySide6 import QtWidgets
+from PySide6 import QtCore, QtWidgets
 
 from toan.gui.record import RecordingContext
 from toan.music import get_note_frequency_by_name
@@ -21,8 +21,11 @@ OUTPUT_LEVEL_TEXT = [
 class RecordOutputLevelPage(QtWidgets.QWizardPage):
     context: RecordingContext
 
+    refresh_timer: QtCore.QTimer
+
     button_record: QtWidgets.QPushButton
     button_play: QtWidgets.QPushButton
+    progress_bar: QtWidgets.QProgressBar
 
     generated_chords: np.ndarray | None = None
     generated_chord_index: int = 0
@@ -35,6 +38,11 @@ class RecordOutputLevelPage(QtWidgets.QWizardPage):
     def __init__(self, parent, context: RecordingContext):
         super().__init__(parent)
         self.context = context
+
+        self.refresh_timer = QtCore.QTimer(self)
+        self.refresh_timer.setInterval(100)
+        self.refresh_timer.timeout.connect(self._refresh_timer_triggered)
+        self.refresh_timer.start()
 
         self.setTitle("Output Level")
         layout = QtWidgets.QVBoxLayout(self)
@@ -61,8 +69,8 @@ class RecordOutputLevelPage(QtWidgets.QWizardPage):
 
         layout.addWidget(button_panel)
 
-        progress_bar = QtWidgets.QProgressBar(self)
-        layout.addWidget(progress_bar)
+        self.progress_bar = QtWidgets.QProgressBar(self)
+        layout.addWidget(self.progress_bar)
 
         self._refresh_buttons()
 
@@ -76,8 +84,11 @@ class RecordOutputLevelPage(QtWidgets.QWizardPage):
 
         if self.generated_chords is None:
             d_root = get_note_frequency_by_name("D", 3, 440.0)
-            self.generated_chords = generate_generic_chord_pluck(
+            raw_signal = generate_generic_chord_pluck(
                 self.context.sample_rate, [4, 7], d_root, 2.0
+            )
+            self.generated_chords = np.concat(
+                (raw_signal, np.zeros(self.context.sample_rate // 2))
             )
         self.generated_chord_index = 0
 
@@ -88,16 +99,55 @@ class RecordOutputLevelPage(QtWidgets.QWizardPage):
             self._record_input_callback,
             self._record_output_callback,
         )
+        self.io_controller.start()
 
     def _record_input_callback(
         self, data: np.ndarray, frames: int, time, status: sd.CallbackFlags
     ):
-        pass
+        if self.recorded_buffer_partial is None:
+            # We are in the brief period between when recording is complete and when the callback closes audio IO
+            return
+        channel_data = data[:, self.context.input_channel.channel_index - 1]
+        self.recorded_buffer_partial = np.concat(
+            (self.recorded_buffer_partial, channel_data)
+        )
+        if len(self.recorded_buffer_partial) >= len(self.generated_chords):
+            self.recorded_buffer = self.recorded_buffer_partial[
+                : len(self.generated_chords)
+            ]
+            self.recorded_buffer_partial = None
 
     def _record_output_callback(
         self, data: np.ndarray, frames: int, time, status: sd.CallbackFlags
     ):
+        channel = self.context.output_channel.channel_index - 1
         data.fill(0)
+        if self.generated_chord_index >= len(self.generated_chords):
+            # Playback is complete, only send zeros now
+            return
+        segment = self.generated_chords[
+            self.generated_chord_index : self.generated_chord_index + frames
+        ]
+        self.generated_chord_index += frames
+        data[0 : len(segment), channel] = segment
+
+    def _refresh_timer_triggered(self):
+        # Progress bar first
+        if self.generated_chords is not None:
+            self.progress_bar.setMaximum(len(self.generated_chords))
+            if self.recorded_buffer_partial is not None:
+                self.progress_bar.setValue(len(self.recorded_buffer_partial))
+
+        if (
+            self.recorded_buffer_partial is None
+            and self.recorded_buffer is not None
+            and self.io_controller is not None
+        ):
+            # Recording has ended, kill the stream
+            self.io_controller.close()
+            self.io_controller = None
+
+        self._refresh_buttons()
 
     def _refresh_buttons(self):
         play_enabled = True
