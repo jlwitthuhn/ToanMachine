@@ -7,6 +7,7 @@ from PySide6 import QtWidgets
 
 from toan.gui.playback import PlaybackWizard
 from toan.gui.record import RecordWizard
+from toan.gui.sound_manager import SoundManager
 from toan.gui.train import TrainingWizard
 from toan.signal import generate_capture_signal
 
@@ -41,6 +42,10 @@ class MainWindow(QtWidgets.QWidget):
         tools_group_box = QtWidgets.QGroupBox("Tools", self)
         tools_layout = QtWidgets.QVBoxLayout(tools_group_box)
 
+        sound_manager_button = QtWidgets.QPushButton("Sound Manager", self)
+        sound_manager_button.clicked.connect(self._clicked_sound_manager)
+        tools_layout.addWidget(sound_manager_button)
+
         test_model_button = QtWidgets.QPushButton("Test Model", self)
         test_model_button.clicked.connect(self._clicked_test_model)
         tools_layout.addWidget(test_model_button)
@@ -65,6 +70,10 @@ class MainWindow(QtWidgets.QWidget):
     def _clicked_record_device(self):
         wizard = RecordWizard(self)
         wizard.show()
+
+    def _clicked_sound_manager(self):
+        window = SoundManager(self)
+        window.show()
 
     def _clicked_test_model(self):
         wizard = PlaybackWizard(self)
