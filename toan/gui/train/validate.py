@@ -8,7 +8,7 @@ import threading
 import zipfile
 
 import numpy as np
-from PySide6 import QtGui, QtWidgets
+from PySide6 import QtCore, QtGui, QtWidgets
 from scipy.io import wavfile
 
 from toan.gui.train import TrainingContext
@@ -16,18 +16,30 @@ from toan.model.metadata import ModelMetadata
 
 
 class _ValidateThreadContext:
-    def __init__(self, page):
-        self.page = page
+    messages_lock = threading.Lock()
+    messages_queue: list[str] = []
+
+    signal_dry: np.ndarray
+    signal_wet: np.ndarray
+    metadata: ModelMetadata
+    sample_rate: int = 0
+
+    complete: bool = False
 
 
 class TrainValidatePage(QtWidgets.QWizardPage):
     context: TrainingContext
     thread_context: _ValidateThreadContext | None = None
+    timer_refresh: QtCore.QTimer
+
     text_edit: QtWidgets.QTextEdit
 
     def __init__(self, parent, context: TrainingContext):
         super().__init__(parent)
         self.context = context
+        self.timer_refresh = QtCore.QTimer(self)
+        self.timer_refresh.setInterval(100)
+        self.timer_refresh.timeout.connect(self._do_refresh)
 
         self.setTitle("Checking Input")
         layout = QtWidgets.QVBoxLayout(self)
@@ -44,8 +56,10 @@ class TrainValidatePage(QtWidgets.QWizardPage):
     def initializePage(self):
         self.text_edit.clear()
         self.text_edit.append(f"Analyzing input file: {self.context.input_path}")
-        self.thread_context = _ValidateThreadContext(self)
+        self.thread_context = _ValidateThreadContext()
         self.thread_context.text_edit = self.text_edit
+
+        self.timer_refresh.start()
 
         def thread_func():
             _run_thread(self.thread_context, self.context.input_path)
@@ -56,6 +70,20 @@ class TrainValidatePage(QtWidgets.QWizardPage):
         return (
             self.context.signal_dry is not None and self.context.signal_wet is not None
         )
+
+    def _do_refresh(self):
+        if self.thread_context is not None:
+            with self.thread_context.messages_lock:
+                for message in self.thread_context.messages_queue:
+                    self.text_edit.append(message)
+                self.thread_context.messages_queue.clear()
+            if self.thread_context.complete:
+                self.context.signal_dry = self.thread_context.signal_dry
+                self.context.signal_wet = self.thread_context.signal_wet
+                self.context.loaded_metadata = self.thread_context.metadata
+                self.context.sample_rate = self.thread_context.sample_rate
+                self.thread_context = None
+                self.completeChanged.emit()
 
 
 def _find_clicks(signal: np.ndarray, raw_noise_floor: float) -> list[int]:
@@ -75,7 +103,8 @@ def _find_clicks(signal: np.ndarray, raw_noise_floor: float) -> list[int]:
 
 def _run_thread(context: _ValidateThreadContext, input_path: str):
     def print_status(message: str):
-        context.page.text_edit.append(message)
+        with context.messages_lock:
+            context.messages_queue.append(message)
 
     print_status("Loading as zip archive...")
     try:
@@ -210,20 +239,19 @@ def _run_thread(context: _ValidateThreadContext, input_path: str):
 
             assert len(dry_trimmed) == len(wet_trimmed)
             print_status(f"Matched samples available: {len(dry_trimmed)}")
-            context.page.context.signal_dry = dry_trimmed
-            context.page.context.signal_wet = wet_trimmed
+            context.signal_dry = dry_trimmed
+            context.signal_wet = wet_trimmed
 
             gear_make = config_json["device_make"]
             gear_model = config_json["device_model"]
-            context.page.context.loaded_metadata = ModelMetadata(
+            context.metadata = ModelMetadata(
                 name=f"{gear_make} -- {gear_model}",
                 gear_make=gear_make,
                 gear_model=gear_model,
             )
 
-            context.page.context.sample_rate = config_json["sample_rate"]
-
-            context.page.completeChanged.emit()
+            context.sample_rate = config_json["sample_rate"]
+            context.complete = True
 
     except zipfile.BadZipFile:
         print_status("Error: File is not a valid zip archive")
