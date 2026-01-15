@@ -9,7 +9,14 @@ from PySide6 import QtCore, QtWidgets
 from toan.gui.record import RecordingContext
 from toan.music import get_note_frequency_by_name
 from toan.signal.chord import generate_generic_chord_pluck
-from toan.soundio import SdPlayrecController, prepare_play_record
+from toan.soundio import (
+    SdChannel,
+    SdDevice,
+    SdPlayrecController,
+    generate_descriptions,
+    get_output_devices,
+    prepare_play_record,
+)
 
 OUTPUT_LEVEL_TEXT = [
     "In this section you will set the output level of your interface. For overdrive and similar effects it is very important to get this right to ensure that the input signal is loud enough to trigger the desired clipping effect.",
@@ -26,6 +33,10 @@ class RecordOutputLevelPage(QtWidgets.QWizardPage):
     button_record: QtWidgets.QPushButton
     button_play: QtWidgets.QPushButton
     progress_bar: QtWidgets.QProgressBar
+
+    combo_playback_channel: QtWidgets.QComboBox
+    combo_playback_map: dict[str, SdChannel]
+    combo_selected_channel: SdChannel | None = None
 
     generated_chords: np.ndarray | None = None
     generated_chord_index: int = 0
@@ -78,6 +89,13 @@ class RecordOutputLevelPage(QtWidgets.QWizardPage):
         self.button_play.clicked.connect(self._pressed_play)
         button_panel_layout.addWidget(self.button_play)
 
+        output_devices: list[SdDevice] = get_output_devices()
+        output_descs, self.output_desc_map = generate_descriptions(output_devices)
+
+        self.combo_playback_channel = QtWidgets.QComboBox(button_panel)
+        self.combo_playback_channel.addItems(output_descs)
+        button_panel_layout.addWidget(self.combo_playback_channel)
+
         layout.addWidget(button_panel)
 
         self._refresh_buttons()
@@ -90,10 +108,17 @@ class RecordOutputLevelPage(QtWidgets.QWizardPage):
         if self.play_controller is not None:
             return
 
+        if self.combo_playback_channel.currentText() not in self.output_desc_map:
+            return
+
+        self.combo_selected_channel = self.output_desc_map[
+            self.combo_playback_channel.currentText()
+        ]
+
         self.recorded_playback_index = 0
         self.play_controller = sd.OutputStream(
             samplerate=self.context.sample_rate,
-            device=self.context.output_channel.device_index,
+            device=self.combo_selected_channel.device_index,
             callback=self._play_output_callback,
         )
         self.play_controller.start()
@@ -140,7 +165,7 @@ class RecordOutputLevelPage(QtWidgets.QWizardPage):
     def _play_output_callback(
         self, data: np.ndarray, frames: int, time, status: sd.CallbackFlags
     ):
-        channel = self.context.output_channel.channel_index - 1
+        channel = self.combo_selected_channel.channel_index - 1
         data.fill(0)
         if self.recorded_playback_index >= len(self.recorded_buffer):
             return
