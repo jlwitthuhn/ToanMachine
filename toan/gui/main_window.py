@@ -23,11 +23,10 @@ class MainWindow(QtWidgets.QWidget):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Toan Machine")
-
-        layout = QtWidgets.QVBoxLayout()
+        layout = QtWidgets.QVBoxLayout(self)
 
         create_group_box = QtWidgets.QGroupBox("Create Model", self)
-        create_layout = QtWidgets.QVBoxLayout()
+        create_layout = QtWidgets.QVBoxLayout(create_group_box)
 
         record_button = QtWidgets.QPushButton("Record Device", self)
         record_button.clicked.connect(self._clicked_record_device)
@@ -37,12 +36,16 @@ class MainWindow(QtWidgets.QWidget):
         train_button.clicked.connect(self._clicked_train_model)
         create_layout.addWidget(train_button)
 
-        playback_button = QtWidgets.QPushButton("Test Model", self)
-        playback_button.clicked.connect(self._clicked_test_model)
-        create_layout.addWidget(playback_button)
-
-        create_group_box.setLayout(create_layout)
         layout.addWidget(create_group_box)
+
+        tools_group_box = QtWidgets.QGroupBox("Tools", self)
+        tools_layout = QtWidgets.QVBoxLayout(tools_group_box)
+
+        test_model_button = QtWidgets.QPushButton("Test Model", self)
+        test_model_button.clicked.connect(self._clicked_test_model)
+        tools_layout.addWidget(test_model_button)
+
+        layout.addWidget(tools_group_box)
 
         if INCLUDE_DEBUG_PANEL:
             debug_group_box = QtWidgets.QGroupBox("Debug", self)
