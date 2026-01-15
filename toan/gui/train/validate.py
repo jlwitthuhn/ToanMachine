@@ -87,7 +87,7 @@ class TrainValidatePage(QtWidgets.QWizardPage):
 
 
 def _find_clicks(signal: np.ndarray, raw_noise_floor: float) -> list[int]:
-    noise_threshold = raw_noise_floor * 3.5
+    noise_threshold = raw_noise_floor * 4.0
     click_indices = []
     silence_samples_remaining = 0
     for i in range(len(signal)):
@@ -95,7 +95,7 @@ def _find_clicks(signal: np.ndarray, raw_noise_floor: float) -> list[int]:
         if np.abs(this_sample) > noise_threshold:
             if silence_samples_remaining <= 0:
                 click_indices.append(i)
-            silence_samples_remaining = 100
+            silence_samples_remaining = 500
         else:
             silence_samples_remaining -= 1
     return click_indices
@@ -204,12 +204,16 @@ def _run_thread(context: _ValidateThreadContext, input_path: str):
 
             dry_click_indices = _find_clicks(dry_clicks, wet_noise_floor)
             if len(dry_click_indices) != 2:
-                print_status(f"Error: Failed to locate clicks in dry signal")
+                print_status(
+                    f"Error: Found {len(dry_click_indices)} dry clicks, should be 2"
+                )
                 return
 
             wet_click_indices = _find_clicks(wet_clicks, wet_noise_floor)
             if len(wet_click_indices) != 2:
-                print_status(f"Error: Failed to locate clicks in wet signal")
+                print_status(
+                    f"Error: Found {len(wet_click_indices)} wet clicks, should be 2"
+                )
                 return
 
             # Click delta is the time between two clicks on a single track
