@@ -43,7 +43,7 @@ class RecordInputGainPage(QtWidgets.QWizardPage):
         super().__init__(parent)
         self.context = context
 
-        single_sweep = generate_chirp(context.sample_rate, 18, 22000, 0.75)
+        single_sweep = generate_chirp(context.sample_rate, 18, 22000, 0.85)
         single_sweep_samples = len(single_sweep)
         volume_buffer_samples = math.floor(single_sweep_samples * 1.1)
         self.volume_samples = np.zeros(volume_buffer_samples)
