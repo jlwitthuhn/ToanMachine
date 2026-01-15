@@ -58,22 +58,27 @@ class RecordOutputLevelPage(QtWidgets.QWizardPage):
         hline.setFrameShadow(QtWidgets.QFrame.Shadow.Sunken)
         layout.addWidget(hline)
 
+        self.button_record = QtWidgets.QPushButton("Record", self)
+        self.button_record.clicked.connect(self._pressed_record)
+        layout.addWidget(self.button_record)
+
+        self.progress_bar = QtWidgets.QProgressBar(self)
+        layout.addWidget(self.progress_bar)
+
+        hline2 = QtWidgets.QFrame(self)
+        hline2.setFrameShape(QtWidgets.QFrame.Shape.HLine)
+        hline2.setFrameShadow(QtWidgets.QFrame.Shadow.Sunken)
+        layout.addWidget(hline2)
+
         button_panel = QtWidgets.QWidget(self)
         button_panel_layout = QtWidgets.QHBoxLayout(button_panel)
         button_panel_layout.setContentsMargins(0, 0, 0, 0)
-
-        self.button_record = QtWidgets.QPushButton("Record", button_panel)
-        self.button_record.clicked.connect(self._pressed_record)
-        button_panel_layout.addWidget(self.button_record)
 
         self.button_play = QtWidgets.QPushButton("Play", button_panel)
         self.button_play.clicked.connect(self._pressed_play)
         button_panel_layout.addWidget(self.button_play)
 
         layout.addWidget(button_panel)
-
-        self.progress_bar = QtWidgets.QProgressBar(self)
-        layout.addWidget(self.progress_bar)
 
         self._refresh_buttons()
 
