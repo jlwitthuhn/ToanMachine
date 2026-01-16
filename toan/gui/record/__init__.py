@@ -7,6 +7,7 @@ from PySide6 import QtCore, QtWidgets
 from toan.gui.record.config import RecordConfigPage
 from toan.gui.record.context import RecordingContext
 from toan.gui.record.device import RecordDevicePage
+from toan.gui.record.extra import RecordExtraPage
 from toan.gui.record.input_gain import RecordInputGainPage
 from toan.gui.record.intro import RecordIntroPage
 from toan.gui.record.output_level import RecordOutputLevelPage
@@ -24,6 +25,7 @@ class RecordWizard(QtWidgets.QWizard):
 
         self.addPage(RecordIntroPage(self))
         self.addPage(RecordConfigPage(self, self.context))
+        self.addPage(RecordExtraPage(self, self.context))
         self.addPage(RecordDevicePage(self, self.context))
         self.addPage(RecordOutputLevelPage(self, self.context))
         self.addPage(RecordInputGainPage(self, self.context))

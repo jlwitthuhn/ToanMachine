@@ -27,6 +27,13 @@ def get_user_wav_dir() -> str:
     return os.path.join(root_dir, "extra")
 
 
+def do_user_wavs_exist() -> bool:
+    wav_dir = Path(get_user_wav_dir())
+    for _ in wav_dir.glob("*.wav"):
+        return True
+    return False
+
+
 def get_user_wav_list() -> list[UserWavDesc]:
     result = []
     wav_dir = Path(get_user_wav_dir())
