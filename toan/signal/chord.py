@@ -87,7 +87,7 @@ def generate_generic_chord_pluck_scale(
         )
         chord_list.append(this_chord)
 
-    return concat_signals(chord_list, sample_rate // 12)
+    return concat_signals(chord_list, sample_rate // 16)
 
 
 def generate_named_chord_pluck_scale(
