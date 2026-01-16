@@ -4,6 +4,11 @@
 
 from PySide6 import QtWidgets
 
+SOUND_TEXT = [
+    "This is a list of user-imported wav files that can be used to enhance the training process.",
+    "Any files listed here can optionally be added to the recording signal and then used as extra training data.",
+]
+
 
 class SoundManager(QtWidgets.QDialog):
     def __init__(self, parent):
@@ -11,3 +16,17 @@ class SoundManager(QtWidgets.QDialog):
 
         self.setWindowTitle("Sound Manager")
         self.setModal(True)
+        self.setMinimumWidth(400)
+        self.setMinimumHeight(300)
+
+        layout = QtWidgets.QVBoxLayout(self)
+
+        label = QtWidgets.QLabel("\n\n".join(SOUND_TEXT), self)
+        label.setWordWrap(True)
+        layout.addWidget(label)
+
+        table = QtWidgets.QTableView(self)
+        layout.addWidget(table)
+
+        refresh_button = QtWidgets.QPushButton("Refresh")
+        layout.addWidget(refresh_button)
