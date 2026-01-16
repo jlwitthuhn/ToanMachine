@@ -5,10 +5,13 @@
 from PySide6 import QtWidgets
 
 from toan.gui.main_window import MainWindow
+from toan.persistence import create_user_wav_dir
 
 
 def run_qt_gui() -> None:
     app = QtWidgets.QApplication([])
+
+    create_user_wav_dir()
 
     window = MainWindow()
     window.show()
