@@ -7,6 +7,7 @@ import sounddevice as sd
 from PySide6 import QtCore, QtWidgets
 
 from toan.gui.record import RecordingContext
+from toan.mix import concat_signals
 from toan.signal import generate_capture_signal
 from toan.soundio import SdPlayrecController, prepare_play_record
 
@@ -74,9 +75,13 @@ class RecordWetSignalPage(QtWidgets.QWizardPage):
     def _clicked_record(self):
         self.button_record.setEnabled(False)
 
-        self.context.signal_dry = (
-            generate_capture_signal(self.context.sample_rate) * 0.94
+        capture_signal_raw = generate_capture_signal(self.context.sample_rate)
+        capture_signal_full = concat_signals(
+            [capture_signal_raw, self.context.extra_signal_dry],
+            self.context.sample_rate // 2,
         )
+
+        self.context.signal_dry = capture_signal_full * 0.94
 
         self.signal_out_index = 0
         self.recorded_samples = []

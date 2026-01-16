@@ -60,6 +60,8 @@ class RecordExtraPage(QtWidgets.QWizardPage):
 
         if len(ready_to_concat) > 0:
             full_signal = concat_signals(ready_to_concat, self.context.sample_rate // 4)
-            self.context.extra_signal = full_signal
+            full_signal = full_signal.astype(np.float32) / np.abs(full_signal).max()
+            self.context.extra_signal_dry = full_signal
         else:
-            self.context.extra_signal = np.zeros(1)
+            self.context.extra_signal_dry = np.zeros(1)
+        return True
