@@ -36,4 +36,5 @@ class RecordExtraPage(QtWidgets.QWizardPage):
     def initializePage(self):
         wav_files = get_user_wav_list()
         model = WavFileModel(self, wav_files, True)
+        model._select_all()
         self.table.setModel(model)

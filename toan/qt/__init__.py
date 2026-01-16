@@ -95,3 +95,10 @@ class WavFileModel(QtCore.QAbstractTableModel):
         if self.with_checkbox and index.column() == 0:
             flags |= Qt.ItemIsUserCheckable | Qt.ItemIsEnabled
         return flags
+
+    def _select_all(self):
+        for file in self.file_list:
+            self.selected_wavs.add(file.path)
+        index_start = self.createIndex(0, 0)
+        index_end = self.createIndex(self.rowCount() - 1, self.columnCount() - 1)
+        self.dataChanged.emit(index_start, index_end)
