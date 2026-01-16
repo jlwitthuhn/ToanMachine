@@ -11,7 +11,7 @@ from toan.persistence import UserWavDesc
 class WavFileModel(QtCore.QAbstractTableModel):
     file_list: list[UserWavDesc]
     with_checkbox: bool
-    selected_wavs: set[UserWavDesc]
+    selected_wavs: set[str]
 
     def __init__(
         self, parent, file_list: list[UserWavDesc], with_checkbox: bool = False
@@ -19,6 +19,7 @@ class WavFileModel(QtCore.QAbstractTableModel):
         super().__init__(parent)
         self.file_list = file_list
         self.with_checkbox = with_checkbox
+        self.selected_wavs = set()
 
     def rowCount(self, parent=QtCore.QModelIndex()):
         return len(self.file_list)
@@ -47,9 +48,26 @@ class WavFileModel(QtCore.QAbstractTableModel):
                 return f"{self.file_list[index.row()].duration:.2f}s"
 
         if role == Qt.CheckStateRole and self.with_checkbox and index.column() == 0:
-            return Qt.Unchecked
+            the_file = self.file_list[index.row()]
+            if the_file.path in self.selected_wavs:
+                return Qt.Checked
+            else:
+                return Qt.Unchecked
 
         return None
+
+    def setData(self, index, value, /, role=...):
+        if not index.isValid():
+            return False
+        if role != Qt.CheckStateRole or index.column() != 0:
+            return False
+        this_path = self.file_list[index.row()].path
+        if this_path in self.selected_wavs:
+            self.selected_wavs.remove(this_path)
+        else:
+            self.selected_wavs.add(this_path)
+        self.dataChanged.emit(index, index, [role])
+        return True
 
     def headerData(self, section, orientation, /, role=...):
         if role != Qt.DisplayRole:
