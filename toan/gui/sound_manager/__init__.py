@@ -24,7 +24,7 @@ class WavFileModel(QtCore.QAbstractTableModel):
         return len(self.file_list)
 
     def columnCount(self, parent=QModelIndex()):
-        return 1
+        return 3
 
     def data(self, index, /, role=...):
         if not index.isValid():
@@ -33,6 +33,10 @@ class WavFileModel(QtCore.QAbstractTableModel):
             return None
         if index.column() == 0:
             return self.file_list[index.row()].filename
+        if index.column() == 1:
+            return f"{self.file_list[index.row()].sample_rate}"
+        if index.column() == 2:
+            return f"{self.file_list[index.row()].duration:.2f}s"
         return None
 
     def headerData(self, section, orientation, /, role=...):
@@ -42,6 +46,10 @@ class WavFileModel(QtCore.QAbstractTableModel):
             return None
         if section == 0:
             return "Filename"
+        if section == 1:
+            return "Samp. Rate"
+        if section == 2:
+            return "Duration"
         return None
 
 

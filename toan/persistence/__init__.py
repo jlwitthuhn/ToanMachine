@@ -7,12 +7,15 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import platformdirs
+from scipy.io import wavfile
 
 
 @dataclass
 class UserWavDesc:
     path: str
     filename: str
+    sample_rate: int
+    duration: float
 
 
 def create_user_wav_dir() -> None:
@@ -29,5 +32,7 @@ def get_user_wav_list() -> list[UserWavDesc]:
     wav_dir = Path(get_user_wav_dir())
     for file in wav_dir.glob("*.wav"):
         path = wav_dir / file.name
-        result.append(UserWavDesc(str(path), file.name))
+        sample_rate, wav_data = wavfile.read(path)
+        duration = len(wav_data) / sample_rate
+        result.append(UserWavDesc(str(path), file.name, sample_rate, duration))
     return result
