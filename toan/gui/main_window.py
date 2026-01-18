@@ -2,6 +2,7 @@
 # https://www.gnu.org/licenses/gpl-3.0.en.html
 # SPDX-License-Identifier: GPL-3.0-only
 
+import scipy
 import sounddevice as sd
 from PySide6 import QtWidgets
 
@@ -13,9 +14,17 @@ from toan.signal import generate_capture_signal
 
 
 def _clicked_play_training_signal():
-    playback_sample_rate = 44100
+    playback_sample_rate = 48000
     signal = generate_capture_signal(playback_sample_rate)
     sd.play(signal, playback_sample_rate)
+
+
+def _clicked_save_training_signal():
+    file_path, _ = QtWidgets.QFileDialog.getSaveFileName(filter="Wav Files (*.wav)")
+    if file_path == "":
+        return
+    signal = generate_capture_signal(48000)
+    scipy.io.wavfile.write(file_path, 48000, signal)
 
 
 class MainWindow(QtWidgets.QWidget):
@@ -59,6 +68,12 @@ class MainWindow(QtWidgets.QWidget):
             )
             play_training_signal_button.clicked.connect(_clicked_play_training_signal)
             debug_layout.addWidget(play_training_signal_button)
+
+            save_training_signal_button = QtWidgets.QPushButton(
+                "Save Training Signal", self
+            )
+            save_training_signal_button.clicked.connect(_clicked_save_training_signal)
+            debug_layout.addWidget(save_training_signal_button)
 
             debug_group_box.setLayout(debug_layout)
             layout.addWidget(debug_group_box)
