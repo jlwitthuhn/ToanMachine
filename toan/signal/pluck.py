@@ -2,11 +2,17 @@
 # https://www.gnu.org/licenses/gpl-3.0.en.html
 # SPDX-License-Identifier: GPL-3.0-only
 
+import math
+
 import numpy as np
 
 # Control how aggressive the low-pass filter is
 # Numbers closer to 0.5 will filter the most
 SPLIT_A = 0.57
+
+
+def _increase_semitones(frequency: float, semitones: int) -> float:
+    return frequency * math.pow(2, semitones / 12)
 
 
 # Generate a pluck using a Karplus-Strong filter over random noise
@@ -31,3 +37,30 @@ def generate_pluck(
         previous = value
 
     return result
+
+
+def generate_generic_chord_pluck(
+    sample_rate: int,
+    shape: list[int],
+    root_frequency: float,
+    duration: float,
+    offset_duration: float = 1.8e-3,
+    decay: float = 0.99,
+) -> np.ndarray:
+    frequencies: list[float] = [root_frequency]
+    for extra_semitones in shape:
+        frequencies.append(_increase_semitones(root_frequency, extra_semitones))
+
+    pluck_list: list[np.ndarray] = []
+    for idx, frequency in enumerate(frequencies):
+        offset = int(idx * offset_duration * sample_rate)
+        pluck_raw = generate_pluck(sample_rate, frequency, duration, decay)
+        if offset == 0:
+            pluck_list.append(pluck_raw)
+        else:
+            offset_buffer = np.zeros(offset)
+            pluck_list.append(np.concatenate((offset_buffer, pluck_raw[:-offset])))
+
+    chord = np.add.reduce(pluck_list)
+    chord = chord / np.abs(chord).max()
+    return chord

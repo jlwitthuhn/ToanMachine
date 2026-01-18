@@ -8,7 +8,7 @@ from PySide6 import QtCore, QtWidgets
 
 from toan.gui.record import RecordingContext
 from toan.music import get_note_frequency_by_name
-from toan.signal.chord import generate_generic_chord_pluck
+from toan.signal.pluck import generate_generic_chord_pluck
 from toan.soundio import (
     SdChannel,
     SdDevice,
