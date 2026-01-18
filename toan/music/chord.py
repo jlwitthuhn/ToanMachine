@@ -6,6 +6,8 @@ from enum import Enum
 
 
 class ChordType(Enum):
+    # Not actually a chord
+    RootOnly = 0
     # 2 notes
     Octave = 1
     Tritone = 2
@@ -22,6 +24,8 @@ class ChordType(Enum):
 
     def get_shape(self) -> list[int]:
         match self:
+            case ChordType.RootOnly:
+                return []
             case ChordType.Octave:
                 return [12]
             case ChordType.Tritone:

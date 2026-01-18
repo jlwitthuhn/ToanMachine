@@ -29,9 +29,9 @@ def generate_generic_chord_pluck_scale(
 ) -> np.ndarray:
     begin_index = get_note_index_by_name(begin_note, begin_octave)
     end_index = get_note_index_by_name(end_note, end_octave)
-    semitone_width = max(shape)
+    semitone_width = max([0] + shape)
     semitone_count = end_index - begin_index - semitone_width
-    assert 0 < semitone_width <= semitone_count
+    assert 0 <= semitone_width <= semitone_count
 
     chord_list: list[np.ndarray] = []
     for i in range(semitone_count):
