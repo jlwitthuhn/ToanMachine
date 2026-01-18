@@ -58,26 +58,7 @@ def generate_named_chord_pluck_scale(
     offset_duration: float = 1.8e-3,
     decay: float = 0.99,
 ) -> np.ndarray:
-    shape = None
-    match type:
-        case ChordType.Octave:
-            shape = [12]
-        case ChordType.Tritone:
-            shape = [6]
-        case ChordType.Major:
-            shape = [4, 7]
-        case ChordType.Minor:
-            shape = [3, 7]
-        case ChordType.Diminished:
-            shape = [3, 6]
-        case ChordType.MajorSeventh:
-            shape = [4, 7, 11]
-        case ChordType.MinorNinth:
-            shape = [3, 7, 10, 14]
-        case ChordType.GuitarStrings:
-            shape = [5, 10, 15, 19, 24]
-        case _:
-            assert False
+    shape = type.get_shape()
     return generate_generic_chord_pluck_scale(
         sample_rate,
         shape,

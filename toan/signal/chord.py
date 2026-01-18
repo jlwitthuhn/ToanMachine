@@ -19,3 +19,24 @@ class ChordType(Enum):
     MinorNinth = 7
     # 6 notes
     GuitarStrings = 8
+
+    def get_shape(self) -> list[int]:
+        match self:
+            case ChordType.Octave:
+                return [12]
+            case ChordType.Tritone:
+                return [6]
+            case ChordType.Major:
+                return [4, 7]
+            case ChordType.Minor:
+                return [3, 7]
+            case ChordType.Diminished:
+                return [3, 6]
+            case ChordType.MajorSeventh:
+                return [4, 7, 11]
+            case ChordType.MinorNinth:
+                return [3, 7, 10, 14]
+            case ChordType.GuitarStrings:
+                return [5, 10, 15, 19, 24]
+            case _:
+                assert False
