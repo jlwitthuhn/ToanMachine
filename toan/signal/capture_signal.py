@@ -11,6 +11,7 @@ from toan.signal.gaussian import generate_gaussian_pulse
 from toan.signal.noise import generate_white_noise
 from toan.signal.pluck_scale import generate_named_chord_pluck_scale
 from toan.signal.trig import generate_cosine_wave, generate_sine_wave
+from toan.signal.warble import generate_warble_chord
 
 SWEEP_DURATION = 12.0
 NOISE_SHORT_DURATION = 1.25
@@ -47,6 +48,8 @@ def generate_capture_signal(sample_rate: int) -> np.ndarray:
 
     sweep_up_cos = sweep_up * cosine_multiplier
     sweep_up_sin = sweep_up * sine_multiplier
+
+    warble_test = generate_warble_chord(sample_rate, 5.0, 220.0, ChordType.RootOnly)
 
     def generate_plucked_scale(shape: ChordType, offset_duration: float):
         return generate_named_chord_pluck_scale(
@@ -101,6 +104,7 @@ def generate_capture_signal(sample_rate: int) -> np.ndarray:
             sweep_up,
             sweep_up_cos,
             sweep_up_sin,
+            warble_test,
             scale_root,
             scale_tritone_chord,
             scale_major_chord,
