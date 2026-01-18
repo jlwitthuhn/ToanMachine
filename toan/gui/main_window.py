@@ -11,8 +11,6 @@ from toan.gui.sound_manager import SoundManager
 from toan.gui.train import TrainingWizard
 from toan.signal import generate_capture_signal
 
-INCLUDE_DEBUG_PANEL = True
-
 
 def _clicked_play_training_signal():
     playback_sample_rate = 44100
@@ -21,7 +19,7 @@ def _clicked_play_training_signal():
 
 
 class MainWindow(QtWidgets.QWidget):
-    def __init__(self):
+    def __init__(self, show_debug=False):
         super().__init__()
         self.setWindowTitle("Toan Machine")
         layout = QtWidgets.QVBoxLayout(self)
@@ -52,7 +50,7 @@ class MainWindow(QtWidgets.QWidget):
 
         layout.addWidget(tools_group_box)
 
-        if INCLUDE_DEBUG_PANEL:
+        if show_debug:
             debug_group_box = QtWidgets.QGroupBox("Debug", self)
             debug_layout = QtWidgets.QVBoxLayout()
 
