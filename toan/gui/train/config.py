@@ -17,6 +17,7 @@ class TrainConfigPage(QtWidgets.QWizardPage):
     edit_device_model: QtWidgets.QLineEdit
     edit_sample_rate: QtWidgets.QLineEdit
     combo_size: QtWidgets.QComboBox
+    edit_comment: QtWidgets.QLineEdit
 
     def __init__(self, parent, context: TrainingContext):
         super().__init__(parent)
@@ -49,11 +50,16 @@ class TrainConfigPage(QtWidgets.QWizardPage):
             self.combo_size.addItem(label, allowed_model.value)
         layout.addRow("Model size:", self.combo_size)
 
+        self.edit_comment = QtWidgets.QLineEdit(self)
+        self.edit_comment.setMinimumWidth(250)
+        layout.addRow("Comment:", self.edit_comment)
+
     def initializePage(self):
         self.edit_model_name.setText(self.context.loaded_metadata.name)
         self.edit_device_make.setText(self.context.loaded_metadata.gear_make)
         self.edit_device_model.setText(self.context.loaded_metadata.gear_model)
         self.edit_sample_rate.setText(str(self.context.sample_rate))
+        self.edit_comment.setText(self.context.loaded_metadata.comment)
 
     def validatePage(self) -> bool:
         self.context.loaded_metadata.name = self.edit_model_name.text()
@@ -62,4 +68,5 @@ class TrainConfigPage(QtWidgets.QWizardPage):
         self.context.model_config = get_wavenet_config(
             ModelSizePreset(self.combo_size.currentData())
         )
+        self.context.loaded_metadata.comment = self.edit_comment.text()
         return True

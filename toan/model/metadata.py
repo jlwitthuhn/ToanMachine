@@ -12,6 +12,7 @@ class ModelMetadata:
     name: str
     gear_make: str
     gear_model: str
+    comment: str | None
 
     def export_dict(self) -> dict:
         result = dataclasses.asdict(self)

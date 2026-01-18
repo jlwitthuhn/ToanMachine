@@ -252,6 +252,7 @@ def _run_thread(context: _ValidateThreadContext, input_path: str):
                 name=f"{gear_make} -- {gear_model}",
                 gear_make=gear_make,
                 gear_model=gear_model,
+                comment="",
             )
 
             context.sample_rate = config_json["sample_rate"]
