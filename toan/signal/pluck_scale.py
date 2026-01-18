@@ -8,7 +8,7 @@ import numpy as np
 
 from toan.mix import concat_signals
 from toan.music import get_note_frequency_by_name, get_note_index_by_name
-from toan.signal.chord import ChordType
+from toan.music.chord import ChordType
 from toan.signal.pluck import generate_generic_chord_pluck
 
 

@@ -6,8 +6,8 @@ import numpy as np
 
 from toan.mix import concat_signals
 from toan.music import get_note_frequency_by_name, get_note_index_by_name
+from toan.music.chord import ChordType
 from toan.signal.chirp import generate_chirp
-from toan.signal.chord import ChordType
 from toan.signal.gaussian import generate_gaussian_pulse
 from toan.signal.noise import generate_white_noise
 from toan.signal.pluck_scale import generate_named_chord_pluck_scale
