@@ -6,13 +6,11 @@ import math
 
 import numpy as np
 
+from toan.music.frequency import increase_frequency_by_semitones
+
 # Control how aggressive the low-pass filter is
 # Numbers closer to 0.5 will filter the most
 SPLIT_A = 0.57
-
-
-def _increase_semitones(frequency: float, semitones: int) -> float:
-    return frequency * math.pow(2, semitones / 12)
 
 
 # Generate a pluck using a Karplus-Strong filter over random noise
@@ -49,7 +47,9 @@ def generate_generic_chord_pluck(
 ) -> np.ndarray:
     frequencies: list[float] = [root_frequency]
     for extra_semitones in shape:
-        frequencies.append(_increase_semitones(root_frequency, extra_semitones))
+        frequencies.append(
+            increase_frequency_by_semitones(root_frequency, extra_semitones)
+        )
 
     pluck_list: list[np.ndarray] = []
     for idx, frequency in enumerate(frequencies):

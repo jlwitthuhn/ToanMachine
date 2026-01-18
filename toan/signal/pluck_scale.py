@@ -9,11 +9,8 @@ import numpy as np
 from toan.mix import concat_signals
 from toan.music import get_note_frequency_by_name, get_note_index_by_name
 from toan.music.chord import ChordType
+from toan.music.frequency import increase_frequency_by_semitones
 from toan.signal.pluck import generate_generic_chord_pluck
-
-
-def _increase_semitones(frequency: float, semitones: int) -> float:
-    return frequency * math.pow(2, semitones / 12)
 
 
 def generate_generic_chord_pluck_scale(
@@ -38,7 +35,7 @@ def generate_generic_chord_pluck_scale(
         root_frequency: float = get_note_frequency_by_name(
             begin_note, begin_octave, 440.0
         )
-        root_frequency = _increase_semitones(root_frequency, i)
+        root_frequency = increase_frequency_by_semitones(root_frequency, i)
         this_chord = generate_generic_chord_pluck(
             sample_rate, shape, root_frequency, single_duration, offset_duration, decay
         )
