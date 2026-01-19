@@ -40,6 +40,7 @@ def generate_warble_chord(
     root_frequency: float,
     chord: ChordType,
     octave_count: int,
+    octave_scale: float,
 ) -> np.ndarray:
     notes: list[int] = [0]
     for this_offset in chord.get_shape():
@@ -59,7 +60,8 @@ def generate_warble_chord(
             note_signals.append(note_signal)
         this_octave = np.add.reduce(note_signals)
         this_octave = this_octave / np.abs(this_octave).max()
-        octaves.append(this_octave)
+        this_octave_scale = octave_scale**octave_index
+        octaves.append(this_octave * this_octave_scale)
     result = np.add.reduce(octaves)
     result = result / np.abs(result).max()
     return result

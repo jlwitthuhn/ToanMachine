@@ -49,7 +49,9 @@ def generate_capture_signal(sample_rate: int) -> np.ndarray:
     sweep_up_cos = sweep_up * cosine_multiplier
     sweep_up_sin = sweep_up * sine_multiplier
 
-    warble_test = generate_warble_chord(sample_rate, 5.0, 220.0, ChordType.Major, 2)
+    warble_test = generate_warble_chord(
+        sample_rate, 5.0, 220.0, ChordType.Major, 3, 0.7
+    )
 
     def generate_plucked_scale(shape: ChordType, offset_duration: float):
         return generate_named_chord_pluck_scale(
