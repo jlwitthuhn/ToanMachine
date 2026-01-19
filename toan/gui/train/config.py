@@ -45,7 +45,11 @@ class TrainConfigPage(QtWidgets.QWizardPage):
         layout.addRow("Sample rate:", self.edit_sample_rate)
 
         self.combo_size = QtWidgets.QComboBox(self)
-        for allowed_model in [ModelSizePreset.NAM_STANDARD, ModelSizePreset.NAM_LITE]:
+        for allowed_model in [
+            ModelSizePreset.NAM_STANDARD,
+            ModelSizePreset.NAM_LITE,
+            ModelSizePreset.TOAN_STANDARD_PLUS,
+        ]:
             label = allowed_model.get_label()
             self.combo_size.addItem(label, allowed_model.value)
         layout.addRow("Model size:", self.combo_size)
