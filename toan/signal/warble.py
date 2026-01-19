@@ -16,7 +16,6 @@ MAXIMUM_PHASE_OFFSET = math.pi / 4
 def _generate_signal_from_frequencies(
     sample_rate: int, frequencies: np.ndarray, phase_offset: float
 ) -> np.ndarray:
-    print(frequencies[0], phase_offset)
     f_rad = 2 * np.pi * frequencies
     phase = np.cumsum(f_rad) / sample_rate
     return np.sin(phase + phase_offset)
