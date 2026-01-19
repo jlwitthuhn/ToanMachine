@@ -49,10 +49,15 @@ def generate_capture_signal(sample_rate: int) -> np.ndarray:
     sweep_up_cos = sweep_up * cosine_multiplier
     sweep_up_sin = sweep_up * sine_multiplier
 
-    warble_flat = generate_warble_chord(
+    warble_major = generate_warble_chord(
         sample_rate, SWEEP_DURATION, 55.0, ChordType.Major, 8, 0.68
     )
-    warble_flat_cos = warble_flat * cosine_multiplier
+    warble_major_cos = warble_major * cosine_multiplier
+
+    warble_minor_seventh = generate_warble_chord(
+        sample_rate, SWEEP_DURATION, 56.0, ChordType.MinorSeventh, 8, 0.68
+    )
+    warble_minor_seventh_sin = warble_minor_seventh * sine_multiplier
 
     def generate_plucked_scale(shape: ChordType, offset_duration: float):
         return generate_named_chord_pluck_scale(
@@ -107,8 +112,10 @@ def generate_capture_signal(sample_rate: int) -> np.ndarray:
             sweep_up,
             sweep_up_cos,
             sweep_up_sin,
-            warble_flat,
-            warble_flat_cos,
+            warble_major,
+            warble_major_cos,
+            warble_minor_seventh,
+            warble_minor_seventh_sin,
             scale_root,
             scale_tritone_chord,
             scale_major_chord,
