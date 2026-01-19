@@ -147,7 +147,7 @@ def _run_training(context: TrainingContext, config: _TrainingConfig):
 
         with context.progress_lock:
             context.progress_iters_done = i
-            if i > 0 and i % 10 == 0:
+            if i > 0 and i % 5 == 0:
                 context.progress_loss = loss_buffer.mean().item()
 
     context.model = model
