@@ -16,8 +16,8 @@ from toan.signal.warble import generate_warble_chord
 SWEEP_DURATION = 12.0
 NOISE_SHORT_DURATION = 1.25
 NOISE_LONG_DURATION = 3.0
-NOTE_DURATION = 0.73
-PLUCK_DECAY = 0.988
+NOTE_DURATION = 0.74
+PLUCK_DECAY = 0.986
 
 
 def generate_capture_signal(sample_rate: int) -> np.ndarray:

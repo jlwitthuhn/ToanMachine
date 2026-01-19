@@ -10,7 +10,7 @@ from toan.music.frequency import increase_frequency_by_semitones
 
 # Control how aggressive the low-pass filter is
 # Numbers closer to 0.5 will filter the most
-SPLIT_A = 0.57
+SPLIT_A = 0.60
 
 
 # Generate a pluck using a Karplus-Strong filter over random noise
