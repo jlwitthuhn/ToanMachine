@@ -5,6 +5,7 @@
 import numpy as np
 
 from toan.music.chord import ChordType
+from toan.music.frequency import increase_frequency_by_semitones
 from toan.signal.trig import generate_sine_wave
 
 WARBLE_CYCLES_PER_SECOND = 2
@@ -34,5 +35,14 @@ def _generate_tone_warble(
 def generate_warble_chord(
     sample_rate: int, duration: float, root_frequency: float, chord: ChordType
 ) -> np.ndarray:
-    root_signal = _generate_tone_warble(sample_rate, duration, root_frequency)
-    return root_signal
+    notes: list[int] = [0]
+    for this_offset in chord.get_shape():
+        notes.append(this_offset)
+    note_signals = []
+    for note in notes:
+        frequency = increase_frequency_by_semitones(root_frequency, note)
+        note_signal = _generate_tone_warble(sample_rate, duration, frequency)
+        note_signals.append(note_signal)
+    result = np.add.reduce(note_signals)
+    result = result / np.abs(result).max()
+    return result
