@@ -9,7 +9,7 @@ from toan.music.chord import ChordType
 from toan.music.frequency import increase_frequency_by_semitones
 from toan.signal.trig import generate_sine_wave
 
-WARBLE_CYCLES_PER_SECOND = 2
+PHASE_CYCLES_PER_SECOND = 3
 MAXIMUM_PHASE_OFFSET = math.pi / 4
 
 
@@ -29,7 +29,7 @@ def _generate_tone_warble(
     frequencies = np.zeros(sample_count)
     frequencies.fill(frequency)
     frequency_multiplier = generate_sine_wave(
-        sample_count, sample_rate // WARBLE_CYCLES_PER_SECOND, 0.99, 1.01
+        sample_count, sample_rate // PHASE_CYCLES_PER_SECOND, 0.99, 1.01
     )
     frequencies *= frequency_multiplier
     return _generate_signal_from_frequencies(sample_rate, frequencies, phase_offset)
