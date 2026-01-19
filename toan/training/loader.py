@@ -16,6 +16,8 @@ class TrainingDataLoader:
 
     dry_begin_points: list[int]
 
+    remaining_begin_points: list[int]
+
     def __init__(
         self,
         signal_dry: np.ndarray,
@@ -30,6 +32,7 @@ class TrainingDataLoader:
         self.wet_width = dry_width - receptive_field + 1
         self.receptive_field = receptive_field
         self.dry_begin_points = []
+        self.remaining_begin_points = []
 
         def dry_begin_from_wet_begin(wet_begin: int) -> int:
             delta = self.dry_width - self.wet_width
@@ -60,8 +63,11 @@ class TrainingDataLoader:
         input_list: list[mx.array] = []
         output_list: list[mx.array] = []
         for i in range(batch_size):
-            index_begin = np.random.randint(len(self.dry_begin_points))
-            sample_begin = self.dry_begin_points[index_begin]
+            if len(self.remaining_begin_points) == 0:
+                self.remaining_begin_points = self.dry_begin_points[:]
+                np.random.shuffle(self.remaining_begin_points)
+            index_begin = np.random.randint(len(self.remaining_begin_points))
+            sample_begin = self.remaining_begin_points.pop(index_begin)
             sample_end = sample_begin + self.dry_width
             this_input = mx.array(self.signal_dry[sample_begin:sample_end])
             this_output = mx.array(
