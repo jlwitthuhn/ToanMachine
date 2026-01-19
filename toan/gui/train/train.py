@@ -13,6 +13,7 @@ from PySide6 import QtCore, QtWidgets
 from toan.gui.train import TrainingContext
 from toan.model.nam_wavenet import NamWaveNet
 from toan.training import TrainingSummary
+from toan.training.loader import TrainingDataLoader
 
 TRAIN_TEXT = [
     "Your model is now training. After training has finished you will be asked to choose a location for the NAM file."
@@ -85,29 +86,12 @@ class TrainTrainPage(QtWidgets.QWizardPage):
 
 @dataclass
 class _TrainingConfig:
-    num_steps: int = 310
+    num_steps: int = 500
     warmup_steps: int = 50
     batch_size: int = 64
     learn_rate_hi: float = 8.0e-4
     learn_rate_lo: float = 1.5e-4
     weight_decay: float = 7.5e-3
-
-
-def _generate_batch(
-    context: TrainingContext, receptive_field: int, batch_count: int, input_samples: int
-) -> tuple[mx.array, mx.array]:
-    input_list: list[mx.array] = []
-    output_list: list[mx.array] = []
-    dry_sample_begin: int = 0
-    dry_sample_end: int = len(context.signal_dry) - input_samples - 1
-    for i in range(batch_count):
-        input_begin = mx.random.randint(dry_sample_begin, dry_sample_end).item()
-        input_end = input_begin + input_samples
-        wet_begin = input_begin + receptive_field - 1
-        assert wet_begin < input_end
-        input_list.append(mx.array(context.signal_dry[input_begin:input_end]))
-        output_list.append(mx.array(context.signal_wet[wet_begin:input_end]))
-    return mx.array(input_list), mx.array(output_list)
 
 
 def _run_training(context: TrainingContext, config: _TrainingConfig):
@@ -134,6 +118,10 @@ def _run_training(context: TrainingContext, config: _TrainingConfig):
     else:
         learn_rate = decay_lr
 
+    data_loader = TrainingDataLoader(
+        context.signal_dry, context.signal_wet, 8192 + 2048, model.receptive_field
+    )
+
     loss_and_grad_fn = nn.value_and_grad(model, NamWaveNet.loss_fn)
     optimizer = optimizers.AdamW(
         learning_rate=learn_rate, weight_decay=config.weight_decay
@@ -149,9 +137,7 @@ def _run_training(context: TrainingContext, config: _TrainingConfig):
 
     for i in range(config.num_steps):
         model.train(True)
-        batch_in, batch_out = _generate_batch(
-            context, model.receptive_field, config.batch_size, 8192 + 2048
-        )
+        batch_in, batch_out = data_loader.make_batch(config.batch_size)
         loss, grads = loss_and_grad_fn(model, batch_in, batch_out)
         optimizer.update(model, grads)
         loss_buffer[i % loss_buffer_sz] = loss
