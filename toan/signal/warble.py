@@ -40,7 +40,7 @@ def _generate_tone_warble(
 def _generate_top_level_modulation(sample_rate: int, duration: float) -> np.ndarray:
     sample_count = int(sample_rate * duration)
     return generate_sine_wave(
-        sample_count, int(sample_rate / BIG_CYCLES_PER_SECOND), 0.8, 1.25
+        sample_count, int(sample_rate / BIG_CYCLES_PER_SECOND), 0.75, 1.333
     )
 
 
