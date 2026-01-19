@@ -34,7 +34,6 @@ class TrainingDataLoader:
         def dry_begin_from_wet_begin(wet_begin: int) -> int:
             delta = self.dry_width - self.wet_width
             result = wet_begin - delta
-            assert result >= 0
             return result
 
         # Scan forward from the first valid wet sample
@@ -44,10 +43,18 @@ class TrainingDataLoader:
             maybe = this_wet_begin + self.wet_width
             if maybe < len(signal_wet):
                 dry_begin = dry_begin_from_wet_begin(this_wet_begin)
+                assert dry_begin >= 0
                 self.dry_begin_points.append(dry_begin)
             this_wet_begin = maybe
 
-        # TODO: Same thing but scan backwards from the end, this will probably be a different offset
+        # Same thing but scan backwards from the end, this will probably be a different offset
+        wet_begin_last = len(self.signal_wet) - self.wet_width
+        this_wet_begin = wet_begin_last
+        while this_wet_begin > 0:
+            maybe = dry_begin_from_wet_begin(this_wet_begin)
+            if maybe >= 0:
+                self.dry_begin_points.append(maybe)
+            this_wet_begin = maybe
 
     def make_batch(self, batch_size: int) -> tuple[mx.array, mx.array]:
         input_list: list[mx.array] = []
