@@ -35,20 +35,31 @@ def _generate_tone_warble(
 
 
 def generate_warble_chord(
-    sample_rate: int, duration: float, root_frequency: float, chord: ChordType
+    sample_rate: int,
+    duration: float,
+    root_frequency: float,
+    chord: ChordType,
+    octave_count: int,
 ) -> np.ndarray:
     notes: list[int] = [0]
     for this_offset in chord.get_shape():
         notes.append(this_offset)
-    note_signals = []
-    for index, note in enumerate(notes):
-        if len(notes) > 1:
-            phase: float = index / (len(notes) - 1) * MAXIMUM_PHASE_OFFSET
-        else:
-            phase = 0.0
-        frequency = increase_frequency_by_semitones(root_frequency, note)
-        note_signal = _generate_tone_warble(sample_rate, duration, frequency, phase)
-        note_signals.append(note_signal)
-    result = np.add.reduce(note_signals)
+    octaves = []
+    for octave_index in range(octave_count + 1):
+        note_signals = []
+        for index, note in enumerate(notes):
+            if len(notes) > 1:
+                phase: float = index / (len(notes) - 1) * MAXIMUM_PHASE_OFFSET
+            else:
+                phase = 0.0
+            frequency = increase_frequency_by_semitones(
+                root_frequency, note + 12 * octave_index
+            )
+            note_signal = _generate_tone_warble(sample_rate, duration, frequency, phase)
+            note_signals.append(note_signal)
+        this_octave = np.add.reduce(note_signals)
+        this_octave = this_octave / np.abs(this_octave).max()
+        octaves.append(this_octave)
+    result = np.add.reduce(octaves)
     result = result / np.abs(result).max()
     return result
