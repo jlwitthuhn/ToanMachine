@@ -9,8 +9,10 @@ from toan.music.chord import ChordType
 from toan.music.frequency import increase_frequency_by_semitones
 from toan.signal.trig import generate_sine_wave
 
-PHASE_CYCLES_PER_SECOND = 3
-MAXIMUM_PHASE_OFFSET = math.pi / 4
+BIG_CYCLES_PER_SECOND = 1.5
+
+PHASE_CYCLES_PER_SECOND = 4
+MAXIMUM_PHASE_OFFSET = math.pi / 4.0
 
 
 def _generate_signal_from_frequencies(
@@ -22,16 +24,24 @@ def _generate_signal_from_frequencies(
 
 
 def _generate_tone_warble(
-    sample_rate: int, duration: float, frequency: float, phase_offset: float
+    sample_rate: int, modulation: np.ndarray, frequency: float, phase_offset: float
 ) -> np.ndarray:
-    sample_count = int(sample_rate * duration)
+    sample_count = len(modulation)
     frequencies = np.zeros(sample_count)
     frequencies.fill(frequency)
+    frequencies *= modulation
     frequency_multiplier = generate_sine_wave(
-        sample_count, sample_rate // PHASE_CYCLES_PER_SECOND, 0.99, 1.01
+        sample_count, int(sample_rate / PHASE_CYCLES_PER_SECOND), 0.99, 1.01
     )
     frequencies *= frequency_multiplier
     return _generate_signal_from_frequencies(sample_rate, frequencies, phase_offset)
+
+
+def _generate_top_level_modulation(sample_rate: int, duration: float) -> np.ndarray:
+    sample_count = int(sample_rate * duration)
+    return generate_sine_wave(
+        sample_count, int(sample_rate / BIG_CYCLES_PER_SECOND), 0.8, 1.25
+    )
 
 
 def generate_warble_chord(
@@ -42,6 +52,7 @@ def generate_warble_chord(
     octave_count: int,
     octave_scale: float,
 ) -> np.ndarray:
+    modulation = _generate_top_level_modulation(sample_rate, duration)
     notes: list[int] = [0]
     for this_offset in chord.get_shape():
         notes.append(this_offset)
@@ -56,7 +67,9 @@ def generate_warble_chord(
             frequency = increase_frequency_by_semitones(
                 root_frequency, note + 12 * octave_index
             )
-            note_signal = _generate_tone_warble(sample_rate, duration, frequency, phase)
+            note_signal = _generate_tone_warble(
+                sample_rate, modulation, frequency, phase
+            )
             note_signals.append(note_signal)
         this_octave = np.add.reduce(note_signals)
         this_octave = this_octave / np.abs(this_octave).max()
