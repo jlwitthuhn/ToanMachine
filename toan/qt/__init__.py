@@ -20,6 +20,7 @@ class WavFileModel(QtCore.QAbstractTableModel):
         self.file_list = file_list
         self.with_checkbox = with_checkbox
         self.selected_wavs = set()
+        self.file_list.sort(key=lambda x: x.filename)
 
     def rowCount(self, parent=QtCore.QModelIndex()):
         return len(self.file_list)
