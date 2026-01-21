@@ -140,8 +140,8 @@ class RecordOutputLevelPage(QtWidgets.QWizardPage):
             d_chord_raw = generate_generic_chord_pluck(
                 self.context.sample_rate, [4, 7], d_root, 0.9, 1.8e-3, 0.992
             )
-            d_chord_2 = d_chord_raw * 0.74
-            d_chord_3 = d_chord_2 * 0.74
+            d_chord_2 = d_chord_raw * 0.70
+            d_chord_3 = d_chord_2 * 0.70
             self.generated_chords = (
                 np.concat(
                     (
@@ -152,7 +152,7 @@ class RecordOutputLevelPage(QtWidgets.QWizardPage):
                         np.zeros(self.context.sample_rate // 2),
                     )
                 )
-                * 0.95
+                * 0.99
             )
         self.generated_chord_index = 0
 
