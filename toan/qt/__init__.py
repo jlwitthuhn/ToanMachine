@@ -5,6 +5,7 @@
 from PySide6 import QtCore
 from PySide6.QtGui import Qt
 
+from toan.formatting import format_seconds_as_mmss
 from toan.persistence import UserWavDesc
 
 
@@ -46,7 +47,7 @@ class WavFileModel(QtCore.QAbstractTableModel):
             if index.column() == 1 + offset:
                 return f"{self.file_list[index.row()].sample_rate}"
             if index.column() == 2 + offset:
-                return f"{self.file_list[index.row()].duration:.2f}s"
+                return format_seconds_as_mmss(self.file_list[index.row()].duration)
 
         if role == Qt.CheckStateRole and self.with_checkbox and index.column() == 0:
             the_file = self.file_list[index.row()]
