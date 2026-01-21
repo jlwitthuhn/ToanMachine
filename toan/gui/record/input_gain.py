@@ -43,15 +43,15 @@ class RecordInputGainPage(QtWidgets.QWizardPage):
         super().__init__(parent)
         self.context = context
 
-        single_sweep = generate_chirp(context.sample_rate, 18, 22000, 0.85)
+        single_sweep = generate_chirp(context.sample_rate, 18, 22000, 0.90)
         single_sweep_samples = len(single_sweep)
-        volume_buffer_samples = math.floor(single_sweep_samples * 1.1)
+        volume_buffer_samples = math.floor(single_sweep_samples * 1.05)
         self.volume_samples = np.zeros(volume_buffer_samples)
 
         self.output_callback_signal = concat_signals([single_sweep] * 30, 0)
 
         self.bar_update_timer = QtCore.QTimer()
-        self.bar_update_timer.setInterval(50)
+        self.bar_update_timer.setInterval(100)
         self.bar_update_timer.setSingleShot(False)
         self.bar_update_timer.timeout.connect(self._update_status)
 
