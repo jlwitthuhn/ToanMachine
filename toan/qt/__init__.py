@@ -118,7 +118,7 @@ class WavFileModel(QtCore.QAbstractTableModel):
     def get_selected_test_wavs(self) -> list[UserWavDesc]:
         result = []
         for maybe_wav in self.file_list:
-            if maybe_wav.path in self.selected_train_wavs:
+            if maybe_wav.path in self.selected_test_wavs:
                 result.append(maybe_wav)
         return result
 
