@@ -13,6 +13,7 @@ from matplotlib.figure import Figure
 
 class LossFunction(Enum):
     RMSE = enum.auto()
+    ESR = enum.auto()
 
 
 @dataclass

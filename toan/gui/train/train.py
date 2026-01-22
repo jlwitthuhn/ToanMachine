@@ -147,6 +147,8 @@ def _run_training(context: TrainingContext, config: _TrainingConfig):
     def loss_fn(model_in, inputs: mx.array, outputs: mx.array):
         if config.loss_fn == LossFunction.RMSE:
             return NamWaveNet.loss_rmse(model_in, inputs, outputs)
+        elif config.loss_fn == LossFunction.ESR:
+            return NamWaveNet.loss_esr(model_in, inputs, outputs)
         assert False
 
     loss_and_grad_fn = nn.value_and_grad(model, loss_fn)
