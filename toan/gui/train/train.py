@@ -1,7 +1,7 @@
 # This file is part of Toan Machine and is licensed under the GPLv3
 # https://www.gnu.org/licenses/gpl-3.0.en.html
 # SPDX-License-Identifier: GPL-3.0-only
-
+import datetime
 import threading
 from dataclasses import dataclass
 
@@ -10,6 +10,7 @@ import mlx.nn as nn
 import mlx.optimizers as optimizers
 from PySide6 import QtCore, QtWidgets
 
+from toan.formatting import format_seconds_as_mmss
 from toan.gui.train import TrainingContext
 from toan.model.nam_wavenet import NamWaveNet
 from toan.training import TrainingSummary
@@ -27,12 +28,15 @@ class TrainTrainPage(QtWidgets.QWizardPage):
     progress_bar: QtWidgets.QProgressBar
     progress_desc: QtWidgets.QLabel
 
+    timestamp_begin: datetime.datetime | None = None
+    timer_label: QtWidgets.QLabel
+
     def __init__(self, parent, context: TrainingContext):
         super().__init__(parent)
         self.context = context
         self.context.progress_lock = threading.Lock()
         self.refresh_timer = QtCore.QTimer()
-        self.refresh_timer.setInterval(100)
+        self.refresh_timer.setInterval(150)
         self.refresh_timer.setSingleShot(False)
         self.refresh_timer.timeout.connect(self.refresh_page)
         self.refresh_timer.start()
@@ -59,10 +63,16 @@ class TrainTrainPage(QtWidgets.QWizardPage):
         self.progress_desc = QtWidgets.QLabel("Loss estimate:", self)
         layout.addWidget(self.progress_desc)
 
+        self.timer_label = QtWidgets.QLabel(
+            f"Time spent: {format_seconds_as_mmss(0)}", self
+        )
+        layout.addWidget(self.timer_label)
+
     def initializePage(self):
         def thread_func():
             _run_training(self.context, _TrainingConfig())
 
+        self.timestamp_begin = datetime.datetime.now()
         threading.Thread(target=thread_func).start()
 
     def isComplete(self) -> bool:
@@ -82,6 +92,11 @@ class TrainTrainPage(QtWidgets.QWizardPage):
             if self.context.model is not None:
                 self.refresh_timer.stop()
                 self.completeChanged.emit()
+        if self.timestamp_begin is not None:
+            current_time = datetime.datetime.now()
+            time_elapsed = current_time - self.timestamp_begin
+            formatted_time = format_seconds_as_mmss(time_elapsed.total_seconds())
+            self.timer_label.setText(f"Time spent: {formatted_time}")
 
 
 @dataclass
