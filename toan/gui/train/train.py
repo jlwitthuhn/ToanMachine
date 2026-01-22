@@ -1,6 +1,7 @@
 # This file is part of Toan Machine and is licensed under the GPLv3
 # https://www.gnu.org/licenses/gpl-3.0.en.html
 # SPDX-License-Identifier: GPL-3.0-only
+
 import datetime
 import threading
 from dataclasses import dataclass
@@ -155,6 +156,13 @@ def _run_training(context: TrainingContext, config: _TrainingConfig):
     train_loss_buffer = mx.ones(16)
     train_loss_buffer_sz = len(train_loss_buffer)
 
+    def get_test_data() -> tuple[mx.array, mx.array]:
+        input = mx.array(context.signal_dry_test).reshape((1, -1))
+        output = mx.array(context.signal_wet_test)[model.receptive_field - 1 :].reshape(
+            (1, -1)
+        )
+        return input, output
+
     for i in range(config.num_steps):
         if context.quit_training:
             return
@@ -169,8 +177,16 @@ def _run_training(context: TrainingContext, config: _TrainingConfig):
 
         with context.progress_lock:
             context.progress_iters_done = i
-            if i > 0 and i % 5 == 0:
-                context.progress_train_loss = train_loss_buffer.mean().item()
+            context.progress_train_loss = train_loss_buffer.mean().item()
+
+        TEST_INTERVAL = 20
+
+        if context.signal_dry_test is not None:
+            if i % TEST_INTERVAL == TEST_INTERVAL - 1:
+                model.train(False)
+                test_in, test_out = get_test_data()
+                loss = model.loss_fn(test_in, test_out).item()
+                print(f"Test loss: {loss:.4f}")
 
     context.model = model
     context.training_summary = summary
