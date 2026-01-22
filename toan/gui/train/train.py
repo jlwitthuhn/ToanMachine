@@ -4,7 +4,6 @@
 
 import datetime
 import threading
-from dataclasses import dataclass
 
 import mlx.core as mx
 import mlx.nn as nn
@@ -15,6 +14,7 @@ from toan.formatting import format_seconds_as_mmss
 from toan.gui.train import TrainingContext
 from toan.model.nam_wavenet import NamWaveNet
 from toan.training import LossFunction, TrainingSummary
+from toan.training.config import TrainingConfig
 from toan.training.loader import TrainingDataLoader
 
 TRAIN_TEXT = [
@@ -71,7 +71,7 @@ class TrainTrainPage(QtWidgets.QWizardPage):
 
     def initializePage(self):
         def thread_func():
-            _run_training(self.context, _TrainingConfig())
+            _run_training(self.context, TrainingConfig())
 
         self.context.quit_training = False
         self.timestamp_begin = datetime.datetime.now()
@@ -105,18 +105,7 @@ class TrainTrainPage(QtWidgets.QWizardPage):
             self.timer_label.setText(f"Time spent: {formatted_time}")
 
 
-@dataclass
-class _TrainingConfig:
-    num_steps: int = 600
-    warmup_steps: int = 50
-    batch_size: int = 64
-    learn_rate_hi: float = 8.0e-4
-    learn_rate_lo: float = 1.5e-4
-    weight_decay: float = 7.5e-3
-    loss_fn: LossFunction = LossFunction.RMSE
-
-
-def _run_training(context: TrainingContext, config: _TrainingConfig):
+def _run_training(context: TrainingContext, config: TrainingConfig):
     mx.random.seed(0o35)
     model = NamWaveNet(
         context.model_config, context.loaded_metadata, context.sample_rate
