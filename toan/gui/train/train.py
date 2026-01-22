@@ -179,14 +179,14 @@ def _run_training(context: TrainingContext, config: _TrainingConfig):
             context.progress_iters_done = i
             context.progress_train_loss = train_loss_buffer.mean().item()
 
-        TEST_INTERVAL = 20
+        TEST_INTERVAL = 25
 
         if context.signal_dry_test is not None:
             if i % TEST_INTERVAL == TEST_INTERVAL - 1:
                 model.train(False)
                 test_in, test_out = get_test_data()
                 loss = model.loss_fn(test_in, test_out).item()
-                print(f"Test loss: {loss:.4f}")
+                summary.losses_test.append(loss)
 
     context.model = model
     context.training_summary = summary
