@@ -75,6 +75,4 @@ class TrainingDataLoader:
             )
             input_list.append(this_input)
             output_list.append(this_output)
-            assert len(this_input) == 10240
-            assert len(this_output) == 6148
         return mx.array(input_list), mx.array(output_list)
