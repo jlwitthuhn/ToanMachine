@@ -82,20 +82,20 @@ class TrainTrainPage(QtWidgets.QWizardPage):
         self.context.quit_training = True
 
     def isComplete(self) -> bool:
-        return self.context.model is not None
+        return self.context.progress_context.model is not None
 
     def validatePage(self) -> bool:
-        return self.context.model is not None
+        return self.context.progress_context.model is not None
 
     def refresh_page(self):
-        with self.context.progress_lock:
-            self.progress_bar.setMaximum(self.context.progress_iters_total)
-            self.progress_bar.setValue(self.context.progress_iters_done)
+        with self.context.progress_context.lock:
+            self.progress_bar.setMaximum(self.context.progress_context.iters_total)
+            self.progress_bar.setValue(self.context.progress_context.iters_done)
             self.progress_bar.repaint()
             self.progress_desc.setText(
-                f"Training loss: {self.context.progress_train_loss:.4f}"
+                f"Training loss: {self.context.progress_context.loss_train:.4f}"
             )
-            if self.context.model is not None:
+            if self.context.progress_context.model is not None:
                 self.refresh_timer.stop()
                 self.completeChanged.emit()
         if self.timestamp_begin is not None:
@@ -145,10 +145,11 @@ def _run_training(context: TrainingGuiContext, config: TrainingConfig):
         learning_rate=learn_rate, weight_decay=config.weight_decay
     )
 
-    with context.progress_lock:
-        context.progress_iters_done = 0
-        context.progress_iters_total = config.num_steps
-        context.progress_train_loss = 1.0
+    with context.progress_context.lock:
+        context.progress_context.iters_done = 0
+        context.progress_context.iters_total = config.num_steps
+        context.progress_context.loss_train = 1.0
+        context.progress_context.loss_test = 1.0
 
     train_loss_buffer = mx.ones(16)
     train_loss_buffer_sz = len(train_loss_buffer)
@@ -161,7 +162,7 @@ def _run_training(context: TrainingGuiContext, config: TrainingConfig):
         return input, output
 
     for i in range(config.num_steps):
-        if context.quit_training:
+        if context.progress_context.quit:
             return
         model.train(True)
         batch_in, batch_out = data_loader.make_batch(config.batch_size)
@@ -172,9 +173,9 @@ def _run_training(context: TrainingGuiContext, config: TrainingConfig):
 
         summary.losses_train.append(loss.item())
 
-        with context.progress_lock:
-            context.progress_iters_done = i
-            context.progress_train_loss = train_loss_buffer.mean().item()
+        with context.progress_context.lock:
+            context.progress_context.iters_done = i
+            context.progress_context.loss_train = train_loss_buffer.mean().item()
 
         TEST_INTERVAL = 25
 
@@ -185,5 +186,5 @@ def _run_training(context: TrainingGuiContext, config: TrainingConfig):
                 loss = model.loss_rmse(test_in, test_out).item()
                 summary.losses_test.append(loss)
 
-    context.model = model
-    context.training_summary = summary
+    context.progress_context.model = model
+    context.progress_context.summary = summary

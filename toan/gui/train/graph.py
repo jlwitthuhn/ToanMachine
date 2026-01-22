@@ -29,7 +29,7 @@ class TrainGraphPage(QtWidgets.QWizardPage):
         layout.addWidget(self.save_button)
 
     def initializePage(self):
-        figure = self.context.training_summary.generate_loss_graph(5)
+        figure = self.context.progress_context.summary.generate_loss_graph(5)
         self.graph.figure = figure
 
     def validatePage(self) -> bool:
@@ -39,7 +39,7 @@ class TrainGraphPage(QtWidgets.QWizardPage):
             return False
 
         with open(file_path, "w") as file:
-            file.write(self.context.model.export_nam_json_str())
+            file.write(self.context.progress_context.model.export_nam_json_str())
 
         return True
 
