@@ -21,6 +21,8 @@ class _ValidateThreadContext:
 
     signal_dry: np.ndarray
     signal_wet: np.ndarray
+    signal_dry_test: np.ndarray | None = None
+    signal_wet_test: np.ndarray | None = None
     metadata: ModelMetadata
     sample_rate: int = 0
 
@@ -80,6 +82,8 @@ class TrainValidatePage(QtWidgets.QWizardPage):
             if self.thread_context.complete:
                 self.context.signal_dry = self.thread_context.signal_dry
                 self.context.signal_wet = self.thread_context.signal_wet
+                self.context.signal_dry_test = self.thread_context.signal_dry_test
+                self.context.signal_wet_test = self.thread_context.signal_wet_test
                 self.context.loaded_metadata = self.thread_context.metadata
                 self.context.sample_rate = self.thread_context.sample_rate
                 self.thread_context = None
@@ -151,6 +155,16 @@ def _run_thread(context: _ValidateThreadContext, input_path: str):
                 return
 
             print_status(f"Sample rate: {config_json["sample_rate"]}")
+
+            if "test_offset" not in config_json or not isinstance(
+                config_json["sample_rate"], int
+            ):
+                print_status("Error: config.json does not contain key 'test_offset'")
+                return
+
+            test_data_offset = config_json["test_offset"]
+            if test_data_offset > 0:
+                print_status("Recording contains test data")
 
             if "dry_signal" not in config_json or not isinstance(
                 config_json["dry_signal"], str
@@ -232,19 +246,45 @@ def _run_thread(context: _ValidateThreadContext, input_path: str):
             latency_samples = min(latency_samples_a, latency_samples_b)
             print_status(f"Recording latency: {latency_samples} samples")
 
-            # Trim the first second off of the dry signal and the equivalent part from wet
-            dry_trimmed = dry_signal[dry_sample_rate:]
-            wet_trimmed = wet_signal[wet_sample_rate + latency_samples :]
+            # Cut the first second of timing calibration data off of the start
+            # Also cut the test data off of the end if it exists
+            if test_data_offset > 0:
+                train_dry = dry_signal[dry_sample_rate:test_data_offset]
+                train_wet = wet_signal[
+                    wet_sample_rate
+                    + latency_samples : test_data_offset
+                    + latency_samples
+                ]
 
-            # Now trim the end so both are the same size
-            trimmed_size = min(len(dry_trimmed), len(wet_trimmed))
-            dry_trimmed = dry_trimmed[:trimmed_size]
-            wet_trimmed = wet_trimmed[:trimmed_size]
+                test_dry = dry_signal[test_data_offset:]
+                test_wet = wet_signal[test_data_offset:]
+            else:
+                train_dry = dry_signal[dry_sample_rate:]
+                train_wet = wet_signal[wet_sample_rate + latency_samples :]
 
-            assert len(dry_trimmed) == len(wet_trimmed)
-            print_status(f"Matched samples available: {len(dry_trimmed)}")
-            context.signal_dry = dry_trimmed
-            context.signal_wet = wet_trimmed
+                test_dry = None
+                test_wet = None
+
+            # Trim the end so we have a 1:1 mapping between the two
+            train_trimmed_size = min(len(train_dry), len(train_wet))
+            train_dry = train_dry[:train_trimmed_size]
+            train_wet = train_wet[:train_trimmed_size]
+
+            if test_dry is not None:
+                assert test_wet is not None
+                test_trimmed_size = min(len(test_dry), len(test_wet))
+                test_dry = test_dry[:test_trimmed_size]
+                test_wet = test_wet[:test_trimmed_size]
+
+            assert len(train_dry) == len(train_wet)
+            if test_dry is not None:
+                assert len(test_dry) == len(test_wet)
+
+            print_status(f"Matched samples available: {len(train_dry)}")
+            context.signal_dry = train_dry
+            context.signal_wet = train_wet
+            context.signal_dry_test = test_dry
+            context.signal_wet_test = test_wet
 
             gear_make = config_json["device_make"]
             gear_model = config_json["device_model"]

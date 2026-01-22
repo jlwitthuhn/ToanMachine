@@ -20,6 +20,8 @@ class TrainingContext:
 
     signal_dry: np.ndarray | None = None
     signal_wet: np.ndarray | None = None
+    signal_dry_test: np.ndarray | None = None
+    signal_wet_test: np.ndarray | None = None
 
     progress_lock: threading.Lock
     progress_iters_done: int = 0
