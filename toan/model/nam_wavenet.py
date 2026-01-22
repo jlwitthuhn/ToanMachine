@@ -200,7 +200,7 @@ class NamWaveNet(nn.Module):
     metadata: ModelMetadata
     sample_rate: int = 0
 
-    def loss_fn(self, inputs: mx.array, targets: mx.array) -> mx.array:
+    def loss_rmse(self, inputs: mx.array, targets: mx.array) -> mx.array:
         outputs = self(inputs)
         delta = targets - outputs
         delta2 = delta**2

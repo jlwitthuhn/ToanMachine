@@ -2,11 +2,17 @@
 # https://www.gnu.org/licenses/gpl-3.0.en.html
 # SPDX-License-Identifier: GPL-3.0-only
 
+import enum
 from dataclasses import dataclass, field
+from enum import Enum
 
 import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib.figure import Figure
+
+
+class LossFunction(Enum):
+    RMSE = enum.auto()
 
 
 @dataclass

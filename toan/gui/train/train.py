@@ -14,7 +14,7 @@ from PySide6 import QtCore, QtWidgets
 from toan.formatting import format_seconds_as_mmss
 from toan.gui.train import TrainingContext
 from toan.model.nam_wavenet import NamWaveNet
-from toan.training import TrainingSummary
+from toan.training import LossFunction, TrainingSummary
 from toan.training.loader import TrainingDataLoader
 
 TRAIN_TEXT = [
@@ -113,6 +113,7 @@ class _TrainingConfig:
     learn_rate_hi: float = 8.0e-4
     learn_rate_lo: float = 1.5e-4
     weight_decay: float = 7.5e-3
+    loss_fn: LossFunction = LossFunction.RMSE
 
 
 def _run_training(context: TrainingContext, config: _TrainingConfig):
@@ -143,7 +144,12 @@ def _run_training(context: TrainingContext, config: _TrainingConfig):
         context.signal_dry, context.signal_wet, 8192 + 2048, model.receptive_field
     )
 
-    loss_and_grad_fn = nn.value_and_grad(model, NamWaveNet.loss_fn)
+    def loss_fn(model_in, inputs: mx.array, outputs: mx.array):
+        if config.loss_fn == LossFunction.RMSE:
+            return NamWaveNet.loss_rmse(model_in, inputs, outputs)
+        assert False
+
+    loss_and_grad_fn = nn.value_and_grad(model, loss_fn)
     optimizer = optimizers.AdamW(
         learning_rate=learn_rate, weight_decay=config.weight_decay
     )
@@ -185,7 +191,7 @@ def _run_training(context: TrainingContext, config: _TrainingConfig):
             if i % TEST_INTERVAL == TEST_INTERVAL - 1:
                 model.train(False)
                 test_in, test_out = get_test_data()
-                loss = model.loss_fn(test_in, test_out).item()
+                loss = model.loss_rmse(test_in, test_out).item()
                 summary.losses_test.append(loss)
 
     context.model = model
