@@ -44,7 +44,7 @@ class RecordExtraPage(QtWidgets.QWizardPage):
         self.table.setModel(model)
 
     def validatePage(self):
-        extra_wavs: list[UserWavDesc] = self.table.model().get_selected_wavs()
+        extra_wavs: list[UserWavDesc] = self.table.model().get_selected_train_wavs()
         ready_to_concat: list[np.ndarray] = []
         for this_wav in extra_wavs:
             this_sample_rate, this_signal = wavfile.read(this_wav.path)
