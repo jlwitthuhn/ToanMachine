@@ -27,3 +27,5 @@ class TrainingContext:
     progress_loss: float = 1.0
     model: NamWaveNet | None = None
     training_summary: TrainingSummary | None = None
+
+    quit_training: bool = False

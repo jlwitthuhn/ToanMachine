@@ -72,8 +72,13 @@ class TrainTrainPage(QtWidgets.QWizardPage):
         def thread_func():
             _run_training(self.context, _TrainingConfig())
 
+        self.context.quit_training = False
         self.timestamp_begin = datetime.datetime.now()
         threading.Thread(target=thread_func).start()
+
+    def cleanupPage(self):
+        self.refresh_timer.stop()
+        self.context.quit_training = True
 
     def isComplete(self) -> bool:
         return self.context.model is not None
@@ -151,6 +156,8 @@ def _run_training(context: TrainingContext, config: _TrainingConfig):
     loss_buffer_sz = len(loss_buffer)
 
     for i in range(config.num_steps):
+        if context.quit_training:
+            return
         model.train(True)
         batch_in, batch_out = data_loader.make_batch(config.batch_size)
         loss, grads = loss_and_grad_fn(model, batch_in, batch_out)
