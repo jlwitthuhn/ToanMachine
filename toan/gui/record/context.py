@@ -13,6 +13,7 @@ class RecordingContext:
     sample_rate: int = 44100
     input_channel: SdChannel
     output_channel: SdChannel
-    extra_signal_dry: np.ndarray | None = None
+    extra_signal_dry_test: np.ndarray | None = None
+    extra_signal_dry_train: np.ndarray | None = None
     signal_dry: np.ndarray | None = None
     signal_recorded: np.ndarray | None = None

@@ -78,7 +78,7 @@ class RecordWetSignalPage(QtWidgets.QWizardPage):
         capture_signal_raw = generate_capture_signal(self.context.sample_rate)
 
         self.context.signal_dry = concat_signals(
-            [capture_signal_raw, self.context.extra_signal_dry],
+            [capture_signal_raw, self.context.extra_signal_dry_train],
             self.context.sample_rate // 2,
         )
 

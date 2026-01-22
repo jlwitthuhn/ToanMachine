@@ -44,10 +44,8 @@ class RecordExtraPage(QtWidgets.QWizardPage):
         self.table.setModel(model)
 
     def validatePage(self):
-        extra_wavs: list[UserWavDesc] = self.table.model().get_selected_train_wavs()
-        ready_to_concat: list[np.ndarray] = []
-        for this_wav in extra_wavs:
-            this_sample_rate, this_signal = wavfile.read(this_wav.path)
+        def load_and_resample_wav(desc: UserWavDesc):
+            this_sample_rate, this_signal = wavfile.read(desc.path)
             if len(this_signal.shape) == 2:
                 this_signal = this_signal[:, 0]
             if this_sample_rate != self.context.sample_rate:
@@ -56,12 +54,35 @@ class RecordExtraPage(QtWidgets.QWizardPage):
                     this_sample_count * (self.context.sample_rate / this_sample_rate)
                 )
                 this_signal = resample(this_signal, desired_sample_count)
-            ready_to_concat.append(this_signal)
+            return this_signal
 
-        if len(ready_to_concat) > 0:
-            full_signal = concat_signals(ready_to_concat, self.context.sample_rate // 4)
-            full_signal = full_signal.astype(np.float32) / np.abs(full_signal).max()
-            self.context.extra_signal_dry = full_signal
+        train_wavs: list[UserWavDesc] = self.table.model().get_selected_train_wavs()
+        train_ready_to_concat: list[np.ndarray] = []
+        for this_wav in train_wavs:
+            this_signal = load_and_resample_wav(this_wav)
+            train_ready_to_concat.append(this_signal)
+
+        if len(train_ready_to_concat) > 0:
+            train_signal = concat_signals(
+                train_ready_to_concat, self.context.sample_rate // 4
+            )
+            train_signal = train_signal.astype(np.float32) / np.abs(train_signal).max()
+            self.context.extra_signal_dry_train = train_signal
         else:
-            self.context.extra_signal_dry = np.zeros(1)
+            self.context.extra_signal_dry_train = np.zeros(1)
+
+        test_wavs: list[UserWavDesc] = self.table.model().get_selected_test_wavs()
+        test_ready_to_concat: list[np.ndarray] = []
+        for this_wav in test_wavs:
+            this_signal = load_and_resample_wav(this_wav)
+            test_ready_to_concat.append(this_signal)
+
+        if len(test_ready_to_concat) > 0:
+            test_signal = concat_signals(
+                test_ready_to_concat, self.context.sample_rate // 4
+            )
+            # TODO: This scales the signal too loud in many cases, it should not do that
+            test_signal = test_signal.astype(np.float32) / np.abs(test_signal).max()
+            self.context.extra_signal_dry_test = test_signal
+
         return True
