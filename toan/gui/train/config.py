@@ -6,7 +6,7 @@ from PySide6 import QtWidgets
 
 from toan.gui.train.context import TrainingContext
 from toan.model.nam_wavenet_presets import get_wavenet_config
-from toan.model.size_presets import ModelSizePreset
+from toan.model.presets import ModelConfigPreset
 
 
 class TrainConfigPage(QtWidgets.QWizardPage):
@@ -46,9 +46,9 @@ class TrainConfigPage(QtWidgets.QWizardPage):
 
         self.combo_size = QtWidgets.QComboBox(self)
         for allowed_model in [
-            ModelSizePreset.NAM_STANDARD,
-            ModelSizePreset.NAM_LITE,
-            ModelSizePreset.TOAN_STANDARD_PLUS,
+            ModelConfigPreset.NAM_STANDARD,
+            ModelConfigPreset.NAM_LITE,
+            ModelConfigPreset.TOAN_STANDARD_PLUS,
         ]:
             label = allowed_model.get_label()
             self.combo_size.addItem(label, allowed_model.value)
@@ -70,7 +70,7 @@ class TrainConfigPage(QtWidgets.QWizardPage):
         self.context.loaded_metadata.gear_make = self.edit_device_make.text()
         self.context.loaded_metadata.gear_model = self.edit_device_model.text()
         self.context.model_config = get_wavenet_config(
-            ModelSizePreset(self.combo_size.currentData())
+            ModelConfigPreset(self.combo_size.currentData())
         )
         self.context.loaded_metadata.comment = self.edit_comment.text()
         return True

@@ -3,12 +3,12 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
 from toan.model.nam_wavenet_config import NameWaveNetLayerGroupConfig, NamWaveNetConfig
-from toan.model.size_presets import ModelSizePreset
+from toan.model.presets import ModelConfigPreset
 
 
-def get_wavenet_config(size_preset: ModelSizePreset) -> NamWaveNetConfig:
+def get_wavenet_config(size_preset: ModelConfigPreset) -> NamWaveNetConfig:
     match size_preset:
-        case ModelSizePreset.NAM_STANDARD:
+        case ModelConfigPreset.NAM_STANDARD:
             return NamWaveNetConfig(
                 layers=[
                     NameWaveNetLayerGroupConfig(
@@ -57,7 +57,7 @@ def get_wavenet_config(size_preset: ModelSizePreset) -> NamWaveNetConfig:
                     ),
                 ]
             )
-        case ModelSizePreset.NAM_LITE:
+        case ModelConfigPreset.NAM_LITE:
             return NamWaveNetConfig(
                 layers=[
                     NameWaveNetLayerGroupConfig(
@@ -106,7 +106,7 @@ def get_wavenet_config(size_preset: ModelSizePreset) -> NamWaveNetConfig:
                     ),
                 ]
             )
-        case ModelSizePreset.TOAN_STANDARD_PLUS:
+        case ModelConfigPreset.TOAN_STANDARD_PLUS:
             return NamWaveNetConfig(
                 layers=[
                     NameWaveNetLayerGroupConfig(
