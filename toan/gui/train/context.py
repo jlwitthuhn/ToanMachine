@@ -26,7 +26,7 @@ class TrainingContext:
     progress_lock: threading.Lock
     progress_iters_done: int = 0
     progress_iters_total: int = 1
-    progress_loss: float = 1.0
+    progress_train_loss: float = 1.0
     model: NamWaveNet | None = None
     training_summary: TrainingSummary | None = None
 

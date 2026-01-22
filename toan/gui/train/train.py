@@ -60,7 +60,7 @@ class TrainTrainPage(QtWidgets.QWizardPage):
         self.progress_bar = QtWidgets.QProgressBar(self)
         layout.addWidget(self.progress_bar)
 
-        self.progress_desc = QtWidgets.QLabel("Loss estimate:", self)
+        self.progress_desc = QtWidgets.QLabel("Training loss:", self)
         layout.addWidget(self.progress_desc)
 
         self.timer_label = QtWidgets.QLabel(
@@ -92,7 +92,7 @@ class TrainTrainPage(QtWidgets.QWizardPage):
             self.progress_bar.setValue(self.context.progress_iters_done)
             self.progress_bar.repaint()
             self.progress_desc.setText(
-                f"Loss estimate: {self.context.progress_loss:.4f}"
+                f"Training loss: {self.context.progress_train_loss:.4f}"
             )
             if self.context.model is not None:
                 self.refresh_timer.stop()
@@ -150,10 +150,10 @@ def _run_training(context: TrainingContext, config: _TrainingConfig):
     with context.progress_lock:
         context.progress_iters_done = 0
         context.progress_iters_total = config.num_steps
-        context.progress_loss = 1.0
+        context.progress_train_loss = 1.0
 
-    loss_buffer = mx.ones(16)
-    loss_buffer_sz = len(loss_buffer)
+    train_loss_buffer = mx.ones(16)
+    train_loss_buffer_sz = len(train_loss_buffer)
 
     for i in range(config.num_steps):
         if context.quit_training:
@@ -162,7 +162,7 @@ def _run_training(context: TrainingContext, config: _TrainingConfig):
         batch_in, batch_out = data_loader.make_batch(config.batch_size)
         loss, grads = loss_and_grad_fn(model, batch_in, batch_out)
         optimizer.update(model, grads)
-        loss_buffer[i % loss_buffer_sz] = loss
+        train_loss_buffer[i % train_loss_buffer_sz] = loss
         mx.eval(model.parameters())
 
         summary.losses.append(loss.item())
@@ -170,7 +170,7 @@ def _run_training(context: TrainingContext, config: _TrainingConfig):
         with context.progress_lock:
             context.progress_iters_done = i
             if i > 0 and i % 5 == 0:
-                context.progress_loss = loss_buffer.mean().item()
+                context.progress_train_loss = train_loss_buffer.mean().item()
 
     context.model = model
     context.training_summary = summary
