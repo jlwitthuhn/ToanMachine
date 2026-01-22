@@ -5,7 +5,7 @@
 from PySide6 import QtCore, QtWidgets
 
 from toan.gui.train.config import TrainConfigPage
-from toan.gui.train.context import TrainingContext
+from toan.gui.train.context import TrainingGuiContext
 from toan.gui.train.graph import TrainGraphPage
 from toan.gui.train.input import TrainInputFilePage
 from toan.gui.train.intro import TrainIntroPage
@@ -14,11 +14,11 @@ from toan.gui.train.validate import TrainValidatePage
 
 
 class TrainingWizard(QtWidgets.QWizard):
-    context: TrainingContext
+    context: TrainingGuiContext
 
     def __init__(self, parent):
         super().__init__(parent)
-        self.context = TrainingContext()
+        self.context = TrainingGuiContext()
         self.setAttribute(QtCore.Qt.WidgetAttribute.WA_DeleteOnClose)
 
         self.addPage(TrainIntroPage(self))

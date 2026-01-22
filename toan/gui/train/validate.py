@@ -11,7 +11,7 @@ import numpy as np
 from PySide6 import QtCore, QtGui, QtWidgets
 from scipy.io import wavfile
 
-from toan.gui.train import TrainingContext
+from toan.gui.train import TrainingGuiContext
 from toan.model.metadata import ModelMetadata
 
 
@@ -30,13 +30,13 @@ class _ValidateThreadContext:
 
 
 class TrainValidatePage(QtWidgets.QWizardPage):
-    context: TrainingContext
+    context: TrainingGuiContext
     thread_context: _ValidateThreadContext | None = None
     timer_refresh: QtCore.QTimer
 
     text_edit: QtWidgets.QTextEdit
 
-    def __init__(self, parent, context: TrainingContext):
+    def __init__(self, parent, context: TrainingGuiContext):
         super().__init__(parent)
         self.context = context
         self.timer_refresh = QtCore.QTimer(self)

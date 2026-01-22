@@ -4,13 +4,13 @@
 
 from PySide6 import QtWidgets
 
-from toan.gui.train.context import TrainingContext
+from toan.gui.train.context import TrainingGuiContext
 from toan.model.nam_wavenet_presets import get_wavenet_config
 from toan.model.presets import ModelConfigPreset
 
 
 class TrainConfigPage(QtWidgets.QWizardPage):
-    context: TrainingContext
+    context: TrainingGuiContext
 
     edit_model_name: QtWidgets.QLineEdit
     edit_device_make: QtWidgets.QLineEdit
@@ -19,7 +19,7 @@ class TrainConfigPage(QtWidgets.QWizardPage):
     combo_size: QtWidgets.QComboBox
     edit_comment: QtWidgets.QLineEdit
 
-    def __init__(self, parent, context: TrainingContext):
+    def __init__(self, parent, context: TrainingGuiContext):
         super().__init__(parent)
         self.context = context
 

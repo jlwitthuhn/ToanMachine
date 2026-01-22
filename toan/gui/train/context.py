@@ -12,7 +12,7 @@ from toan.model.nam_wavenet_config import NamWaveNetConfig
 from toan.training import TrainingSummary
 
 
-class TrainingContext:
+class TrainingGuiContext:
     input_path: str
     loaded_metadata: ModelMetadata | None = None
     sample_rate: int = 0

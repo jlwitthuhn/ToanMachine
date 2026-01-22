@@ -11,7 +11,7 @@ import mlx.optimizers as optimizers
 from PySide6 import QtCore, QtWidgets
 
 from toan.formatting import format_seconds_as_mmss
-from toan.gui.train import TrainingContext
+from toan.gui.train import TrainingGuiContext
 from toan.model.nam_wavenet import NamWaveNet
 from toan.training import LossFunction, TrainingSummary
 from toan.training.config import TrainingConfig
@@ -23,7 +23,7 @@ TRAIN_TEXT = [
 
 
 class TrainTrainPage(QtWidgets.QWizardPage):
-    context: TrainingContext
+    context: TrainingGuiContext
     refresh_timer: QtCore.QTimer
 
     progress_bar: QtWidgets.QProgressBar
@@ -32,7 +32,7 @@ class TrainTrainPage(QtWidgets.QWizardPage):
     timestamp_begin: datetime.datetime | None = None
     timer_label: QtWidgets.QLabel
 
-    def __init__(self, parent, context: TrainingContext):
+    def __init__(self, parent, context: TrainingGuiContext):
         super().__init__(parent)
         self.context = context
         self.context.progress_lock = threading.Lock()
@@ -105,7 +105,7 @@ class TrainTrainPage(QtWidgets.QWizardPage):
             self.timer_label.setText(f"Time spent: {formatted_time}")
 
 
-def _run_training(context: TrainingContext, config: TrainingConfig):
+def _run_training(context: TrainingGuiContext, config: TrainingConfig):
     mx.random.seed(0o35)
     model = NamWaveNet(
         context.model_config, context.loaded_metadata, context.sample_rate

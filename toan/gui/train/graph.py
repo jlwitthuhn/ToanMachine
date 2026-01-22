@@ -5,16 +5,16 @@
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg
 from PySide6 import QtWidgets
 
-from toan.gui.train import TrainingContext
+from toan.gui.train import TrainingGuiContext
 
 
 class TrainGraphPage(QtWidgets.QWizardPage):
-    context: TrainingContext
+    context: TrainingGuiContext
 
     graph: FigureCanvasQTAgg
     save_button: QtWidgets.QPushButton
 
-    def __init__(self, parent, context: TrainingContext):
+    def __init__(self, parent, context: TrainingGuiContext):
         super().__init__(parent)
         self.context = context
 

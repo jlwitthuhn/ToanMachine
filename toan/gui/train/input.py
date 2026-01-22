@@ -6,14 +6,14 @@ from pathlib import Path
 
 from PySide6 import QtWidgets
 
-from toan.gui.train import TrainingContext
+from toan.gui.train import TrainingGuiContext
 
 
 class TrainInputFilePage(QtWidgets.QWizardPage):
-    context: TrainingContext
+    context: TrainingGuiContext
     file_edit: QtWidgets.QLineEdit
 
-    def __init__(self, parent, context: TrainingContext):
+    def __init__(self, parent, context: TrainingGuiContext):
         super().__init__(parent)
         self.context = context
 
