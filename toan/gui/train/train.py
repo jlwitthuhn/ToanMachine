@@ -27,7 +27,8 @@ class TrainTrainPage(QtWidgets.QWizardPage):
     refresh_timer: QtCore.QTimer
 
     progress_bar: QtWidgets.QProgressBar
-    progress_desc: QtWidgets.QLabel
+    progress_desc_test: QtWidgets.QLabel
+    progress_desc_train: QtWidgets.QLabel
 
     timestamp_begin: datetime.datetime | None = None
     timer_label: QtWidgets.QLabel
@@ -55,19 +56,19 @@ class TrainTrainPage(QtWidgets.QWizardPage):
         hline.setFrameShadow(QtWidgets.QFrame.Shadow.Sunken)
         layout.addWidget(hline)
 
-        label_progress = QtWidgets.QLabel("Progress:", self)
-        layout.addWidget(label_progress)
-
-        self.progress_bar = QtWidgets.QProgressBar(self)
-        layout.addWidget(self.progress_bar)
-
-        self.progress_desc = QtWidgets.QLabel("Training loss:", self)
-        layout.addWidget(self.progress_desc)
-
         self.timer_label = QtWidgets.QLabel(
             f"Time spent: {format_seconds_as_mmss(0)}", self
         )
         layout.addWidget(self.timer_label)
+
+        self.progress_bar = QtWidgets.QProgressBar(self)
+        layout.addWidget(self.progress_bar)
+
+        self.progress_desc_test = QtWidgets.QLabel(f"Test loss: ?")
+        layout.addWidget(self.progress_desc_test)
+
+        self.progress_desc_train = QtWidgets.QLabel("Training loss:", self)
+        layout.addWidget(self.progress_desc_train)
 
     def initializePage(self):
         def thread_func():
@@ -92,9 +93,17 @@ class TrainTrainPage(QtWidgets.QWizardPage):
             self.progress_bar.setMaximum(self.context.progress_context.iters_total)
             self.progress_bar.setValue(self.context.progress_context.iters_done)
             self.progress_bar.repaint()
-            self.progress_desc.setText(
+            self.progress_desc_train.setText(
                 f"Training loss: {self.context.progress_context.loss_train:.4f}"
             )
+            if (
+                self.context.progress_context.summary is not None
+                and self.context.progress_context.summary.losses_test is not None
+                and len(self.context.progress_context.summary.losses_test) > 0
+            ):
+                self.progress_desc_test.setText(
+                    f"Test loss: {self.context.progress_context.summary.losses_test[-1]:.4f}"
+                )
             if self.context.progress_context.model is not None:
                 self.refresh_timer.stop()
                 self.completeChanged.emit()
@@ -114,6 +123,7 @@ def _run_training(context: TrainingGuiContext, config: TrainingConfig):
     mx.eval(model.parameters())
 
     summary = TrainingSummary()
+    context.progress_context.summary = summary
 
     normal_steps = config.num_steps - config.warmup_steps
     decay_lr = optimizers.cosine_decay(
@@ -177,14 +187,13 @@ def _run_training(context: TrainingGuiContext, config: TrainingConfig):
             context.progress_context.iters_done = i
             context.progress_context.loss_train = train_loss_buffer.mean().item()
 
-        TEST_INTERVAL = 25
+            TEST_INTERVAL = 25
 
-        if context.signal_dry_test is not None:
-            if i % TEST_INTERVAL == TEST_INTERVAL - 1:
-                model.train(False)
-                test_in, test_out = get_test_data()
-                loss = model.loss_rmse(test_in, test_out).item()
-                summary.losses_test.append(loss)
+            if context.signal_dry_test is not None:
+                if i % TEST_INTERVAL == TEST_INTERVAL - 1:
+                    model.train(False)
+                    test_in, test_out = get_test_data()
+                    loss = model.loss_rmse(test_in, test_out).item()
+                    summary.losses_test.append(loss)
 
     context.progress_context.model = model
-    context.progress_context.summary = summary
