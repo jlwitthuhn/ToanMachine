@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
 import os
+import warnings
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -39,7 +40,8 @@ def get_user_wav_list() -> list[UserWavDesc]:
     wav_dir = Path(get_user_wav_dir())
     for file in wav_dir.glob("*.wav"):
         path = wav_dir / file.name
-        sample_rate, wav_data = wavfile.read(path)
+        with warnings.catch_warnings():
+            sample_rate, wav_data = wavfile.read(path)
         duration = len(wav_data) / sample_rate
         result.append(UserWavDesc(str(path), file.name, sample_rate, duration))
     return result

@@ -2,6 +2,8 @@
 # https://www.gnu.org/licenses/gpl-3.0.en.html
 # SPDX-License-Identifier: GPL-3.0-only
 
+import warnings
+
 import numpy as np
 from PySide6 import QtWidgets
 from scipy.io import wavfile
@@ -45,7 +47,8 @@ class RecordExtraPage(QtWidgets.QWizardPage):
 
     def validatePage(self):
         def load_and_resample_wav(desc: UserWavDesc):
-            this_sample_rate, this_signal = wavfile.read(desc.path)
+            with warnings.catch_warnings():
+                this_sample_rate, this_signal = wavfile.read(desc.path)
             if len(this_signal.shape) == 2:
                 this_signal = this_signal[:, 0]
             if this_sample_rate != self.context.sample_rate:
