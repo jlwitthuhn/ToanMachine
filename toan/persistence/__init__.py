@@ -41,6 +41,7 @@ def get_user_wav_list() -> list[UserWavDesc]:
     for file in wav_dir.glob("*.wav"):
         path = wav_dir / file.name
         with warnings.catch_warnings():
+            warnings.filterwarnings("ignore", category=wavfile.WavFileWarning)
             sample_rate, wav_data = wavfile.read(path)
         duration = len(wav_data) / sample_rate
         result.append(UserWavDesc(str(path), file.name, sample_rate, duration))

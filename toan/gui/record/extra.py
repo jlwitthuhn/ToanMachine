@@ -49,6 +49,7 @@ class RecordExtraPage(QtWidgets.QWizardPage):
     def validatePage(self):
         def load_and_resample_wav(desc: UserWavDesc):
             with warnings.catch_warnings():
+                warnings.filterwarnings("ignore", category=wavfile.WavFileWarning)
                 this_sample_rate, this_signal = wavfile.read(desc.path)
             if len(this_signal.shape) == 2:
                 this_signal = this_signal[:, 0]
