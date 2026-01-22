@@ -257,7 +257,7 @@ def _run_thread(context: _ValidateThreadContext, input_path: str):
                 ]
 
                 test_dry = dry_signal[test_data_offset:]
-                test_wet = wet_signal[test_data_offset:]
+                test_wet = wet_signal[test_data_offset + latency_samples :]
             else:
                 train_dry = dry_signal[dry_sample_rate:]
                 train_wet = wet_signal[wet_sample_rate + latency_samples :]
