@@ -44,6 +44,7 @@ class RecordExtraPage(QtWidgets.QWizardPage):
         model = WavFileModel(self, wav_files, True)
         model._select_all()
         self.table.setModel(model)
+        self.table.resizeColumnsToContents()
 
     def validatePage(self):
         def load_and_resample_wav(desc: UserWavDesc):
