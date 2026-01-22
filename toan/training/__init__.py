@@ -11,19 +11,20 @@ from matplotlib.figure import Figure
 
 @dataclass
 class TrainingSummary:
-    losses: list[float] = field(default_factory=list)
+    losses_train: list[float] = field(default_factory=list)
 
     def generate_loss_graph(self, smooth_factor: int) -> Figure:
         fig, ax = plt.subplots()
         ax.set_title("Training Loss")
 
-        np_losses = np.array(self.losses)
-        smooth_losses = np.convolve(
-            np_losses, np.ones((smooth_factor,)) / smooth_factor, mode="valid"
+        np_losses_train = np.array(self.losses_train)
+        smooth_losses_train = np.convolve(
+            np_losses_train, np.ones((smooth_factor,)) / smooth_factor, mode="valid"
         ).tolist()
-        eval_points = np.arange(len(smooth_losses)) + smooth_factor // 2
+        eval_points_train = np.arange(len(smooth_losses_train)) + smooth_factor // 2
 
-        ax.plot(eval_points, smooth_losses, label="loss")
+        ax.plot(eval_points_train, smooth_losses_train, label="train")
         ax.grid(True)
+        ax.legend()
 
         return fig

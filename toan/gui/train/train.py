@@ -173,7 +173,7 @@ def _run_training(context: TrainingContext, config: _TrainingConfig):
         train_loss_buffer[i % train_loss_buffer_sz] = loss
         mx.eval(model.parameters())
 
-        summary.losses.append(loss.item())
+        summary.losses_train.append(loss.item())
 
         with context.progress_lock:
             context.progress_iters_done = i
