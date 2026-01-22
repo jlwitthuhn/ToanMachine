@@ -17,3 +17,4 @@ class RecordingContext:
     extra_signal_dry_train: np.ndarray | None = None
     signal_dry: np.ndarray | None = None
     signal_recorded: np.ndarray | None = None
+    test_signal_offset: int = 0

@@ -76,11 +76,20 @@ class RecordWetSignalPage(QtWidgets.QWizardPage):
         self.button_record.setEnabled(False)
 
         capture_signal_raw = generate_capture_signal(self.context.sample_rate)
-
-        self.context.signal_dry = concat_signals(
+        capture_signal_train = concat_signals(
             [capture_signal_raw, self.context.extra_signal_dry_train],
             self.context.sample_rate // 2,
         )
+
+        if self.context.extra_signal_dry_test is not None:
+            self.context.test_signal_offset = len(capture_signal_train)
+            self.context.signal_dry = concat_signals(
+                [capture_signal_train, self.context.extra_signal_dry_test],
+                self.context.sample_rate,
+            )
+        else:
+            self.context.test_signal_offset = 0
+            self.context.signal_dry = capture_signal_train
 
         self.signal_out_index = 0
         self.recorded_samples = []

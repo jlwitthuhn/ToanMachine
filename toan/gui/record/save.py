@@ -61,6 +61,7 @@ class RecordSavePage(QtWidgets.QWizardPage):
             "device_make": self.context.device_make,
             "device_model": self.context.device_model,
             "sample_rate": self.context.sample_rate,
+            "test_offset": self.context.test_signal_offset,
             "dry_signal": "dry.wav",
             "wet_signal": "wet.wav",
         }
