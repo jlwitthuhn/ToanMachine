@@ -1,10 +1,12 @@
 # This file is part of Toan Machine and is licensed under the GPLv3
 # https://www.gnu.org/licenses/gpl-3.0.en.html
 # SPDX-License-Identifier: GPL-3.0-only
-
+import os
 import threading
 import time
 from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser
+
+from matplotlib.figure import Figure
 
 from toan.model.nam_wavenet_presets import get_wavenet_config
 from toan.model.presets import ModelConfigPreset
@@ -59,7 +61,12 @@ def main():
                     break
             time.sleep(1.0)
 
-        print("Training complete")
+        print("Training complete, saving model...")
+        model_root_path = f"./output/{name}"
+        graph_path = f"{model_root_path}/graph.png"
+        os.makedirs(model_root_path, exist_ok=True)
+        fig: Figure = train_context.summary.generate_loss_graph(3)
+        fig.savefig(graph_path)
 
     # Copy paste the below bit to do multiple training runs with different configs
 
