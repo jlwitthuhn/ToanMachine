@@ -15,6 +15,7 @@ from toan.gui.train import TrainingGuiContext
 from toan.model.nam_wavenet import NamWaveNet
 from toan.training import LossFunction, TrainingSummary
 from toan.training.config import TrainingConfig
+from toan.training.context import TrainingProgressContext
 from toan.training.loader import TrainingDataLoader
 
 TRAIN_TEXT = [
@@ -71,8 +72,18 @@ class TrainTrainPage(QtWidgets.QWizardPage):
         layout.addWidget(self.progress_desc_train)
 
     def initializePage(self):
+        # Copy all needed data from gui context to thread context before starting
+        self.context.progress_context.model_config = self.context.model_config
+        self.context.progress_context.metadata = self.context.loaded_metadata
+        self.context.progress_context.sample_rate = self.context.sample_rate
+
+        self.context.progress_context.signal_dry_test = self.context.signal_dry_test
+        self.context.progress_context.signal_wet_test = self.context.signal_wet_test
+        self.context.progress_context.signal_dry_train = self.context.signal_dry
+        self.context.progress_context.signal_wet_train = self.context.signal_wet
+
         def thread_func():
-            _run_training(self.context, TrainingConfig())
+            _run_training(self.context.progress_context, TrainingConfig())
 
         self.context.quit_training = False
         self.timestamp_begin = datetime.datetime.now()
@@ -114,16 +125,14 @@ class TrainTrainPage(QtWidgets.QWizardPage):
             self.timer_label.setText(f"Time spent: {formatted_time}")
 
 
-def _run_training(context: TrainingGuiContext, config: TrainingConfig):
+def _run_training(context: TrainingProgressContext, config: TrainingConfig):
     mx.random.seed(0o35)
-    model = NamWaveNet(
-        context.model_config, context.loaded_metadata, context.sample_rate
-    )
+    model = NamWaveNet(context.model_config, context.metadata, context.sample_rate)
     assert model is not None
     mx.eval(model.parameters())
 
     summary = TrainingSummary()
-    context.progress_context.summary = summary
+    context.summary = summary
 
     normal_steps = config.num_steps - config.warmup_steps
     decay_lr = optimizers.cosine_decay(
@@ -140,7 +149,10 @@ def _run_training(context: TrainingGuiContext, config: TrainingConfig):
         learn_rate = decay_lr
 
     data_loader = TrainingDataLoader(
-        context.signal_dry, context.signal_wet, 8192 + 2048, model.receptive_field
+        context.signal_dry_train,
+        context.signal_wet_train,
+        8192 + 2048,
+        model.receptive_field,
     )
 
     def loss_fn(model_in, inputs: mx.array, outputs: mx.array):
@@ -155,11 +167,11 @@ def _run_training(context: TrainingGuiContext, config: TrainingConfig):
         learning_rate=learn_rate, weight_decay=config.weight_decay
     )
 
-    with context.progress_context.lock:
-        context.progress_context.iters_done = 0
-        context.progress_context.iters_total = config.num_steps
-        context.progress_context.loss_train = 1.0
-        context.progress_context.loss_test = 1.0
+    with context.lock:
+        context.iters_done = 0
+        context.iters_total = config.num_steps
+        context.loss_train = 1.0
+        context.loss_test = 1.0
 
     train_loss_buffer = mx.ones(16)
     train_loss_buffer_sz = len(train_loss_buffer)
@@ -172,7 +184,7 @@ def _run_training(context: TrainingGuiContext, config: TrainingConfig):
         return input, output
 
     for i in range(config.num_steps):
-        if context.progress_context.quit:
+        if context.quit:
             return
         model.train(True)
         batch_in, batch_out = data_loader.make_batch(config.batch_size)
@@ -183,9 +195,9 @@ def _run_training(context: TrainingGuiContext, config: TrainingConfig):
 
         summary.losses_train.append(loss.item())
 
-        with context.progress_context.lock:
-            context.progress_context.iters_done = i
-            context.progress_context.loss_train = train_loss_buffer.mean().item()
+        with context.lock:
+            context.iters_done = i
+            context.loss_train = train_loss_buffer.mean().item()
 
             TEST_INTERVAL = 25
 
@@ -196,4 +208,4 @@ def _run_training(context: TrainingGuiContext, config: TrainingConfig):
                     loss = model.loss_rmse(test_in, test_out).item()
                     summary.losses_test.append(loss)
 
-    context.progress_context.model = model
+    context.model = model
