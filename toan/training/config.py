@@ -13,6 +13,7 @@ class TrainingConfig:
     test_interval: int = 25
     warmup_steps: int = 50
     batch_size: int = 64
+    input_sample_width: int = 8192 + 2048
     learn_rate_hi: float = 8.0e-4
     learn_rate_lo: float = 1.5e-4
     weight_decay: float = 7.5e-3

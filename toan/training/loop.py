@@ -39,7 +39,7 @@ def run_training_loop(context: TrainingProgressContext, config: TrainingConfig):
     data_loader = TrainingDataLoader(
         context.signal_dry_train,
         context.signal_wet_train,
-        8192 + 2048,
+        config.input_sample_width,
         model.receptive_field,
     )
 
