@@ -67,6 +67,9 @@ def main():
         os.makedirs(model_root_path, exist_ok=True)
         fig: Figure = train_context.summary.generate_loss_graph(3)
         fig.savefig(graph_path)
+        model_path = f"{model_root_path}/model.nam"
+        with open(model_path, "w") as file:
+            file.write(train_context.model.export_nam_json_str())
 
     # Copy paste the below bit to do multiple training runs with different configs
 
