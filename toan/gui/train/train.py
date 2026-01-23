@@ -131,7 +131,7 @@ def _run_training(context: TrainingProgressContext, config: TrainingConfig):
     assert model is not None
     mx.eval(model.parameters())
 
-    summary = TrainingSummary()
+    summary = TrainingSummary(test_interval=config.test_interval)
     context.summary = summary
 
     normal_steps = config.num_steps - config.warmup_steps
@@ -199,10 +199,8 @@ def _run_training(context: TrainingProgressContext, config: TrainingConfig):
             context.iters_done = i
             context.loss_train = train_loss_buffer.mean().item()
 
-            TEST_INTERVAL = 25
-
             if context.signal_dry_test is not None:
-                if i % TEST_INTERVAL == TEST_INTERVAL - 1:
+                if i % config.test_interval == config.test_interval - 1:
                     model.train(False)
                     test_in, test_out = get_test_data()
                     loss = model.loss_rmse(test_in, test_out).item()

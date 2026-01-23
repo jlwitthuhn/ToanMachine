@@ -10,6 +10,7 @@ from toan.training import LossFunction
 @dataclass
 class TrainingConfig:
     num_steps: int = 600
+    test_interval: int = 25
     warmup_steps: int = 50
     batch_size: int = 64
     learn_rate_hi: float = 8.0e-4
