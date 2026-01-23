@@ -17,8 +17,8 @@ class ZipLoaderContext:
     messages_lock = threading.Lock()
     messages_queue: list[str] = []
 
-    signal_dry: np.ndarray
-    signal_wet: np.ndarray
+    signal_dry: np.ndarray | None = None
+    signal_wet: np.ndarray | None = None
     signal_dry_test: np.ndarray | None = None
     signal_wet_test: np.ndarray | None = None
     metadata: ModelMetadata
