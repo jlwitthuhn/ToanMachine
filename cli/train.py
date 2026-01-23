@@ -2,6 +2,8 @@
 # https://www.gnu.org/licenses/gpl-3.0.en.html
 # SPDX-License-Identifier: GPL-3.0-only
 
+import threading
+import time
 from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser
 
 from toan.model.nam_wavenet_presets import get_wavenet_config
@@ -38,8 +40,21 @@ def main():
     train_context.signal_dry_train = zip_context.signal_dry
     train_context.signal_wet_train = zip_context.signal_wet
 
+    def thread_func():
+        run_training_loop(train_context, TrainingConfig())
+
     print("Data loaded, beginning training...")
-    run_training_loop(train_context, TrainingConfig())
+    last_loss: float = train_context.loss_test
+    threading.Thread(target=thread_func).start()
+
+    while True:
+        with train_context.lock:
+            if train_context.loss_test != last_loss:
+                last_loss = train_context.loss_test
+                print(f"Test loss: {last_loss}")
+            if train_context.model is not None:
+                break
+        time.sleep(1.0)
 
     print("Done")
 

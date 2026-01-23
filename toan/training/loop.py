@@ -93,5 +93,6 @@ def run_training_loop(context: TrainingProgressContext, config: TrainingConfig):
                     test_in, test_out = get_test_data()
                     loss = model.loss_rmse(test_in, test_out).item()
                     summary.losses_test.append(loss)
+                    context.loss_test = loss
 
     context.model = model
