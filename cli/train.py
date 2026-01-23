@@ -27,36 +27,44 @@ def main():
     zip_context = ZipLoaderContext()
     run_zip_loader(zip_context, args.zip_path)
 
-    train_context = TrainingProgressContext()
+    def train_model(name: str, train_config: TrainingConfig):
+        print(f"Beginning training for {name}")
 
-    model_preset = ModelConfigPreset.NAM_STANDARD
-    model_config = get_wavenet_config(model_preset)
-    train_context.model_config = model_config
-    train_context.metadata = zip_context.metadata
-    train_context.sample_rate = zip_context.sample_rate
+        train_context = TrainingProgressContext()
 
-    train_context.signal_dry_test = zip_context.signal_dry_test
-    train_context.signal_wet_test = zip_context.signal_wet_test
-    train_context.signal_dry_train = zip_context.signal_dry
-    train_context.signal_wet_train = zip_context.signal_wet
+        model_preset = ModelConfigPreset.NAM_STANDARD
+        model_config = get_wavenet_config(model_preset)
+        train_context.model_config = model_config
+        train_context.metadata = zip_context.metadata
+        train_context.sample_rate = zip_context.sample_rate
 
-    def thread_func():
-        run_training_loop(train_context, TrainingConfig())
+        train_context.signal_dry_test = zip_context.signal_dry_test[:]
+        train_context.signal_wet_test = zip_context.signal_wet_test[:]
+        train_context.signal_dry_train = zip_context.signal_dry[:]
+        train_context.signal_wet_train = zip_context.signal_wet[:]
 
-    print("Data loaded, beginning training...")
-    last_loss: float = train_context.loss_test
-    threading.Thread(target=thread_func).start()
+        def thread_func():
+            run_training_loop(train_context, train_config)
 
-    while True:
-        with train_context.lock:
-            if train_context.loss_test != last_loss:
-                last_loss = train_context.loss_test
-                print(f"Test loss: {last_loss}")
-            if train_context.model is not None:
-                break
-        time.sleep(1.0)
+        print("Data loaded, beginning training...")
+        last_loss: float = train_context.loss_test
+        threading.Thread(target=thread_func).start()
 
-    print("Done")
+        while True:
+            with train_context.lock:
+                if train_context.loss_test != last_loss:
+                    last_loss = train_context.loss_test
+                    print(f"Test loss: {last_loss}")
+                if train_context.model is not None:
+                    break
+            time.sleep(1.0)
+
+        print("Training complete")
+
+    # Copy paste the below bit to do multiple training runs with different configs
+
+    train_config = TrainingConfig()
+    train_model("default", train_config)
 
 
 if __name__ == "__main__":
