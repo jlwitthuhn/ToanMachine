@@ -96,4 +96,5 @@ def run_training_loop(context: TrainingProgressContext, config: TrainingConfig):
                     context.loss_test = loss
 
     context.metadata.loss_test_rmse = measure_test_loss(LossFunction.RMSE)
+    context.metadata.loss_test_esr = measure_test_loss(LossFunction.ESR)
     context.model = model
