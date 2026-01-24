@@ -9,6 +9,7 @@ from mlx import nn, utils
 
 from toan.model.metadata import ModelMetadata
 from toan.model.nam_wavenet_config import NameWaveNetLayerGroupConfig, NamWaveNetConfig
+from toan.training import LossFunction
 
 # Based on code from Neural Amp Modeler
 # https://github.com/sdatkinson/neural-amp-modeler/blob/e054002e48cd102b0993811d69e8172db4a91597/nam/models/wavenet.py
@@ -199,6 +200,15 @@ class NamWaveNet(nn.Module):
     config: NamWaveNetConfig
     metadata: ModelMetadata
     sample_rate: int = 0
+
+    def loss(self, inputs: mx.array, targets: mx.array, func: LossFunction) -> mx.array:
+        match func:
+            case LossFunction.RMSE:
+                return self.loss_rmse(inputs, targets)
+            case LossFunction.ESR:
+                return self.loss_esr(inputs, targets)
+            case _:
+                assert False
 
     def loss_esr(self, inputs: mx.array, targets: mx.array) -> mx.array:
         outputs = self(inputs)

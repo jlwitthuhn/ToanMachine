@@ -43,12 +43,9 @@ def run_training_loop(context: TrainingProgressContext, config: TrainingConfig):
         model.receptive_field,
     )
 
+    # Make a loss function in the shape that MLX expects
     def loss_fn(model_in, inputs: mx.array, outputs: mx.array):
-        if config.loss_fn == LossFunction.RMSE:
-            return NamWaveNet.loss_rmse(model_in, inputs, outputs)
-        elif config.loss_fn == LossFunction.ESR:
-            return NamWaveNet.loss_esr(model_in, inputs, outputs)
-        assert False
+        return model.loss(inputs, outputs, config.loss_fn)
 
     loss_and_grad_fn = nn.value_and_grad(model, loss_fn)
     optimizer = optimizers.AdamW(
