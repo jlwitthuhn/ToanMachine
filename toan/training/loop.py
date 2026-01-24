@@ -71,7 +71,7 @@ def run_training_loop(context: TrainingProgressContext, config: TrainingConfig):
     def measure_test_loss(func: LossFunction) -> float:
         model.train(False)
         test_in, test_out = get_test_data()
-        loss = model.loss(test_in, test_out, func).item()
+        return model.loss(test_in, test_out, func).item()
 
     for i in range(config.num_steps):
         if context.quit:
