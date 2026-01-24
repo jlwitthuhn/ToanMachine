@@ -11,10 +11,10 @@ from toan.training import LossFunction
 class TrainingConfig:
     num_steps: int = 500
     test_interval: int = 25
-    warmup_steps: int = 50
+    warmup_steps: int = 60
     batch_size: int = 32
     input_sample_width: int = 8192 + 4096
-    learn_rate_hi: float = 7.5e-3
-    learn_rate_lo: float = 5.0e-3
+    learn_rate_hi: float = 5.0e-3
+    learn_rate_lo: float = 3.0e-3
     weight_decay: float = 7.5e-3
     loss_fn: LossFunction = LossFunction.RMSE
