@@ -68,6 +68,11 @@ def run_training_loop(context: TrainingProgressContext, config: TrainingConfig):
         )
         return input, output
 
+    def measure_test_loss(func: LossFunction) -> float:
+        model.train(False)
+        test_in, test_out = get_test_data()
+        loss = model.loss(test_in, test_out, func).item()
+
     for i in range(config.num_steps):
         if context.quit:
             return
@@ -86,11 +91,9 @@ def run_training_loop(context: TrainingProgressContext, config: TrainingConfig):
 
             if context.signal_dry_test is not None:
                 if i % config.test_interval == config.test_interval - 1:
-                    model.train(False)
-                    test_in, test_out = get_test_data()
-                    loss = model.loss_rmse(test_in, test_out).item()
+                    loss = measure_test_loss(config.loss_fn)
                     summary.losses_test.append(loss)
                     context.loss_test = loss
 
-    context.metadata.loss_test_rmse = context.loss_test
+    context.metadata.loss_test_rmse = measure_test_loss(LossFunction.RMSE)
     context.model = model
