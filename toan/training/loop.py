@@ -92,5 +92,5 @@ def run_training_loop(context: TrainingProgressContext, config: TrainingConfig):
                     summary.losses_test.append(loss)
                     context.loss_test = loss
 
-    context.metadata.loss_test = context.loss_test
+    context.metadata.loss_test_rmse = context.loss_test
     context.model = model

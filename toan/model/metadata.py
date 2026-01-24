@@ -13,7 +13,7 @@ class ModelMetadata:
     gear_make: str
     gear_model: str
     comment: str | None = None
-    loss_test: float | None = None
+    loss_test_rmse: float | None = None
 
     def export_dict(self) -> dict:
         result = dataclasses.asdict(self)
