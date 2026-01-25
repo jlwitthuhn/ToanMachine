@@ -73,11 +73,25 @@ def run_training_loop(context: TrainingProgressContext, config: TrainingConfig):
         test_in, test_out = get_test_data()
         return model.loss(test_in, test_out, func).item()
 
+    def get_batch_size(iter: int) -> int:
+        if config.batch_size > 0:
+            return config.batch_size
+        assert len(config.batch_size_list) > 0
+        progress = iter / config.num_steps
+        result = 1
+        for threshold, count in config.batch_size_list:
+            if progress >= threshold:
+                result = count
+            else:
+                break
+        return result
+
     for i in range(config.num_steps):
         if context.quit:
             return
         model.train(True)
-        batch_in, batch_out = data_loader.make_batch(config.batch_size)
+        this_batch_size = get_batch_size(i)
+        batch_in, batch_out = data_loader.make_batch(this_batch_size)
         loss, grads = loss_and_grad_fn(model, batch_in, batch_out)
         optimizer.update(model, grads)
         train_loss_buffer[i % train_loss_buffer_sz] = loss
