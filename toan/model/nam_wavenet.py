@@ -203,6 +203,8 @@ class NamWaveNet(nn.Module):
 
     def loss(self, inputs: mx.array, targets: mx.array, func: LossFunction) -> mx.array:
         match func:
+            case LossFunction.MSE:
+                return self.loss_mse(inputs, targets)
             case LossFunction.RMSE:
                 return self.loss_rmse(inputs, targets)
             case LossFunction.ESR:
@@ -220,12 +222,14 @@ class NamWaveNet(nn.Module):
         loss_per_batch_item = delta2_mean / (target2_mean + eps)
         return loss_per_batch_item.mean()
 
-    def loss_rmse(self, inputs: mx.array, targets: mx.array) -> mx.array:
+    def loss_mse(self, inputs: mx.array, targets: mx.array) -> mx.array:
         outputs = self(inputs)
         delta = targets - outputs
         delta2 = delta**2
-        ms = delta2.mean()
-        return mx.sqrt(ms)
+        return delta2.mean()
+
+    def loss_rmse(self, inputs: mx.array, targets: mx.array) -> mx.array:
+        return mx.sqrt(self.loss_mse(inputs, targets))
 
     def __init__(
         self, config: NamWaveNetConfig, metadata: ModelMetadata, sample_rate: int
