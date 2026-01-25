@@ -217,7 +217,8 @@ class NamWaveNet(nn.Module):
         target2 = targets**2
         delta2_mean = delta2.mean(axis=-1)
         target2_mean = target2.mean(axis=-1)
-        return delta2_mean / (target2_mean + eps)
+        loss_per_batch_item = delta2_mean / (target2_mean + eps)
+        return loss_per_batch_item.mean()
 
     def loss_rmse(self, inputs: mx.array, targets: mx.array) -> mx.array:
         outputs = self(inputs)
