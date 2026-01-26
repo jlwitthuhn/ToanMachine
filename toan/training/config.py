@@ -13,8 +13,16 @@ class TrainingConfig:
     test_interval: int = 25
     warmup_steps: int = 60
     # If batch_size is 0, batch_size_list will be used
-    batch_size: int = 32
-    batch_size_list: list[tuple[float, int]] = field(default_factory=list)
+    batch_size: int = 0
+    batch_size_list: list[tuple[float, int]] = field(
+        default_factory=lambda: [
+            (0.0, 24),
+            (0.1, 32),
+            (0.8, 40),
+            (0.9, 48),
+            (0.98, 64),
+        ]
+    )
     input_sample_width: int = 8192 + 4096
     learn_rate_hi: float = 5.0e-3
     learn_rate_lo: float = 3.0e-3
