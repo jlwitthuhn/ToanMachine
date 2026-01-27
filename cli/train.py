@@ -1,12 +1,14 @@
 # This file is part of Toan Machine and is licensed under the GPLv3
 # https://www.gnu.org/licenses/gpl-3.0.en.html
 # SPDX-License-Identifier: GPL-3.0-only
+
 import os
 import threading
 import time
 from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser
 
 from matplotlib.figure import Figure
+from tqdm import tqdm
 
 from toan.model.nam_wavenet_presets import get_wavenet_config
 from toan.model.presets import ModelConfigPreset
@@ -49,17 +51,21 @@ def main():
             run_training_loop(train_context, train_config)
 
         print("Data loaded, beginning training...")
-        last_loss: float = train_context.loss_test
         threading.Thread(target=thread_func).start()
 
-        while True:
-            with train_context.lock:
-                if train_context.loss_test != last_loss:
-                    last_loss = train_context.loss_test
-                    print(f"Test loss: {last_loss}")
-                if train_context.model is not None:
-                    break
-            time.sleep(1.0)
+        with tqdm(total=train_config.num_steps) as progress_bar:
+            last_loss: float = train_context.loss_test
+            while True:
+                with train_context.lock:
+                    if train_context.loss_test != last_loss:
+                        last_loss = train_context.loss_test
+                        progress_bar.set_description(
+                            f"Test: {train_context.loss_test:0.5f}"
+                        )
+                    if train_context.model is not None:
+                        break
+                    progress_bar.update(train_context.iters_done - progress_bar.n)
+                time.sleep(1.0)
 
         print("Training complete, saving model...")
         model_root_path = f"./output/{name}"
