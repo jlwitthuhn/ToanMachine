@@ -86,6 +86,8 @@ def generate_warble_chord(
                 sample_rate, modulation, frequency, phase
             )
             note_signals.append(note_signal)
+        if len(note_signals) == 0:
+            continue
         this_octave = np.add.reduce(note_signals)
         this_octave = this_octave / np.abs(this_octave).max()
         this_octave_scale = octave_scale**octave_index

@@ -54,7 +54,7 @@ def generate_capture_signal(sample_rate: int) -> np.ndarray:
 
     def generate_warble_signal(shape: ChordType):
         return generate_warble_chord(
-            sample_rate, SWEEP_DURATION / 2, 55.0, shape, 8, 0.68
+            sample_rate, SWEEP_DURATION / 2, 55.0, shape, 10, 0.68
         )
 
     warble_octave = generate_warble_signal(ChordType.Octave)
@@ -62,6 +62,12 @@ def generate_capture_signal(sample_rate: int) -> np.ndarray:
         len(warble_octave), len(warble_octave) // 3
     )
     warble_octave *= warble_modulation
+
+    warble_perfect_fifth = generate_warble_signal(ChordType.PerfectFifth)
+    warble_perfect_fifth *= warble_modulation
+
+    warble_diminished = generate_warble_signal(ChordType.Diminished)
+    warble_diminished *= warble_modulation
 
     warble_major = generate_warble_signal(ChordType.Major)
     warble_major *= warble_modulation
@@ -126,6 +132,8 @@ def generate_capture_signal(sample_rate: int) -> np.ndarray:
             sweep_down_cos,
             sweep_down_sin,
             warble_octave,
+            warble_perfect_fifth,
+            warble_diminished,
             warble_major,
             warble_minor_seventh,
             warble_guitar,

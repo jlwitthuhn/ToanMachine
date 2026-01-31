@@ -2,26 +2,27 @@
 # https://www.gnu.org/licenses/gpl-3.0.en.html
 # SPDX-License-Identifier: GPL-3.0-only
 
-from enum import Enum
+import enum
 
 
-class ChordType(Enum):
+class ChordType(enum.Enum):
     # Not actually a chord
-    RootOnly = 0
+    RootOnly = enum.auto()
     # 2 notes
-    Octave = 1
-    Tritone = 2
+    Octave = enum.auto()
+    PerfectFifth = enum.auto()
+    Tritone = enum.auto()
     # 3 notes
-    Major = 3
-    Minor = 4
-    Diminished = 5
+    Major = enum.auto()
+    Minor = enum.auto()
+    Diminished = enum.auto()
     # 4 notes
-    MajorSeventh = 6
-    MinorSeventh = 7
+    MajorSeventh = enum.auto()
+    MinorSeventh = enum.auto()
     # 5 notes
-    MinorNinth = 8
+    MinorNinth = enum.auto()
     # 6 notes
-    GuitarStrings = 9
+    GuitarStrings = enum.auto()
 
     def get_shape(self) -> list[int]:
         match self:
@@ -29,6 +30,8 @@ class ChordType(Enum):
                 return []
             case ChordType.Octave:
                 return [12]
+            case ChordType.PerfectFifth:
+                return [7]
             case ChordType.Tritone:
                 return [6]
             case ChordType.Major:
