@@ -52,23 +52,25 @@ def generate_capture_signal(sample_rate: int) -> np.ndarray:
     sweep_down_cos = sweep_down * cosine_multiplier
     sweep_down_sin = sweep_down * sine_multiplier
 
-    warble_major = generate_warble_chord(
-        sample_rate, SWEEP_DURATION / 2, 55.0, ChordType.Major, 8, 0.68
-    )
+    def generate_warble_signal(shape: ChordType):
+        return generate_warble_chord(
+            sample_rate, SWEEP_DURATION / 2, 55.0, shape, 8, 0.68
+        )
+
+    warble_octave = generate_warble_signal(ChordType.Octave)
     warble_modulation = generate_gaussian_pulse(
-        len(warble_major), len(warble_major) // 3
+        len(warble_octave), len(warble_octave) // 3
     )
-    warble_major_mod = warble_major * warble_modulation
+    warble_octave *= warble_modulation
 
-    warble_minor_seventh = generate_warble_chord(
-        sample_rate, SWEEP_DURATION / 2, 56.0, ChordType.MinorSeventh, 8, 0.68
-    )
-    warble_minor_seventh_mod = warble_minor_seventh * warble_modulation
+    warble_major = generate_warble_signal(ChordType.Major)
+    warble_major *= warble_modulation
 
-    warble_guitar = generate_warble_chord(
-        sample_rate, SWEEP_DURATION / 2, 56.0, ChordType.GuitarStrings, 8, 0.68
-    )
-    warble_guitar_mod = warble_guitar * warble_modulation
+    warble_minor_seventh = generate_warble_signal(ChordType.MinorSeventh)
+    warble_minor_seventh *= warble_modulation
+
+    warble_guitar = generate_warble_signal(ChordType.GuitarStrings)
+    warble_guitar *= warble_modulation
 
     def generate_plucked_scale(shape: ChordType, offset_duration: float):
         return generate_named_chord_pluck_scale(
@@ -123,9 +125,10 @@ def generate_capture_signal(sample_rate: int) -> np.ndarray:
             sweep_up,
             sweep_down_cos,
             sweep_down_sin,
-            warble_major_mod,
-            warble_minor_seventh_mod,
-            warble_guitar_mod,
+            warble_octave,
+            warble_major,
+            warble_minor_seventh,
+            warble_guitar,
             scale_root,
             scale_tritone_chord,
             scale_major_chord,
