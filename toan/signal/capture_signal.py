@@ -13,7 +13,7 @@ from toan.signal.pluck_scale import generate_named_chord_pluck_scale
 from toan.signal.trig import generate_cosine_wave, generate_sine_wave
 from toan.signal.warble import generate_warble_chord
 
-SWEEP_DURATION = 10.0
+SWEEP_DURATION = 12.0
 NOISE_SHORT_DURATION = 1.25
 NOISE_LONG_DURATION = 3.0
 NOTE_DURATION = 0.70
@@ -55,12 +55,15 @@ def generate_capture_signal(sample_rate: int) -> np.ndarray:
     warble_major = generate_warble_chord(
         sample_rate, SWEEP_DURATION / 2, 55.0, ChordType.Major, 8, 0.68
     )
-    warble_major_cos = warble_major * cosine_multiplier
+    warble_modulation = generate_gaussian_pulse(
+        len(warble_major), len(warble_major) // 3
+    )
+    warble_major_mod = warble_major * warble_modulation
 
     warble_minor_seventh = generate_warble_chord(
         sample_rate, SWEEP_DURATION / 2, 56.0, ChordType.MinorSeventh, 8, 0.68
     )
-    warble_minor_seventh_sin = warble_minor_seventh * sine_multiplier
+    warble_minor_seventh_mod = warble_minor_seventh * warble_modulation
 
     def generate_plucked_scale(shape: ChordType, offset_duration: float):
         return generate_named_chord_pluck_scale(
@@ -115,10 +118,8 @@ def generate_capture_signal(sample_rate: int) -> np.ndarray:
             sweep_up,
             sweep_down_cos,
             sweep_down_sin,
-            warble_major,
-            warble_major_cos,
-            warble_minor_seventh,
-            warble_minor_seventh_sin,
+            warble_major_mod,
+            warble_minor_seventh_mod,
             scale_root,
             scale_tritone_chord,
             scale_major_chord,
