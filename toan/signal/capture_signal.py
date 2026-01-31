@@ -14,8 +14,8 @@ from toan.signal.trig import generate_cosine_wave, generate_sine_wave
 from toan.signal.warble import generate_warble_chord
 
 SWEEP_DURATION = 12.0
-NOISE_SHORT_DURATION = 1.25
-NOISE_LONG_DURATION = 3.0
+NOISE_SHORT_DURATION = 1.5
+NOISE_LONG_DURATION = 3.5
 NOTE_DURATION = 0.70
 PLUCK_DECAY = 0.985
 
@@ -64,6 +64,11 @@ def generate_capture_signal(sample_rate: int) -> np.ndarray:
         sample_rate, SWEEP_DURATION / 2, 56.0, ChordType.MinorSeventh, 8, 0.68
     )
     warble_minor_seventh_mod = warble_minor_seventh * warble_modulation
+
+    warble_guitar = generate_warble_chord(
+        sample_rate, SWEEP_DURATION / 2, 56.0, ChordType.GuitarStrings, 8, 0.68
+    )
+    warble_guitar_mod = warble_guitar * warble_modulation
 
     def generate_plucked_scale(shape: ChordType, offset_duration: float):
         return generate_named_chord_pluck_scale(
@@ -120,6 +125,7 @@ def generate_capture_signal(sample_rate: int) -> np.ndarray:
             sweep_down_sin,
             warble_major_mod,
             warble_minor_seventh_mod,
+            warble_guitar_mod,
             scale_root,
             scale_tritone_chord,
             scale_major_chord,
