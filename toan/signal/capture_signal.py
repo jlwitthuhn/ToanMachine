@@ -16,8 +16,8 @@ from toan.signal.warble import generate_warble_chord
 SWEEP_DURATION = 10.0
 NOISE_SHORT_DURATION = 1.25
 NOISE_LONG_DURATION = 3.0
-NOTE_DURATION = 0.74
-PLUCK_DECAY = 0.986
+NOTE_DURATION = 0.70
+PLUCK_DECAY = 0.985
 
 
 def generate_capture_signal(sample_rate: int) -> np.ndarray:
@@ -42,20 +42,23 @@ def generate_capture_signal(sample_rate: int) -> np.ndarray:
 
     # Sweep of audible frequencies
     sweep_up = generate_chirp(sample_rate, 18.0, 21000.0, SWEEP_DURATION)
+    sweep_down = generate_chirp(sample_rate, 21000.0, 18.0, SWEEP_DURATION / 2)
 
-    cosine_multiplier = generate_cosine_wave(len(sweep_up), sample_rate // 4, 0.08, 1.0)
-    sine_multiplier = generate_sine_wave(len(sweep_up), sample_rate // 4, 0.08, 1.0)
+    cosine_multiplier = generate_cosine_wave(
+        len(sweep_down), sample_rate // 5, 0.08, 1.0
+    )
+    sine_multiplier = generate_sine_wave(len(sweep_down), sample_rate // 5, 0.08, 1.0)
 
-    sweep_up_cos = sweep_up * cosine_multiplier
-    sweep_up_sin = sweep_up * sine_multiplier
+    sweep_down_cos = sweep_down * cosine_multiplier
+    sweep_down_sin = sweep_down * sine_multiplier
 
     warble_major = generate_warble_chord(
-        sample_rate, SWEEP_DURATION, 55.0, ChordType.Major, 8, 0.68
+        sample_rate, SWEEP_DURATION / 2, 55.0, ChordType.Major, 8, 0.68
     )
     warble_major_cos = warble_major * cosine_multiplier
 
     warble_minor_seventh = generate_warble_chord(
-        sample_rate, SWEEP_DURATION, 56.0, ChordType.MinorSeventh, 8, 0.68
+        sample_rate, SWEEP_DURATION / 2, 56.0, ChordType.MinorSeventh, 8, 0.68
     )
     warble_minor_seventh_sin = warble_minor_seventh * sine_multiplier
 
@@ -110,8 +113,8 @@ def generate_capture_signal(sample_rate: int) -> np.ndarray:
             impulse6,
             impulse7,
             sweep_up,
-            sweep_up_cos,
-            sweep_up_sin,
+            sweep_down_cos,
+            sweep_down_sin,
             warble_major,
             warble_major_cos,
             warble_minor_seventh,

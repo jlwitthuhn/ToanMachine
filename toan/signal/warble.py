@@ -9,10 +9,10 @@ from toan.music.chord import ChordType
 from toan.music.frequency import increase_frequency_by_semitones
 from toan.signal.trig import generate_sine_wave
 
-BIG_CYCLES_PER_SECOND = 1.5
+BIG_CYCLES_PER_SECOND = 3.0
 
-PHASE_CYCLES_PER_SECOND = 4
-MAXIMUM_PHASE_OFFSET = math.pi / 4.0
+PHASE_CYCLES_PER_SECOND = 4.0
+MAXIMUM_PHASE_OFFSET = math.pi / 2.0
 
 
 def _generate_signal_from_frequencies(
