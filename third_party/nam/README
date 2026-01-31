@@ -1,3 +1,3 @@
-The original NAM python code is the basis for the model architecture and training algorithm used by this program. This code originally targeted pytorch and has been ported to work with MLX.
+The original NAM python code is the basis for the model architecture and some activation functions. This code originally targeted pytorch and has been ported to work with MLX.
 
 https://github.com/sdatkinson/neural-amp-modeler/

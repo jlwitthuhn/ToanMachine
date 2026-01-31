@@ -3,10 +3,12 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
 import json
+import warnings
 
 import mlx.core as mx
 from mlx import nn, utils
 
+from toan.model.activation import FastTanh, LeakyHardTanh
 from toan.model.metadata import ModelMetadata
 from toan.model.nam_wavenet_config import NameWaveNetLayerGroupConfig, NamWaveNetConfig
 from toan.training import LossFunction
@@ -16,8 +18,32 @@ from toan.training import LossFunction
 
 
 def _get_activation(activation: str) -> nn.Module:
-    if activation == "Tanh":
-        return nn.Tanh()
+    match activation:
+        case "Fasttanh":
+            return FastTanh()
+        case "Hardswish":
+            return nn.Hardswish()
+        case "Hardtanh":
+            return nn.HardTanh()
+        case "LeakyHardtanh":
+            warnings.warn("Creating leaky hard tanh with default config")
+            return LeakyHardTanh()
+        case "LeakyReLU":
+            warnings.warn("Creating leaky relu with default config")
+            return nn.LeakyReLU()
+        case "PReLU":
+            # This will need to be implemented as a per-channel activation
+            # where each channel has a different init value
+            warnings.warn("Creating prelu with default config")
+            return nn.PReLU()
+        case "ReLU":
+            return nn.ReLU()
+        case "Sigmoid":
+            return nn.Sigmoid()
+        case "SiLU":
+            return nn.SiLU()
+        case "Tanh":
+            return nn.Tanh()
     assert False
 
 
