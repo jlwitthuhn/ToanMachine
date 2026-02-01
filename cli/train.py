@@ -53,7 +53,7 @@ def main():
         print("Data loaded, beginning training...")
         threading.Thread(target=thread_func).start()
 
-        with tqdm(total=train_config.num_steps) as progress_bar:
+        with tqdm(total=train_config.steps_total()) as progress_bar:
             last_loss: float = train_context.loss_test
             while True:
                 with train_context.lock:

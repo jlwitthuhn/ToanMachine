@@ -22,16 +22,15 @@ def run_training_loop(context: TrainingProgressContext, config: TrainingConfig):
     summary = TrainingSummary(test_interval=config.test_interval)
     context.summary = summary
 
-    normal_steps = config.num_steps - config.warmup_steps
     decay_lr = optimizers.cosine_decay(
-        config.learn_rate_hi, normal_steps, config.learn_rate_lo
+        config.learn_rate_hi, config.steps_main, config.learn_rate_lo
     )
-    if config.warmup_steps > 0:
+    if config.steps_warmup > 0:
         warmup_lr = optimizers.linear_schedule(
-            config.learn_rate_hi / 100.0, config.learn_rate_hi, config.warmup_steps
+            config.learn_rate_hi / 100.0, config.learn_rate_hi, config.steps_warmup
         )
         learn_rate = optimizers.join_schedules(
-            [warmup_lr, decay_lr], [config.warmup_steps]
+            [warmup_lr, decay_lr], [config.steps_warmup]
         )
     else:
         learn_rate = decay_lr
@@ -54,7 +53,7 @@ def run_training_loop(context: TrainingProgressContext, config: TrainingConfig):
 
     with context.lock:
         context.iters_done = 0
-        context.iters_total = config.num_steps
+        context.iters_total = config.steps_total()
         context.loss_train = 1.0
         context.loss_test = 1.0
 
@@ -77,7 +76,7 @@ def run_training_loop(context: TrainingProgressContext, config: TrainingConfig):
         if config.batch_size > 0:
             return config.batch_size
         assert len(config.batch_size_list) > 0
-        progress = iter / config.num_steps
+        progress = iter / config.steps_total()
         result = 1
         for threshold, count in config.batch_size_list:
             if progress >= threshold:
@@ -86,7 +85,7 @@ def run_training_loop(context: TrainingProgressContext, config: TrainingConfig):
                 break
         return result
 
-    for i in range(config.num_steps):
+    for i in range(config.steps_total()):
         if context.quit:
             return
         model.train(True)

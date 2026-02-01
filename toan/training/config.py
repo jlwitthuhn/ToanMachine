@@ -9,9 +9,9 @@ from toan.training import LossFunction
 
 @dataclass
 class TrainingConfig:
-    num_steps: int = 500
+    steps_warmup: int = 40
+    steps_main: int = 460
     test_interval: int = 25
-    warmup_steps: int = 60
     # If batch_size is 0, batch_size_list will be used
     batch_size: int = 0
     batch_size_list: list[tuple[float, int]] = field(
@@ -28,3 +28,6 @@ class TrainingConfig:
     learn_rate_lo: float = 3.0e-3
     weight_decay: float = 7.5e-3
     loss_fn: LossFunction = LossFunction.RMSE
+
+    def steps_total(self) -> int:
+        return self.steps_warmup + self.steps_main
