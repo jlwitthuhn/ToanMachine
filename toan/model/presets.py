@@ -19,7 +19,7 @@ class ModelConfigPreset(Enum):
             case ModelConfigPreset.NAM_LITE:
                 return "NAM A1 Lite - 6553p"
             case ModelConfigPreset.NAM_FEATHER:
-                return "NAM A1 Feather"
+                return "NAM A1 Feather - 3025p"
             case ModelConfigPreset.NAM_NANO:
                 return "NAM A1 Nano"
             case ModelConfigPreset.TOAN_STANDARD_PLUS:

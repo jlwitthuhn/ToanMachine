@@ -106,6 +106,55 @@ def get_wavenet_config(size_preset: ModelConfigPreset) -> NamWaveNetConfig:
                     ),
                 ]
             )
+        case ModelConfigPreset.NAM_FEATHER:
+            return NamWaveNetConfig(
+                layers=[
+                    NameWaveNetLayerGroupConfig(
+                        input_size=1,
+                        condition_size=1,
+                        head_size=4,
+                        channels=8,
+                        kernel_size=3,
+                        dilations=[
+                            1,
+                            2,
+                            4,
+                            8,
+                            16,
+                            32,
+                            64,
+                        ],
+                        activation="Tanh",
+                        gated=False,
+                        head_bias=False,
+                    ),
+                    NameWaveNetLayerGroupConfig(
+                        input_size=8,
+                        condition_size=1,
+                        head_size=1,
+                        channels=4,
+                        kernel_size=3,
+                        dilations=[
+                            128,
+                            256,
+                            512,
+                            1,
+                            2,
+                            4,
+                            8,
+                            16,
+                            32,
+                            64,
+                            128,
+                            256,
+                            512,
+                        ],
+                        activation="Tanh",
+                        gated=False,
+                        head_bias=True,
+                    ),
+                ]
+            )
         case ModelConfigPreset.TOAN_STANDARD_PLUS:
             return NamWaveNetConfig(
                 layers=[

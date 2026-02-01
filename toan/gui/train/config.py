@@ -48,6 +48,7 @@ class TrainConfigPage(QtWidgets.QWizardPage):
         for allowed_model in [
             ModelConfigPreset.NAM_STANDARD,
             ModelConfigPreset.NAM_LITE,
+            ModelConfigPreset.NAM_FEATHER,
             ModelConfigPreset.TOAN_STANDARD_PLUS,
         ]:
             label = allowed_model.get_label()
