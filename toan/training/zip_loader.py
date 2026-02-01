@@ -217,7 +217,11 @@ def run_zip_loader(context: ZipLoaderContext, input_path: str):
             if test_dry is not None:
                 assert len(test_dry) == len(test_wet)
 
-            print_status(f"Matched samples available: {len(train_dry)}")
+            print_status(f"Training samples available: {len(train_dry)}")
+            if test_dry is not None:
+                print_status(f"Testing samples available: {len(test_dry)}")
+            else:
+                print_status("No testing samples available")
             context.signal_dry = train_dry
             context.signal_wet = train_wet
             context.signal_dry_test = test_dry
