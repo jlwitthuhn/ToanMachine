@@ -19,6 +19,7 @@ SAVE_TEXT = [
 SAVE_README_TEXT = [
     "This zip file was created by Toan Machine to be used for training a neural network.",
     "If you just want to create a capture there isn't much to see here.",
+    "https://github.com/jlwitthuhn/ToanMachine",
 ]
 
 
