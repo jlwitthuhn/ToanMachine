@@ -8,7 +8,7 @@ from toan.training import LossFunction
 
 
 @dataclass
-class TrainingConfig:
+class TrainingStageConfig:
     steps_warmup: int = 40
     steps_main: int = 460
     test_interval: int = 25

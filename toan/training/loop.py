@@ -8,12 +8,12 @@ from mlx import optimizers as optimizers
 
 from toan.model.nam_wavenet import NamWaveNet
 from toan.training import LossFunction, TrainingSummary
-from toan.training.config import TrainingConfig
+from toan.training.config import TrainingStageConfig
 from toan.training.context import TrainingProgressContext
 from toan.training.data_loader import TrainingDataLoader
 
 
-def run_training_loop(context: TrainingProgressContext, config: TrainingConfig):
+def run_training_loop(context: TrainingProgressContext, config: TrainingStageConfig):
     mx.random.seed(0o35)
     model = NamWaveNet(context.model_config, context.metadata, context.sample_rate)
     assert model is not None

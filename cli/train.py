@@ -12,7 +12,7 @@ from tqdm import tqdm
 
 from toan.model.nam_wavenet_presets import get_wavenet_config
 from toan.model.presets import ModelConfigPreset
-from toan.training.config import TrainingConfig
+from toan.training.config import TrainingStageConfig
 from toan.training.context import TrainingProgressContext
 from toan.training.loop import run_training_loop
 from toan.training.zip_loader import ZipLoaderContext, run_zip_loader
@@ -31,7 +31,7 @@ def main():
     zip_context = ZipLoaderContext()
     run_zip_loader(zip_context, args.zip_path)
 
-    def train_model(name: str, train_config: TrainingConfig):
+    def train_model(name: str, train_config: TrainingStageConfig):
         print(f"Beginning training for {name}")
 
         train_context = TrainingProgressContext()
@@ -79,7 +79,7 @@ def main():
 
     # Copy paste the below bit to do multiple training runs with different configs
 
-    train_config = TrainingConfig()
+    train_config = TrainingStageConfig()
     train_model("default", train_config)
 
 
