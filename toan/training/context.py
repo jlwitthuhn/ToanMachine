@@ -9,7 +9,7 @@ import numpy as np
 from toan.model.metadata import ModelMetadata
 from toan.model.nam_wavenet import NamWaveNet
 from toan.model.nam_wavenet_config import NamWaveNetConfig
-from toan.training import TrainingSummary
+from toan.training import TrainingStageSummary
 
 
 class TrainingProgressContext:
@@ -29,6 +29,6 @@ class TrainingProgressContext:
     loss_test: float = 1.0
 
     model: NamWaveNet | None = None
-    summary: TrainingSummary | None = None
+    summary: TrainingStageSummary | None = None
 
     quit: bool = False

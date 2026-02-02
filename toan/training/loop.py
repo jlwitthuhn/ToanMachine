@@ -9,7 +9,7 @@ from mlx import nn as nn
 from mlx import optimizers as optimizers
 
 from toan.model.nam_wavenet import NamWaveNet
-from toan.training import LossFunction, TrainingSummary
+from toan.training import LossFunction, TrainingStageSummary
 from toan.training.config import TrainingConfig, TrainingStageConfig
 from toan.training.context import TrainingProgressContext
 from toan.training.data_loader import TrainingDataLoader
@@ -72,7 +72,7 @@ def run_training_loop(context: TrainingProgressContext, config: TrainingConfig):
         context.loss_test = 1.0
 
     for stage_config in config.stages:
-        summary = TrainingSummary(test_interval=stage_config.test_interval)
+        summary = TrainingStageSummary(test_interval=stage_config.test_interval)
         context.summary = summary
 
         learn_rate = get_learn_rate(stage_config)

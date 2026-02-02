@@ -18,7 +18,7 @@ class LossFunction(Enum):
 
 
 @dataclass
-class TrainingSummary:
+class TrainingStageSummary:
     losses_train: list[float] = field(default_factory=list)
     losses_test: list[float] = field(default_factory=list)
     test_interval: int = 100
