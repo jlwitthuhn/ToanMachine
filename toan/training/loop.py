@@ -44,7 +44,7 @@ def run_training_loop(context: TrainingProgressContext, config: TrainingConfig):
 
     # Make a loss function in the shape that MLX expects
     def loss_fn(model_in, inputs: mx.array, outputs: mx.array):
-        return model.loss(inputs, outputs, config.loss_fn)
+        return model_in.loss(inputs, outputs, config.loss_fn)
 
     loss_and_grad_fn = nn.value_and_grad(model, loss_fn)
     optimizer = optimizers.AdamW(
