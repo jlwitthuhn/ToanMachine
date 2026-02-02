@@ -8,7 +8,7 @@ from mlx import optimizers as optimizers
 
 from toan.model.nam_wavenet import NamWaveNet
 from toan.training import LossFunction, TrainingSummary
-from toan.training.config import TrainingConfig, TrainingStageConfig
+from toan.training.config import TrainingConfig
 from toan.training.context import TrainingProgressContext
 from toan.training.data_loader import TrainingDataLoader
 
@@ -18,6 +18,18 @@ def run_training_loop(context: TrainingProgressContext, config: TrainingConfig):
     model = NamWaveNet(context.model_config, context.metadata, context.sample_rate)
     assert model is not None
     mx.eval(model.parameters())
+
+    def get_test_data() -> tuple[mx.array, mx.array]:
+        input = mx.array(context.signal_dry_test).reshape((1, -1))
+        output = mx.array(context.signal_wet_test)[model.receptive_field - 1 :].reshape(
+            (1, -1)
+        )
+        return input, output
+
+    def measure_test_loss(func: LossFunction) -> float:
+        model.train(False)
+        test_in, test_out = get_test_data()
+        return model.loss(test_in, test_out, func).item()
 
     for stage_config in config.stages:
         summary = TrainingSummary(test_interval=stage_config.test_interval)
@@ -64,18 +76,6 @@ def run_training_loop(context: TrainingProgressContext, config: TrainingConfig):
 
         train_loss_buffer = mx.ones(16)
         train_loss_buffer_sz = len(train_loss_buffer)
-
-        def get_test_data() -> tuple[mx.array, mx.array]:
-            input = mx.array(context.signal_dry_test).reshape((1, -1))
-            output = mx.array(context.signal_wet_test)[
-                model.receptive_field - 1 :
-            ].reshape((1, -1))
-            return input, output
-
-        def measure_test_loss(func: LossFunction) -> float:
-            model.train(False)
-            test_in, test_out = get_test_data()
-            return model.loss(test_in, test_out, func).item()
 
         def get_batch_size(iter: int) -> int:
             if stage_config.batch_size > 0:
