@@ -31,3 +31,16 @@ class TrainingStageConfig:
 
     def steps_total(self) -> int:
         return self.steps_warmup + self.steps_main
+
+
+@dataclass
+class TrainingConfig:
+    stages: list[TrainingStageConfig] = field(
+        default_factory=lambda: [TrainingStageConfig()]
+    )
+
+    def steps_total(self) -> int:
+        total = 0
+        for stage in self.stages:
+            total += stage.steps_total()
+        return total
