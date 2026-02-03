@@ -26,7 +26,7 @@ class TrainingStageConfig:
     input_sample_width: int = 8192 + 4096
     learn_rate_hi: float = 5.0e-3
     learn_rate_lo: float = 3.0e-3
-    weight_decay: float = 7.5e-3
+    weight_decay: float = 1.1e-2
     loss_fn: LossFunction = LossFunction.RMSE
 
     def steps_total(self) -> int:
