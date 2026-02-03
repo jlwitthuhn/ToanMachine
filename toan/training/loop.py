@@ -5,6 +5,7 @@
 import math
 from typing import Any
 
+import numpy as np
 from mlx import core as mx
 from mlx import nn as nn
 from mlx import optimizers as optimizers
@@ -20,6 +21,9 @@ def run_training_loop(context: TrainingProgressContext, config: TrainingConfig):
     assert len(config.stages) > 0
     model = NamWaveNet(context.model_config, context.metadata, context.sample_rate)
     mx.eval(model.parameters())
+
+    np_rng_state = np.random.get_state()
+    np.random.seed(0x35)
 
     def get_batch_size(stage_cfg: TrainingStageConfig, iter: int) -> int:
         if stage_cfg.batch_size > 0:
@@ -125,3 +129,5 @@ def run_training_loop(context: TrainingProgressContext, config: TrainingConfig):
     context.metadata.loss_test_rmse = math.sqrt(context.metadata.loss_test_mse)
     context.metadata.loss_test_esr = measure_test_loss(LossFunction.ESR)
     context.model = model
+
+    np.random.set_state(np_rng_state)
