@@ -73,7 +73,10 @@ def run_training_loop(context: TrainingProgressContext, config: TrainingConfig):
         context.loss_test = 1.0
 
     for stage_config in config.stages:
-        summary = TrainingStageSummary(test_interval=stage_config.test_interval)
+        summary = TrainingStageSummary(
+            test_interval=stage_config.test_interval,
+            warmup_length=stage_config.steps_warmup,
+        )
         context.summary = summary
 
         learn_rate = get_learn_rate(stage_config)
