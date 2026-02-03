@@ -21,7 +21,8 @@ PLUCK_DECAY = 0.985
 
 
 def generate_capture_signal(sample_rate: int) -> np.ndarray:
-    np.random.seed(12345)
+    rng_state = np.random.get_state()
+    np.random.seed(0x35)
     quarter_second_samples = sample_rate // 4
 
     # Quarter second of silence
@@ -151,6 +152,8 @@ def generate_capture_signal(sample_rate: int) -> np.ndarray:
         ],
         quarter_second_samples,
     )
+
+    np.random.set_state(rng_state)
 
     return concat_signals(
         [
