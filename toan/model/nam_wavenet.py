@@ -258,9 +258,17 @@ class NamWaveNet(nn.Module):
         return mx.sqrt(self.loss_mse(inputs, targets))
 
     def __init__(
-        self, config: NamWaveNetConfig, metadata: ModelMetadata, sample_rate: int
+        self,
+        config: NamWaveNetConfig,
+        metadata: ModelMetadata,
+        sample_rate: int,
+        rng_seed: int = 0x35,
     ):
         super().__init__()
+
+        rng_state = mx.random.state
+        mx.random.seed(rng_seed)
+
         self.config = config
         self.metadata = metadata
         self.sample_rate = sample_rate
@@ -268,6 +276,8 @@ class NamWaveNet(nn.Module):
             _NamWaveNetLayerGroup(layer_config) for layer_config in config.layers
         ]
         assert config.head_config is None
+
+        mx.random.state = rng_state
 
     @property
     def parameter_count(self) -> int:

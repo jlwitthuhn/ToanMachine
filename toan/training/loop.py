@@ -18,9 +18,7 @@ from toan.training.data_loader import TrainingDataLoader
 
 def run_training_loop(context: TrainingProgressContext, config: TrainingConfig):
     assert len(config.stages) > 0
-    mx.random.seed(0o35)
     model = NamWaveNet(context.model_config, context.metadata, context.sample_rate)
-    assert model is not None
     mx.eval(model.parameters())
 
     def get_batch_size(stage_cfg: TrainingStageConfig, iter: int) -> int:
