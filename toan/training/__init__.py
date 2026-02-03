@@ -38,7 +38,6 @@ class TrainingStageSummary:
             for point in points:
                 if point < self.warmup_length:
                     points_clipped += 1
-            print("Clipped: ", points_clipped)
             return losses[points_clipped:], points[points_clipped:]
 
         np_losses_train = np.array(self.losses_train)
@@ -49,7 +48,6 @@ class TrainingStageSummary:
         plot_losses_train, plot_points_train = clip_warmup(
             smooth_losses_train, eval_points_train
         )
-        print(plot_points_train)
         ax.plot(plot_points_train, plot_losses_train, label="train")
 
         clip_warmup(smooth_losses_train, eval_points_train)
