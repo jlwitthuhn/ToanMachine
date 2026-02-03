@@ -2,6 +2,7 @@
 # https://www.gnu.org/licenses/gpl-3.0.en.html
 # SPDX-License-Identifier: GPL-3.0-only
 
+import math
 from typing import Any
 
 from mlx import core as mx
@@ -119,6 +120,7 @@ def run_training_loop(context: TrainingProgressContext, config: TrainingConfig):
                         summary.losses_test.append(loss)
                         context.loss_test = loss
 
-    context.metadata.loss_test_rmse = measure_test_loss(LossFunction.RMSE)
+    context.metadata.loss_test_mse = measure_test_loss(LossFunction.MSE)
+    context.metadata.loss_test_rmse = math.sqrt(context.metadata.loss_test_mse)
     context.metadata.loss_test_esr = measure_test_loss(LossFunction.ESR)
     context.model = model

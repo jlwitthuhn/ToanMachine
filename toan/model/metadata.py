@@ -13,6 +13,7 @@ class ModelMetadata:
     gear_make: str
     gear_model: str
     comment: str | None = None
+    loss_test_mse: float | None = None
     loss_test_rmse: float | None = None
     loss_test_esr: float | None = None
 
