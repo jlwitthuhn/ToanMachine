@@ -96,7 +96,9 @@ def run_training_loop(context: TrainingProgressContext, config: TrainingConfig):
 
         loss_and_grad_fn = nn.value_and_grad(model, loss_fn)
         optimizer = optimizers.AdamW(
-            learning_rate=learn_rate, weight_decay=stage_config.weight_decay
+            learning_rate=learn_rate,
+            betas=stage_config.adam_betas,
+            weight_decay=stage_config.weight_decay,
         )
 
         train_loss_buffer = mx.ones(12)

@@ -28,6 +28,7 @@ class TrainingStageConfig:
     learn_rate_lo: float = 3.0e-3
     weight_decay: float = 1.1e-2
     loss_fn: LossFunction = LossFunction.RMSE
+    adam_betas: list[float] = field(default_factory=lambda: [0.89, 0.98])
 
     def steps_total(self) -> int:
         return self.steps_warmup + self.steps_main
