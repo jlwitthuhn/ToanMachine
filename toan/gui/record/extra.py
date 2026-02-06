@@ -39,10 +39,43 @@ class RecordExtraPage(QtWidgets.QWizardPage):
         self.table = QtWidgets.QTableView(self)
         layout.addWidget(self.table)
 
+        panel_button = QtWidgets.QWidget(self)
+        panel_button_layout = QtWidgets.QHBoxLayout(panel_button)
+        panel_button_layout.setContentsMargins(0, 0, 0, 0)
+
+        def pressed_train_all():
+            model = self.table.model()
+            if isinstance(model, WavFileModel):
+                model.select_all_train()
+
+        button_train_all = QtWidgets.QPushButton("Train with all")
+        button_train_all.clicked.connect(pressed_train_all)
+        panel_button_layout.addWidget(button_train_all)
+
+        def pressed_test_all():
+            model = self.table.model()
+            if isinstance(model, WavFileModel):
+                model.select_all_test()
+
+        button_test_all = QtWidgets.QPushButton("Test with all")
+        button_test_all.clicked.connect(pressed_test_all)
+        panel_button_layout.addWidget(button_test_all)
+
+        def pressed_deselect():
+            model = self.table.model()
+            if isinstance(model, WavFileModel):
+                model.deselect_all()
+
+        button_deselect_all = QtWidgets.QPushButton("Deselect all")
+        button_deselect_all.clicked.connect(pressed_deselect)
+        panel_button_layout.addWidget(button_deselect_all)
+
+        layout.addWidget(panel_button)
+
     def initializePage(self):
         wav_files = get_user_wav_list()
         model = WavFileModel(self, wav_files, True)
-        model._select_all()
+        model.select_all_train()
         self.table.setModel(model)
         self.table.resizeColumnsToContents()
 

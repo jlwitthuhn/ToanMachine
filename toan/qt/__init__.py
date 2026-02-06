@@ -129,9 +129,24 @@ class WavFileModel(QtCore.QAbstractTableModel):
                 result.append(maybe_wav)
         return result
 
-    def _select_all(self):
-        for file in self.file_list:
-            self.selected_train_wavs.add(file.path)
+    def deselect_all(self):
+        self.selected_test_wavs.clear()
+        self.selected_train_wavs.clear()
+        self.emit_all_changed()
+
+    def emit_all_changed(self):
         index_start = self.createIndex(0, 0)
         index_end = self.createIndex(self.rowCount() - 1, self.columnCount() - 1)
         self.dataChanged.emit(index_start, index_end)
+
+    def select_all_test(self):
+        self.deselect_all()
+        for file in self.file_list:
+            self.selected_test_wavs.add(file.path)
+        self.emit_all_changed()
+
+    def select_all_train(self):
+        self.deselect_all()
+        for file in self.file_list:
+            self.selected_train_wavs.add(file.path)
+        self.emit_all_changed()
