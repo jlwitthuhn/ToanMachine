@@ -121,15 +121,20 @@ def run_training_loop(context: TrainingProgressContext, config: TrainingConfig):
                 context.iters_done = i
                 context.loss_train = train_loss_buffer.mean().item()
 
-                if context.signal_dry_test is not None:
+                if (
+                    context.signal_dry_test is not None
+                    and stage_config.test_interval > 0
+                ):
                     if i % stage_config.test_interval == stage_config.test_interval - 1:
                         loss = measure_test_loss(stage_config.loss_fn)
                         summary.losses_test.append(loss)
                         context.loss_test = loss
 
-    context.metadata.loss_test_mse = measure_test_loss(LossFunction.MSE)
-    context.metadata.loss_test_rmse = math.sqrt(context.metadata.loss_test_mse)
-    context.metadata.loss_test_esr = measure_test_loss(LossFunction.ESR)
+    if context.signal_dry_test is not None:
+        context.metadata.loss_test_mse = measure_test_loss(LossFunction.MSE)
+        context.metadata.loss_test_rmse = math.sqrt(context.metadata.loss_test_mse)
+        context.metadata.loss_test_esr = measure_test_loss(LossFunction.ESR)
+
     context.model = model
 
     np.random.set_state(np_rng_state)
