@@ -77,13 +77,15 @@ class WavFileModel(QtCore.QAbstractTableModel):
             if this_path in self.selected_train_wavs:
                 self.selected_train_wavs.remove(this_path)
             else:
-                self.selected_test_wavs.remove(this_path)
+                if this_path in self.selected_test_wavs:
+                    self.selected_test_wavs.remove(this_path)
                 self.selected_train_wavs.add(this_path)
         elif index.column() == 1:
             if this_path in self.selected_test_wavs:
                 self.selected_test_wavs.remove(this_path)
             else:
-                self.selected_train_wavs.remove(this_path)
+                if this_path in self.selected_train_wavs:
+                    self.selected_train_wavs.remove(this_path)
                 self.selected_test_wavs.add(this_path)
         self.emit_all_changed()
         return True
