@@ -89,13 +89,6 @@ class _NamConv1dLayer(nn.Conv1d):
             pass
         return i
 
-    def __call__(self, x: mx.array) -> mx.array:
-        # Input is in the format (Batch, Channel, Sequence)
-        # MLX Wants channel last
-        x = x.transpose(0, 2, 1)
-        x = super().__call__(x)
-        return x.transpose(0, 2, 1)
-
 
 class _NamWaveNetLayer(nn.Module):
     channels: int
@@ -130,18 +123,18 @@ class _NamWaveNetLayer(nn.Module):
         self, x: mx.array, h: mx.array, out_length: int
     ) -> tuple[mx.array, mx.array]:
         zconv = self.conv(x)
-        z1 = zconv + self.input_mixer(h)[:, :, -zconv.shape[2] :]
+        z1 = zconv + self.input_mixer(h)[:, -zconv.shape[1] :, :]
         post_activation = (
             self.activation(z1)
             if not self.gated
             else (
-                self.activation(z1[:, : self.channels])
-                * mx.sigmoid(z1[:, self.channels :])
+                self.activation(z1[:, :, : self.channels])
+                * mx.sigmoid(z1[:, :, self.channels :])
             )
         )
         return (
-            x[:, :, -post_activation.shape[2] :] + self.conv1x1(post_activation),
-            post_activation[:, :, -out_length:],
+            x[:, -post_activation.shape[1] :, :] + self.conv1x1(post_activation),
+            post_activation[:, -out_length:, :],
         )
 
     def export_nam_linear_weights(self) -> list[float]:
@@ -188,14 +181,14 @@ class _NamWaveNetLayerGroup(nn.Module):
     def __call__(
         self, x: mx.array, c: mx.array, head_input: mx.array | None = None
     ) -> tuple[mx.array, mx.array]:
-        out_length = x.shape[2] - (self.receptive_field - 1)
+        out_length = x.shape[1] - (self.receptive_field - 1)
         x = self.rechannel(x)
         for layer in self.layers:
             x, head_term = layer(x, c, out_length)
             head_input = (
                 head_term
                 if head_input is None
-                else head_input[:, :, -out_length:] + head_term
+                else head_input[:, -out_length:, :] + head_term
             )
         return self.head_rechannel(head_input), x
 
@@ -291,14 +284,15 @@ class NamWaveNet(nn.Module):
         y, head_input = x, None
         for group in self.layer_groups:
             head_input, y = group(y, x, head_input)
-        return head_input if self.head is None else self.head(head_input)
+        result = head_input if self.head is None else self.head(head_input)
+        return result
 
     def __call__(self, x: mx.array) -> mx.array:
         if x.ndim == 2:
-            x = x[:, None, :]
+            x = x[:, :, None]
         y = self._forward(x)
-        assert y.shape[1] == 1
-        return y[:, 0, :]
+        assert y.shape[2] == 1
+        return y[:, :, 0]
 
     def export_nam_linear_weights(self) -> list[float]:
         result = []
