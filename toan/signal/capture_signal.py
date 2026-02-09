@@ -2,6 +2,8 @@
 # https://www.gnu.org/licenses/gpl-3.0.en.html
 # SPDX-License-Identifier: GPL-3.0-only
 
+from dataclasses import dataclass, field
+
 import numpy as np
 
 from toan.mix import concat_signals
@@ -13,11 +15,34 @@ from toan.signal.pluck_scale import generate_named_chord_pluck_scale
 from toan.signal.trig import generate_cosine_wave, generate_sine_wave
 from toan.signal.warble import generate_warble_chord
 
-SWEEP_DURATION = 12.0
-NOISE_SHORT_DURATION = 1.5
-NOISE_LONG_DURATION = 3.5
-NOTE_DURATION = 0.70
-PLUCK_DECAY = 0.985
+
+@dataclass
+class CaptureSignalConfig:
+    sweep_duration: float = 12.0
+    warble_duration: float = 6.0
+    noise_duration: float = 3.5
+    pluck_note_duration: float = 0.70
+    pluck_decay: float = 0.985
+    warble_chords: list[ChordType] = field(
+        default_factory=lambda: [
+            ChordType.PerfectFifth,
+            ChordType.Diminished,
+            ChordType.Major,
+            ChordType.MinorSeventh,
+            ChordType.GuitarStrings,
+        ]
+    )
+    plucked_chords: list[ChordType] = field(
+        default_factory=lambda: [
+            ChordType.RootOnly,
+            ChordType.Tritone,
+            ChordType.Major,
+            ChordType.Minor,
+            ChordType.MajorSeventh,
+            ChordType.MinorNinth,
+            ChordType.GuitarStrings,
+        ]
+    )
 
 
 def _generate_calibration_block(sample_rate: int) -> np.ndarray:
@@ -81,13 +106,13 @@ def _generate_sweep_block(sample_rate: int, duration: float) -> np.ndarray:
     )
 
 
-def _generate_warble_block(sample_rate: int, chords: list[ChordType]) -> np.ndarray:
+def _generate_warble_block(
+    sample_rate: int, chords: list[ChordType], duration: float
+) -> np.ndarray:
     def generate_warble_signal(shape: ChordType):
-        return generate_warble_chord(
-            sample_rate, SWEEP_DURATION / 2, 55.0, shape, 10, 0.68
-        )
+        return generate_warble_chord(sample_rate, duration, 55.0, shape, 10, 0.68)
 
-    buffer_size = int(sample_rate * SWEEP_DURATION / 2)
+    buffer_size = int(sample_rate * duration)
     modulation = generate_gaussian_pulse(buffer_size, buffer_size // 3)
     chord_buffers = []
     for chord in chords:
@@ -97,7 +122,9 @@ def _generate_warble_block(sample_rate: int, chords: list[ChordType]) -> np.ndar
     return concat_signals(chord_buffers, sample_rate // 4)
 
 
-def _generate_plucked_block(sample_rate: int, chords: list[ChordType]) -> np.ndarray:
+def _generate_plucked_block(
+    sample_rate: int, chords: list[ChordType], note_duration: float, pluck_decay: float
+) -> np.ndarray:
     def generate_plucked_scale(shape: ChordType, offset_duration: float):
         return generate_named_chord_pluck_scale(
             shape,
@@ -106,9 +133,9 @@ def _generate_plucked_block(sample_rate: int, chords: list[ChordType]) -> np.nda
             1,
             "G",
             6,
-            NOTE_DURATION,
+            note_duration,
             offset_duration,
-            PLUCK_DECAY,
+            pluck_decay,
         )
 
     buffers = []
@@ -118,12 +145,12 @@ def _generate_plucked_block(sample_rate: int, chords: list[ChordType]) -> np.nda
     return concat_signals(buffers, sample_rate // 4)
 
 
-def _generate_white_noise_block(sample_rate: int) -> np.ndarray:
-    noise_samples_short = int(sample_rate * NOISE_SHORT_DURATION)
+def _generate_white_noise_block(sample_rate: int, duration: float) -> np.ndarray:
+    noise_samples_short = int(sample_rate * duration / 2)
     white_noise_full = generate_white_noise(noise_samples_short)
     white_noise_half = white_noise_full * 0.5
     white_noise_quarter = white_noise_half * 0.5
-    gaussian_samples = int(sample_rate * NOISE_LONG_DURATION)
+    gaussian_samples = int(sample_rate * duration)
     white_noise_gaussian = generate_white_noise(
         gaussian_samples
     ) * generate_gaussian_pulse(gaussian_samples)
@@ -133,33 +160,24 @@ def _generate_white_noise_block(sample_rate: int) -> np.ndarray:
     )
 
 
-def generate_capture_signal(sample_rate: int) -> np.ndarray:
+def generate_capture_signal(
+    sample_rate: int, config: CaptureSignalConfig = CaptureSignalConfig()
+) -> np.ndarray:
     rng_state = np.random.get_state()
     np.random.seed(0x35)
 
-    warble_chords: list[ChordType] = [
-        ChordType.PerfectFifth,
-        ChordType.Diminished,
-        ChordType.Major,
-        ChordType.MinorSeventh,
-        ChordType.GuitarStrings,
-    ]
-
-    plucked_chords: list[ChordType] = [
-        ChordType.RootOnly,
-        ChordType.Tritone,
-        ChordType.Major,
-        ChordType.Minor,
-        ChordType.MajorSeventh,
-        ChordType.MinorNinth,
-        ChordType.GuitarStrings,
-    ]
-
     block_impulse = _generate_impulse_block(sample_rate)
-    block_sweep = _generate_sweep_block(sample_rate, SWEEP_DURATION)
-    block_warble = _generate_warble_block(sample_rate, warble_chords)
-    block_plucked = _generate_plucked_block(sample_rate, plucked_chords)
-    block_white_noise = _generate_white_noise_block(sample_rate)
+    block_sweep = _generate_sweep_block(sample_rate, config.sweep_duration)
+    block_warble = _generate_warble_block(
+        sample_rate, config.warble_chords, config.warble_duration
+    )
+    block_plucked = _generate_plucked_block(
+        sample_rate,
+        config.plucked_chords,
+        config.pluck_note_duration,
+        config.pluck_decay,
+    )
+    block_white_noise = _generate_white_noise_block(sample_rate, config.noise_duration)
 
     signal_train = concat_signals(
         [
