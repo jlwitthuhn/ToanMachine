@@ -12,7 +12,7 @@ from toan.signal.pluck import generate_generic_chord_pluck
 from toan.soundio import (
     SdChannel,
     SdDevice,
-    SdPlayrecController,
+    SdIoController,
     generate_descriptions,
     get_output_devices,
     prepare_play_record,
@@ -45,7 +45,7 @@ class RecordOutputLevelPage(QtWidgets.QWizardPage):
     recorded_buffer_partial: np.ndarray | None = None
     recorded_playback_index: int = 0
 
-    record_controller: SdPlayrecController | None = None
+    record_controller: SdIoController | None = None
     play_controller: sd.OutputStream | None = None
 
     def __init__(self, parent, context: RecordingContext):

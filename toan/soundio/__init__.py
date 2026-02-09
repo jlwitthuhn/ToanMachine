@@ -24,7 +24,7 @@ class SdDevice:
     channels_out: int
 
 
-class SdPlayrecController:
+class SdIoController:
     stream_in: sd.InputStream | None
     stream_out: sd.OutputStream | None
     stream_io: sd.Stream | None
@@ -84,7 +84,7 @@ def prepare_play_record(
     channel_out: SdChannel,
     callback_in: Callable[[numpy.ndarray, int, any, sd.CallbackFlags], None],
     callback_out: Callable[[numpy.ndarray, int, any, sd.CallbackFlags], None],
-) -> SdPlayrecController:
+) -> SdIoController:
 
     if channel_in.device_index == channel_out.device_index:
 
@@ -103,7 +103,7 @@ def prepare_play_record(
             device=channel_in.device_index,
             callback=callback_io,
         )
-        return SdPlayrecController(stream_io=io_stream)
+        return SdIoController(stream_io=io_stream)
     else:
         input_stream = sd.InputStream(
             samplerate=sample_rate,
@@ -115,7 +115,7 @@ def prepare_play_record(
             device=channel_out.device_index,
             callback=callback_out,
         )
-        return SdPlayrecController(stream_in=input_stream, stream_out=output_stream)
+        return SdIoController(stream_in=input_stream, stream_out=output_stream)
 
 
 def get_input_devices() -> list[SdDevice]:

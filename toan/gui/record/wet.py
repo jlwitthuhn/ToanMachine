@@ -9,7 +9,7 @@ from PySide6 import QtCore, QtWidgets
 from toan.gui.record import RecordingContext
 from toan.mix import concat_signals
 from toan.signal import generate_capture_signal
-from toan.soundio import SdPlayrecController, prepare_play_record
+from toan.soundio import SdIoController, prepare_play_record
 
 RECORD_TEXT = [
     "In this section you will send a signal through your pedal and record the result.",
@@ -23,7 +23,7 @@ class RecordWetSignalPage(QtWidgets.QWizardPage):
     button_record: QtWidgets.QPushButton
     bar_progress: QtWidgets.QProgressBar
     bar_update_timer: QtCore.QTimer
-    io_controller: SdPlayrecController | None = None
+    io_controller: SdIoController | None = None
 
     signal_out_index: int
 

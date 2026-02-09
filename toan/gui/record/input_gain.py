@@ -11,7 +11,7 @@ from PySide6 import QtCore, QtWidgets
 from toan.gui.record import RecordingContext
 from toan.mix import concat_signals
 from toan.signal import generate_chirp
-from toan.soundio import SdPlayrecController, prepare_play_record
+from toan.soundio import SdIoController, prepare_play_record
 
 VOLUME_TEXT = [
     "In this section you will set the input gain on your interface. You want the audio signal to be captured as loudly as possible without clipping.",
@@ -36,7 +36,7 @@ class RecordInputGainPage(QtWidgets.QWizardPage):
     bar_update_timer: QtCore.QTimer
     text_volume: QtWidgets.QLineEdit
 
-    io_controller: SdPlayrecController | None = None
+    io_controller: SdIoController | None = None
     volume_samples: np.ndarray
 
     def __init__(self, parent, context: RecordingContext):
