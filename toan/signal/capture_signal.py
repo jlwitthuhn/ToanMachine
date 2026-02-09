@@ -109,6 +109,9 @@ def _generate_sweep_block(sample_rate: int, duration: float) -> np.ndarray:
 def _generate_warble_block(
     sample_rate: int, chords: list[ChordType], duration: float
 ) -> np.ndarray:
+    if len(chords) == 0:
+        return np.zeros(1)
+
     def generate_warble_signal(shape: ChordType):
         return generate_warble_chord(sample_rate, duration, 55.0, shape, 10, 0.68)
 
@@ -125,6 +128,9 @@ def _generate_warble_block(
 def _generate_plucked_block(
     sample_rate: int, chords: list[ChordType], note_duration: float, pluck_decay: float
 ) -> np.ndarray:
+    if len(chords) == 0:
+        return np.zeros(1)
+
     def generate_plucked_scale(shape: ChordType, offset_duration: float):
         return generate_named_chord_pluck_scale(
             shape,
