@@ -9,13 +9,8 @@ from PySide6 import QtCore, QtWidgets
 from toan.gui.record import RecordingContext
 from toan.music import get_note_frequency_by_name
 from toan.signal.pluck import generate_generic_chord_pluck
-from toan.soundio import (
-    SdChannel,
-    SdDevice,
-    SdIoController,
-    generate_descriptions,
-    get_output_devices,
-)
+from toan.soundio import SdChannel, SdDevice, generate_descriptions, get_output_devices
+from toan.soundio.record_wet import RecordWetController, RecordWetProgress
 
 OUTPUT_LEVEL_TEXT = [
     "In this section you will set the output level of your interface. For overdrive and similar effects it is very important to get this right to ensure that the input signal is loud enough to trigger the desired clipping effect.",
@@ -38,13 +33,12 @@ class RecordOutputLevelPage(QtWidgets.QWizardPage):
     combo_selected_channel: SdChannel | None = None
 
     generated_chords: np.ndarray | None = None
-    generated_chord_index: int = 0
 
+    record_controller: RecordWetController | None = None
+    record_progress: RecordWetProgress | None = None
     recorded_buffer: np.ndarray | None = None
-    recorded_buffer_partial: np.ndarray | None = None
     recorded_playback_index: int = 0
 
-    record_controller: SdIoController | None = None
     play_controller: sd.OutputStream | None = None
 
     def __init__(self, parent, context: RecordingContext):
@@ -123,15 +117,12 @@ class RecordOutputLevelPage(QtWidgets.QWizardPage):
         self.play_controller.start()
 
     def _pressed_record(self):
-        if self.recorded_buffer_partial is not None:
-            return
         if self.record_controller is not None:
             return
         if self.play_controller is not None:
             return
 
         self.recorded_buffer = None
-        self.recorded_buffer_partial = np.ndarray([0])
         self._refresh_buttons()
 
         if self.generated_chords is None:
@@ -153,15 +144,14 @@ class RecordOutputLevelPage(QtWidgets.QWizardPage):
                 )
                 * 0.99
             )
-        self.generated_chord_index = 0
 
-        self.record_controller = SdIoController.from_callbacks(
+        self.record_controller = RecordWetController(
             self.context.sample_rate,
+            self.generated_chords,
             self.context.input_channel,
             self.context.output_channel,
-            self._record_input_callback,
-            self._record_output_callback,
         )
+        self.record_progress = self.record_controller.progress
         self.record_controller.start()
 
     def _play_output_callback(
@@ -177,52 +167,17 @@ class RecordOutputLevelPage(QtWidgets.QWizardPage):
         self.recorded_playback_index += frames
         data[0 : len(segment), channel] = segment
 
-    def _record_input_callback(
-        self, data: np.ndarray, frames: int, time, status: sd.CallbackFlags
-    ):
-        if self.recorded_buffer_partial is None:
-            # We are in the brief period between when recording is complete and when the callback closes audio IO
-            return
-        channel_data = data[:, self.context.input_channel.channel_index - 1]
-        self.recorded_buffer_partial = np.concat(
-            (self.recorded_buffer_partial, channel_data)
-        )
-        if len(self.recorded_buffer_partial) >= len(self.generated_chords):
-            self.recorded_buffer = self.recorded_buffer_partial[
-                : len(self.generated_chords)
-            ]
-            self.recorded_buffer_partial = None
-
-    def _record_output_callback(
-        self, data: np.ndarray, frames: int, time, status: sd.CallbackFlags
-    ):
-        channel = self.context.output_channel.channel_index - 1
-        data.fill(0)
-        if self.generated_chord_index >= len(self.generated_chords):
-            # Playback is complete, only send zeros now
-            return
-        segment = self.generated_chords[
-            self.generated_chord_index : self.generated_chord_index + frames
-        ]
-        self.generated_chord_index += frames
-        data[0 : len(segment), channel] = segment
-
     def _refresh_timer_triggered(self):
         # Progress bar first
         if self.generated_chords is not None:
             self.progress_bar.setMaximum(len(self.generated_chords))
-            if self.recorded_buffer_partial is not None:
-                self.progress_bar.setValue(len(self.recorded_buffer_partial))
-            else:
-                self.progress_bar.setValue(0)
+            if self.record_progress is not None:
+                self.progress_bar.setValue(self.record_progress.samples_played)
 
-        if (
-            self.recorded_buffer_partial is None
-            and self.recorded_buffer is not None
-            and self.record_controller is not None
-        ):
+        if self.record_controller is not None and self.record_controller.is_complete():
             # Recording has ended, kill the stream
             self.record_controller.close()
+            self.recorded_buffer = self.record_controller.get_recorded_signal()
             self.record_controller = None
 
         if self.play_controller is not None and self.recorded_playback_index >= len(
@@ -241,7 +196,7 @@ class RecordOutputLevelPage(QtWidgets.QWizardPage):
         if self.recorded_buffer is None:
             play_enabled = False
 
-        if self.recorded_buffer_partial is not None:
+        if self.record_controller is not None:
             play_enabled = False
             record_enabled = False
 
