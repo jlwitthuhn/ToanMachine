@@ -15,7 +15,6 @@ from toan.soundio import (
     SdIoController,
     generate_descriptions,
     get_output_devices,
-    prepare_play_record,
 )
 
 OUTPUT_LEVEL_TEXT = [
@@ -156,7 +155,7 @@ class RecordOutputLevelPage(QtWidgets.QWizardPage):
             )
         self.generated_chord_index = 0
 
-        self.record_controller = prepare_play_record(
+        self.record_controller = SdIoController.from_callbacks(
             self.context.sample_rate,
             self.context.input_channel,
             self.context.output_channel,

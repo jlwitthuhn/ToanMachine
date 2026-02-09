@@ -56,6 +56,45 @@ class SdIoController:
         if self.stream_io is not None:
             self.stream_io.start()
 
+    @staticmethod
+    def from_callbacks(
+        sample_rate: int,
+        channel_in: SdChannel,
+        channel_out: SdChannel,
+        callback_in: Callable[[numpy.ndarray, int, any, sd.CallbackFlags], None],
+        callback_out: Callable[[numpy.ndarray, int, any, sd.CallbackFlags], None],
+    ):
+        if channel_in.device_index == channel_out.device_index:
+
+            def callback_io(
+                indata: np.ndarray,
+                outdata: np.ndarray,
+                frames: int,
+                time,
+                status: sd.CallbackFlags,
+            ) -> None:
+                callback_in(indata, frames, time, status)
+                callback_out(outdata, frames, time, status)
+
+            io_stream = sd.Stream(
+                samplerate=sample_rate,
+                device=channel_in.device_index,
+                callback=callback_io,
+            )
+            return SdIoController(stream_io=io_stream)
+        else:
+            input_stream = sd.InputStream(
+                samplerate=sample_rate,
+                device=channel_in.device_index,
+                callback=callback_in,
+            )
+            output_stream = sd.OutputStream(
+                samplerate=sample_rate,
+                device=channel_out.device_index,
+                callback=callback_out,
+            )
+            return SdIoController(stream_in=input_stream, stream_out=output_stream)
+
 
 def _get_devices(
     include_input: bool = True, include_output: bool = True
@@ -76,46 +115,6 @@ def _get_devices(
             )
             result.append(this_device)
     return result
-
-
-def prepare_play_record(
-    sample_rate: int,
-    channel_in: SdChannel,
-    channel_out: SdChannel,
-    callback_in: Callable[[numpy.ndarray, int, any, sd.CallbackFlags], None],
-    callback_out: Callable[[numpy.ndarray, int, any, sd.CallbackFlags], None],
-) -> SdIoController:
-
-    if channel_in.device_index == channel_out.device_index:
-
-        def callback_io(
-            indata: np.ndarray,
-            outdata: np.ndarray,
-            frames: int,
-            time,
-            status: sd.CallbackFlags,
-        ) -> None:
-            callback_in(indata, frames, time, status)
-            callback_out(outdata, frames, time, status)
-
-        io_stream = sd.Stream(
-            samplerate=sample_rate,
-            device=channel_in.device_index,
-            callback=callback_io,
-        )
-        return SdIoController(stream_io=io_stream)
-    else:
-        input_stream = sd.InputStream(
-            samplerate=sample_rate,
-            device=channel_in.device_index,
-            callback=callback_in,
-        )
-        output_stream = sd.OutputStream(
-            samplerate=sample_rate,
-            device=channel_out.device_index,
-            callback=callback_out,
-        )
-        return SdIoController(stream_in=input_stream, stream_out=output_stream)
 
 
 def get_input_devices() -> list[SdDevice]:
