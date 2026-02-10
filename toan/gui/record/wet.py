@@ -2,14 +2,12 @@
 # https://www.gnu.org/licenses/gpl-3.0.en.html
 # SPDX-License-Identifier: GPL-3.0-only
 
-import numpy as np
-import sounddevice as sd
 from PySide6 import QtCore, QtWidgets
 
 from toan.gui.record import RecordingContext
 from toan.mix import concat_signals
 from toan.signal import generate_capture_signal
-from toan.soundio import SdIoController
+from toan.soundio.record_wet import RecordWetController, RecordWetProgress
 
 RECORD_TEXT = [
     "In this section you will send a signal through your pedal and record the result.",
@@ -23,17 +21,13 @@ class RecordWetSignalPage(QtWidgets.QWizardPage):
     button_record: QtWidgets.QPushButton
     bar_progress: QtWidgets.QProgressBar
     bar_update_timer: QtCore.QTimer
-    io_controller: SdIoController | None = None
 
-    signal_out_index: int
-
-    recorded_samples: list[np.ndarray]
+    record_controller: RecordWetController | None = None
+    record_progress: RecordWetProgress | None = None
 
     def __init__(self, parent, context: RecordingContext):
         super().__init__(parent)
         self.context = context
-        self.signal_out_index = 0
-        self.recorded_samples = []
 
         self.bar_update_timer = QtCore.QTimer()
         self.bar_update_timer.setInterval(50)
@@ -63,8 +57,9 @@ class RecordWetSignalPage(QtWidgets.QWizardPage):
         layout.addWidget(self.bar_progress)
 
     def cleanupPage(self):
-        if self.io_controller is not None:
-            self.io_controller.close()
+        if self.record_controller is not None:
+            self.record_controller.close()
+            self.record_controller = None
 
     def isComplete(self):
         if self.context.signal_recorded is not None:
@@ -91,48 +86,28 @@ class RecordWetSignalPage(QtWidgets.QWizardPage):
             self.context.test_signal_offset = 0
             self.context.signal_dry = capture_signal_train
 
-        self.signal_out_index = 0
-        self.recorded_samples = []
-
-        self.io_controller = SdIoController.from_callbacks(
+        self.record_controller = RecordWetController(
             self.context.sample_rate,
+            self.context.signal_dry,
             self.context.input_channel,
             self.context.output_channel,
-            self._input_callback,
-            self._output_callback,
         )
-        self.io_controller.start()
+        self.record_progress = self.record_controller.progress
+        self.record_controller.start()
 
         self.bar_update_timer.start()
 
-    def _input_callback(
-        self, indata: np.ndarray, frames: int, time, status: sd.CallbackFlags
-    ) -> None:
-        self.recorded_samples.append(
-            indata[:, self.context.input_channel.channel_index - 1].copy()
-        )
-
-    def _output_callback(
-        self, outdata: np.ndarray, frames: int, time, status: sd.CallbackFlags
-    ) -> None:
-        channel = self.context.output_channel.channel_index - 1
-        outdata.fill(0)
-        if self.signal_out_index >= len(self.context.signal_dry):
-            return
-        segment = self.context.signal_dry[
-            self.signal_out_index : self.signal_out_index + frames
-        ]
-        self.signal_out_index += frames
-        outdata[0 : len(segment), channel] = segment
-
     def _update_status(self):
         self.bar_progress.setMaximum(len(self.context.signal_dry))
-        self.bar_progress.setValue(self.signal_out_index)
-        if self.signal_out_index >= len(self.context.signal_dry):
-            self._complete()
-            self.bar_update_timer.stop()
+        if self.record_progress is not None:
+            self.bar_progress.setValue(self.record_progress.samples_played)
+            if self.record_progress.samples_recorded >= len(self.context.signal_dry):
+                self._complete()
+                self.bar_update_timer.stop()
 
     def _complete(self):
-        self.io_controller.close()
-        self.context.signal_recorded = np.concat(self.recorded_samples).squeeze()
+        assert self.record_controller is not None
+        self.record_controller.close()
+        self.context.signal_recorded = self.record_controller.get_recorded_signal()
+        self.record_controller = None
         self.completeChanged.emit()
