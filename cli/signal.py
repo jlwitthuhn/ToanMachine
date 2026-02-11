@@ -12,6 +12,7 @@ from toan.signal import generate_capture_signal
 from toan.signal.capture_signal import CaptureSignalConfig
 from toan.soundio import SdChannel, get_input_devices, get_output_devices
 from toan.soundio.record_wet import RecordWetController
+from toan.zip import create_training_zip
 
 
 def _parse_colon_syntax(device_str: str) -> SdChannel | None:
@@ -60,6 +61,20 @@ def do_iteration(
     signal_wet = record_controller.get_recorded_signal()
     record_controller.close()
     print(f"Recording complete, got {len(signal_wet)} samples")
+
+    print("Packaging recording...")
+    zip_buffer = create_training_zip(
+        sample_rate,
+        signal_dry,
+        signal_wet,
+        "Test Make",
+        "Test Model",
+        0,
+    )
+
+    print("Writing file...")
+    with open("./test.zip", "wb") as f:
+        f.write(zip_buffer.getvalue())
 
 
 def main() -> None:
