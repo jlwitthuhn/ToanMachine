@@ -93,6 +93,15 @@ class RecordOutputLevelPage(QtWidgets.QWizardPage):
 
         self._refresh_buttons()
 
+    def cleanupPage(self):
+        if self.record_controller is not None:
+            self.record_controller.close()
+            self.record_controller = None
+
+    def validatePage(self):
+        self.cleanupPage()
+        return True
+
     def _pressed_play(self):
         if self.recorded_buffer is None:
             return
