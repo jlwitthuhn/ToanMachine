@@ -29,8 +29,8 @@ class RecordWetController:
 
     controller: SdIoController
 
-    _recorded_segment_lock: threading.Lock = threading.Lock()
-    _recorded_segments: list[np.ndarray] = []
+    _recorded_segment_lock: threading.Lock
+    _recorded_segments: list[np.ndarray]
 
     def __init__(
         self,
@@ -43,6 +43,8 @@ class RecordWetController:
         self.dry_signal = dry_signal
         self.channel_in = channel_in
         self.channel_out = channel_out
+        self._recorded_segment_lock = threading.Lock()
+        self._recorded_segments = []
 
         self.progress = RecordWetProgress(
             samples_to_play=len(dry_signal),
