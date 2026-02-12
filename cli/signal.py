@@ -29,12 +29,14 @@ def _parse_colon_syntax(device_str: str) -> SdChannel | None:
 
 def _validate_sdchannel(channel: SdChannel, is_input: bool) -> str | None:
     devices = get_input_devices() if is_input else get_output_devices()
+    if channel.channel_index <= 0:
+        return "1 is the lowest valid channel"
     for device in devices:
         if channel.device_index != device.index:
             continue
-        if is_input and channel.channel_index >= device.channels_in:
+        if is_input and channel.channel_index > device.channels_in:
             return "Selected device does not have enough input channels"
-        if not is_input and channel.channel_index >= device.channels_out:
+        if not is_input and channel.channel_index > device.channels_out:
             return "Selected device does not have enough output channels"
         return None
 
