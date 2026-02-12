@@ -12,6 +12,7 @@ from toan.signal import generate_capture_signal
 from toan.signal.capture_signal import CaptureSignalConfig
 from toan.soundio import SdChannel, get_input_devices, get_output_devices
 from toan.soundio.record_wet import RecordWetController
+from toan.training.zip_loader import ZipLoaderContext, run_zip_loader
 from toan.zip import create_training_zip
 
 
@@ -74,9 +75,17 @@ def do_iteration(
         0,
     )
 
-    print("Writing file...")
-    with open("./test.zip", "wb") as f:
-        f.write(zip_buffer.getvalue())
+    print("Loading zip file...")
+    zip_context = ZipLoaderContext()
+    run_zip_loader(zip_context, zip_buffer)
+
+    if zip_context.errored:
+        print("Failed to load zip file, replaying log...")
+        for line in zip_context.messages_queue:
+            print(f">> {line}")
+        return
+    assert zip_context.complete
+    print("Loaded")
 
 
 def main() -> None:

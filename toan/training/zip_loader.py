@@ -25,6 +25,7 @@ class ZipLoaderContext:
     sample_rate: int = 0
 
     complete: bool = False
+    errored: bool = False
 
 
 def _find_clicks(signal: np.ndarray, raw_noise_floor: float) -> list[int]:
@@ -42,14 +43,16 @@ def _find_clicks(signal: np.ndarray, raw_noise_floor: float) -> list[int]:
     return click_indices
 
 
-def run_zip_loader(context: ZipLoaderContext, input_path: str):
+def run_zip_loader(context: ZipLoaderContext, input_file: str | io.BytesIO):
     def print_status(message: str):
         with context.messages_lock:
             context.messages_queue.append(message)
 
+    # So errored is true for any early exits, only gets set False at the end
+    context.errored = True
     print_status("Loading as zip archive...")
     try:
-        with zipfile.ZipFile(input_path, "r") as zip_file:
+        with zipfile.ZipFile(input_file, "r") as zip_file:
             print_status("Loading config...")
 
             try:
@@ -237,6 +240,7 @@ def run_zip_loader(context: ZipLoaderContext, input_path: str):
             )
 
             context.sample_rate = config_json["sample_rate"]
+            context.errored = False
             context.complete = True
 
     except zipfile.BadZipFile:
