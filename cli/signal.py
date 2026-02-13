@@ -119,7 +119,10 @@ def do_iteration(
     print("Training complete")
     print(f"train loss: {progress_context.loss_train}")
     print(f"test loss: {progress_context.loss_test}")
-    return progress_context.loss_train
+    if progress_context.loss_test is not None:
+        return progress_context.loss_test
+    else:
+        return progress_context.loss_train
 
 
 def main() -> None:
@@ -188,14 +191,26 @@ def main() -> None:
         test_signal = concat_signals(signal_list, args.samplerate // 4)
         test_signal = test_signal.astype(np.float32) / np.abs(test_signal).max()
 
-    print("Beginning iteration...")
-    do_iteration(
-        args.samplerate,
-        input_channel,
-        output_channel,
-        CaptureSignalConfig(),
-        test_signal,
-    )
+    print("Beginning main loop...")
+
+    losses: dict[str, float] = {}
+
+    def do_iteration_and_log(label: str, capture_config: CaptureSignalConfig) -> None:
+        loss = do_iteration(
+            args.samplerate,
+            input_channel,
+            output_channel,
+            capture_config,
+            test_signal,
+        )
+        losses[label] = loss
+
+    do_iteration_and_log("default", CaptureSignalConfig())
+
+    print()
+    print("Summary:")
+    for label, loss in losses.items():
+        print(f"{label:<10}: {loss}")
 
 
 if __name__ == "__main__":
