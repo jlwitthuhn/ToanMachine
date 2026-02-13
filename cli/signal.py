@@ -8,10 +8,16 @@
 import time
 from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser
 
+from toan.model.metadata import ModelMetadata
+from toan.model.nam_wavenet_presets import get_wavenet_config
+from toan.model.presets import ModelConfigPreset
 from toan.signal import generate_capture_signal
 from toan.signal.capture_signal import CaptureSignalConfig
 from toan.soundio import SdChannel, get_input_devices, get_output_devices
 from toan.soundio.record_wet import RecordWetController
+from toan.training.config import TrainingConfig
+from toan.training.context import TrainingProgressContext
+from toan.training.loop import run_training_loop
 from toan.training.zip_loader import ZipLoaderContext, run_zip_loader
 from toan.zip import create_training_zip
 
@@ -85,7 +91,19 @@ def do_iteration(
             print(f">> {line}")
         return
     assert zip_context.complete
-    print("Loaded")
+
+    print("Beginning training...")
+    training_config = TrainingConfig()
+    progress_context = TrainingProgressContext()
+    progress_context.model_config = get_wavenet_config(ModelConfigPreset.NAM_STANDARD)
+    progress_context.metadata = zip_context.metadata
+    progress_context.sample_rate = sample_rate
+    progress_context.signal_dry_train = zip_context.signal_dry
+    progress_context.signal_wet_train = zip_context.signal_wet
+    progress_context.signal_dry_test = zip_context.signal_dry_test
+    progress_context.signal_wet_test = zip_context.signal_wet_test
+    run_training_loop(progress_context, training_config)
+    print("Training complete, train loss: ", progress_context.loss_train)
 
 
 def main() -> None:
