@@ -116,7 +116,9 @@ def do_iteration(
     progress_context.signal_dry_test = zip_context.signal_dry_test
     progress_context.signal_wet_test = zip_context.signal_wet_test
     run_training_loop(progress_context, training_config)
-    print("Training complete, train loss: ", progress_context.loss_train)
+    print("Training complete")
+    print(f"train loss: {progress_context.loss_train}")
+    print(f"test loss: {progress_context.loss_test}")
     return progress_context.loss_train
 
 
