@@ -138,6 +138,12 @@ def main() -> None:
         required=True,
     )
     arg_parser.add_argument(
+        "--samplerate",
+        type=int,
+        default=48000,
+        help="Desired sample rate of the recording and model",
+    )
+    arg_parser.add_argument(
         "--testwavs",
         type=str,
         help="Comma separated list of test wavs",
@@ -162,8 +168,6 @@ def main() -> None:
         print(f"Failed to find output device: {output_err}")
         return
 
-    SAMPLE_RATE = 48000
-
     test_signal = None
     if args.testwavs is not None:
         print("Loading test wavs...")
@@ -178,13 +182,17 @@ def main() -> None:
             print(f"Warning: Could not find {wav_set}")
         signal_list: list[np.ndarray] = []
         for wav_path in paths:
-            signal_list.append(load_and_resample_wav(SAMPLE_RATE, wav_path))
-        test_signal = concat_signals(signal_list, SAMPLE_RATE // 4)
+            signal_list.append(load_and_resample_wav(args.samplerate, wav_path))
+        test_signal = concat_signals(signal_list, args.samplerate // 4)
         test_signal = test_signal.astype(np.float32) / np.abs(test_signal).max()
 
     print("Beginning iteration...")
     do_iteration(
-        SAMPLE_RATE, input_channel, output_channel, CaptureSignalConfig(), test_signal
+        args.samplerate,
+        input_channel,
+        output_channel,
+        CaptureSignalConfig(),
+        test_signal,
     )
 
 
