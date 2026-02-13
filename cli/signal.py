@@ -5,12 +5,16 @@
 # This script is used to evaluate the effectiveness of changes to the capture signal
 # It can record and then train on that recording in a loop to measure test loss
 
+import math
 import time
 from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser
 
-from toan.model.metadata import ModelMetadata
+import numpy as np
+
+from toan.mix import concat_signals
 from toan.model.nam_wavenet_presets import get_wavenet_config
 from toan.model.presets import ModelConfigPreset
+from toan.persistence import get_user_wav_list
 from toan.signal import generate_capture_signal
 from toan.signal.capture_signal import CaptureSignalConfig
 from toan.soundio import SdChannel, get_input_devices, get_output_devices
@@ -19,6 +23,7 @@ from toan.training.config import TrainingConfig
 from toan.training.context import TrainingProgressContext
 from toan.training.loop import run_training_loop
 from toan.training.zip_loader import ZipLoaderContext, run_zip_loader
+from toan.wav import load_and_resample_wav
 from toan.zip import create_training_zip
 
 
@@ -55,9 +60,17 @@ def do_iteration(
     channel_in: SdChannel,
     channel_out: SdChannel,
     signal_config: CaptureSignalConfig,
+    extra_signal_test: np.ndarray | None,
 ) -> float:
     print("Generating signal...")
     signal_dry = generate_capture_signal(sample_rate, signal_config)
+
+    test_offset = 0
+    if extra_signal_test is not None:
+        print(f"Adding extra test signal of {len(extra_signal_test)} samples...")
+        assert extra_signal_test.ndim == 1
+        test_offset = len(signal_dry)
+        signal_dry = concat_signals([signal_dry, extra_signal_test], sample_rate // 2)
 
     print("Beginning recording...")
     record_controller = RecordWetController(
@@ -78,7 +91,7 @@ def do_iteration(
         signal_wet,
         "Test Make",
         "Test Model",
-        0,
+        test_offset,
     )
 
     print("Loading zip file...")
@@ -89,7 +102,7 @@ def do_iteration(
         print("Failed to load zip file, replaying log...")
         for line in zip_context.messages_queue:
             print(f">> {line}")
-        return
+        return math.inf
     assert zip_context.complete
 
     print("Beginning training...")
@@ -116,11 +129,18 @@ def main() -> None:
         "--input",
         type=str,
         help="Input device in the format '[index]:[channel]' ex: '0:1'",
+        required=True,
     )
     arg_parser.add_argument(
         "--output",
         type=str,
         help="Output device in the format '[index]:[channel]' ex: '0:1'",
+        required=True,
+    )
+    arg_parser.add_argument(
+        "--testwavs",
+        type=str,
+        help="Comma separated list of test wavs",
     )
     args = arg_parser.parse_args()
 
@@ -142,8 +162,30 @@ def main() -> None:
         print(f"Failed to find output device: {output_err}")
         return
 
+    SAMPLE_RATE = 48000
+
+    test_signal = None
+    if args.testwavs is not None:
+        print("Loading test wavs...")
+        wav_set = set(args.testwavs.split(","))
+        available_wavs = get_user_wav_list()
+        paths: list[str] = []
+        for user_wav in available_wavs:
+            if user_wav.filename in wav_set:
+                paths.append(user_wav.path)
+                wav_set.remove(user_wav.filename)
+        if len(wav_set) > 0:
+            print(f"Warning: Could not find {wav_set}")
+        signal_list: list[np.ndarray] = []
+        for wav_path in paths:
+            signal_list.append(load_and_resample_wav(SAMPLE_RATE, wav_path))
+        test_signal = concat_signals(signal_list, SAMPLE_RATE // 4)
+        test_signal = test_signal.astype(np.float32) / np.abs(test_signal).max()
+
     print("Beginning iteration...")
-    do_iteration(48000, input_channel, output_channel, CaptureSignalConfig())
+    do_iteration(
+        SAMPLE_RATE, input_channel, output_channel, CaptureSignalConfig(), test_signal
+    )
 
 
 if __name__ == "__main__":
