@@ -13,6 +13,7 @@ from toan.gui.record import RecordingContext
 from toan.mix import concat_signals
 from toan.persistence import UserWavDesc, get_user_wav_list
 from toan.qt import WavFileModel
+from toan.wav import load_and_resample_wav
 
 EXTRA_AUDIO_TEXT = [
     "Select any extra audio you would like to include in the recorded signal.",
@@ -80,24 +81,10 @@ class RecordExtraPage(QtWidgets.QWizardPage):
         self.table.resizeColumnsToContents()
 
     def validatePage(self):
-        def load_and_resample_wav(desc: UserWavDesc):
-            with warnings.catch_warnings():
-                warnings.filterwarnings("ignore", category=wavfile.WavFileWarning)
-                this_sample_rate, this_signal = wavfile.read(desc.path)
-            if len(this_signal.shape) == 2:
-                this_signal = this_signal[:, 0]
-            if this_sample_rate != self.context.sample_rate:
-                this_sample_count = len(this_signal)
-                desired_sample_count = int(
-                    this_sample_count * (self.context.sample_rate / this_sample_rate)
-                )
-                this_signal = resample(this_signal, desired_sample_count)
-            return this_signal
-
         train_wavs: list[UserWavDesc] = self.table.model().get_selected_train_wavs()
         train_ready_to_concat: list[np.ndarray] = []
         for this_wav in train_wavs:
-            this_signal = load_and_resample_wav(this_wav)
+            this_signal = load_and_resample_wav(self.context.sample_rate, this_wav.path)
             train_ready_to_concat.append(this_signal)
 
         if len(train_ready_to_concat) > 0:
