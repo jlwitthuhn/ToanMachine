@@ -162,7 +162,7 @@ def _generate_white_noise_block(sample_rate: int, duration: float) -> np.ndarray
     ) * generate_gaussian_pulse(gaussian_samples)
     return concat_signals(
         [white_noise_full, white_noise_half, white_noise_quarter, white_noise_gaussian],
-        sample_rate // 4,
+        sample_rate // 10,
     )
 
 
