@@ -55,7 +55,7 @@ def do_iteration(
     channel_in: SdChannel,
     channel_out: SdChannel,
     signal_config: CaptureSignalConfig,
-) -> None:
+) -> float:
     print("Generating signal...")
     signal_dry = generate_capture_signal(sample_rate, signal_config)
 
@@ -104,6 +104,7 @@ def do_iteration(
     progress_context.signal_wet_test = zip_context.signal_wet_test
     run_training_loop(progress_context, training_config)
     print("Training complete, train loss: ", progress_context.loss_train)
+    return progress_context.loss_train
 
 
 def main() -> None:
