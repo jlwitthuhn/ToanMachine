@@ -71,8 +71,6 @@ def run_training_loop(context: TrainingProgressContext, config: TrainingConfig):
     with context.lock:
         context.iters_done = 0
         context.iters_total = config.steps_total()
-        context.loss_train = 1.0
-        context.loss_test = 1.0
 
     for stage_config in config.stages:
         summary = TrainingStageSummary(
