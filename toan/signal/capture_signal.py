@@ -26,8 +26,8 @@ class CaptureSignalConfig:
     warble_chords: list[ChordType] = field(
         default_factory=lambda: [
             ChordType.PerfectFifth,
-            ChordType.Diminished,
-            ChordType.Major,
+            ChordType.DiminishedTriad,
+            ChordType.MajorTriad,
             ChordType.MinorSeventh,
             ChordType.GuitarStrings,
         ]
@@ -36,10 +36,10 @@ class CaptureSignalConfig:
         default_factory=lambda: [
             ChordType.RootOnly,
             ChordType.Tritone,
-            ChordType.Major,
-            ChordType.Minor,
-            ChordType.MajorSeventh,
-            ChordType.MinorNinth,
+            ChordType.MajorTriad,
+            ChordType.MinorTriad,
+            ChordType.MajorSeventhTetrad,
+            ChordType.MinorNinthPentad,
             ChordType.GuitarStrings,
         ]
     )
