@@ -198,14 +198,16 @@ def main() -> None:
     def do_iteration_and_log(
         label: str, capture_config: CaptureSignalConfig, count: int = 1
     ) -> None:
+        train_config = TrainingConfig()
         losses: list[float] = []
-        for _ in range(count):
+        for i in range(count):
+            train_config.rng_seed = 0x35 + i
             loss = do_iteration(
                 args.samplerate,
                 input_channel,
                 output_channel,
                 capture_config,
-                TrainingConfig(),
+                train_config,
                 test_signal,
             )
             losses.append(loss)
