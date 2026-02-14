@@ -33,6 +33,7 @@ class TrainingConfig:
     stages: list[TrainingStageConfig] = field(
         default_factory=lambda: [TrainingStageConfig()]
     )
+    rng_seed: int = 0x35
 
     def steps_total(self) -> int:
         total = 0
