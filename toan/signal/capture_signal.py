@@ -43,6 +43,7 @@ class CaptureSignalConfig:
             ChordType.GuitarStrings,
         ]
     )
+    rand_seed: int = 0x35
 
 
 def _generate_calibration_block(sample_rate: int) -> np.ndarray:
@@ -170,7 +171,7 @@ def generate_capture_signal(
     sample_rate: int, config: CaptureSignalConfig = CaptureSignalConfig()
 ) -> np.ndarray:
     rng_state = np.random.get_state()
-    np.random.seed(0x35)
+    np.random.seed(config.rand_seed)
 
     block_impulse = _generate_impulse_block(sample_rate)
     block_sweep = _generate_sweep_block(sample_rate, config.sweep_duration)

@@ -60,6 +60,7 @@ def do_iteration(
     channel_in: SdChannel,
     channel_out: SdChannel,
     signal_config: CaptureSignalConfig,
+    training_config: TrainingConfig,
     extra_signal_test: np.ndarray | None,
 ) -> float:
     print("Generating signal...")
@@ -106,7 +107,6 @@ def do_iteration(
     assert zip_context.complete
 
     print("Beginning training...")
-    training_config = TrainingConfig()
     progress_context = TrainingProgressContext()
     progress_context.model_config = get_wavenet_config(ModelConfigPreset.NAM_STANDARD)
     progress_context.metadata = zip_context.metadata
@@ -205,6 +205,7 @@ def main() -> None:
                 input_channel,
                 output_channel,
                 capture_config,
+                TrainingConfig(),
                 test_signal,
             )
             losses.append(loss)
