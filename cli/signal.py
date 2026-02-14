@@ -193,24 +193,34 @@ def main() -> None:
 
     print("Beginning main loop...")
 
-    losses: dict[str, float] = {}
+    loss_dict: dict[str, tuple[float, float]] = {}
 
-    def do_iteration_and_log(label: str, capture_config: CaptureSignalConfig) -> None:
-        loss = do_iteration(
-            args.samplerate,
-            input_channel,
-            output_channel,
-            capture_config,
-            test_signal,
-        )
-        losses[label] = loss
+    def do_iteration_and_log(
+        label: str, capture_config: CaptureSignalConfig, count: int = 1
+    ) -> None:
+        losses: list[float] = []
+        for _ in range(count):
+            loss = do_iteration(
+                args.samplerate,
+                input_channel,
+                output_channel,
+                capture_config,
+                test_signal,
+            )
+            losses.append(loss)
+        loss_min: float = np.min(losses)
+        loss_mean: float = float(np.mean(losses))
+        loss_dict[label] = (loss_min, loss_mean)
 
     do_iteration_and_log("default", CaptureSignalConfig())
 
     print()
     print("Summary:")
-    for label, loss in losses.items():
-        print(f"{label:<10}: {loss}")
+    for label, (loss_min, loss_mean) in loss_dict.items():
+        if loss_min < loss_mean:
+            print(f"{label:<10}: {loss_min:0.7f}, {loss_mean:0.7f}")
+        else:
+            print(f"{label:<10}: {loss_mean:0.7f}")
 
 
 if __name__ == "__main__":
