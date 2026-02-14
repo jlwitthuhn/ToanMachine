@@ -215,7 +215,7 @@ def main() -> None:
         loss_mean: float = float(np.mean(losses))
         loss_dict[label] = (loss_min, loss_mean)
 
-    do_iteration_and_log("default", CaptureSignalConfig())
+    do_iteration_and_log("default", CaptureSignalConfig(), 3)
 
     print()
     print("Summary:")
