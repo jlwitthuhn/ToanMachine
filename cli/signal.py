@@ -14,6 +14,7 @@ import numpy as np
 from toan.mix import concat_signals
 from toan.model.nam_wavenet_presets import get_wavenet_config
 from toan.model.presets import ModelConfigPreset
+from toan.music.chord import ChordType
 from toan.persistence import get_user_wav_list
 from toan.signal import generate_capture_signal
 from toan.signal.capture_signal import CaptureSignalConfig
@@ -215,15 +216,30 @@ def main() -> None:
         loss_mean: float = float(np.mean(losses))
         loss_dict[label] = (loss_min, loss_mean)
 
-    do_iteration_and_log("default", CaptureSignalConfig(), 3)
+    signal_config = CaptureSignalConfig()
+    do_iteration_and_log("default", signal_config, 3)
+
+    signal_config.plucked_chords = []
+    signal_config.warble_chords = []
+    do_iteration_and_log("blank", signal_config, 3)
+
+    def iterate_with_added_warble():
+        original_warbles = signal_config.warble_chords.copy()
+        for chord_type in ChordType:
+            signal_config.warble_chords = original_warbles.copy()
+            signal_config.warble_chords.append(chord_type)
+            signal_config.warble_chords.append(chord_type)
+            do_iteration_and_log(chord_type.name, signal_config, 3)
+
+    iterate_with_added_warble()
 
     print()
     print("Summary:")
     for label, (loss_min, loss_mean) in loss_dict.items():
         if loss_min < loss_mean:
-            print(f"{label:<10}: {loss_min:0.7f}, {loss_mean:0.7f}")
+            print(f"{label:<12}: {loss_min:0.7f}, {loss_mean:0.7f}")
         else:
-            print(f"{label:<10}: {loss_mean:0.7f}")
+            print(f"{label:<12}: {loss_mean:0.7f}")
 
 
 if __name__ == "__main__":
