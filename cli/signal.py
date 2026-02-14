@@ -99,6 +99,7 @@ def do_iteration(
     print("Loading zip file...")
     zip_context = ZipLoaderContext()
     run_zip_loader(zip_context, zip_buffer)
+    zip_buffer.close()
 
     if zip_context.errored:
         print("Failed to load zip file, replaying log...")
