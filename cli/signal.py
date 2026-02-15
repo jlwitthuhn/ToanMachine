@@ -201,6 +201,8 @@ def main() -> None:
         label: str, capture_config: CaptureSignalConfig, count: int = 1
     ) -> None:
         train_config = TrainingConfig()
+        for stage in train_config.stages:
+            stage.test_interval = 0
         losses: list[float] = []
         for i in range(count):
             train_config.rng_seed = 0x35 + i
