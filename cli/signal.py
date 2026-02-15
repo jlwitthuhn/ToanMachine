@@ -81,7 +81,7 @@ def do_iteration(
     record_controller.start()
 
     while not record_controller.is_complete():
-        time.sleep(0.2)
+        time.sleep(0.0)
     signal_wet = record_controller.get_recorded_signal()
     record_controller.close()
     print(f"Recording complete, got {len(signal_wet)} samples")
