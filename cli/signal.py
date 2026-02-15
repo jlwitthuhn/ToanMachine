@@ -215,6 +215,7 @@ def main() -> None:
             losses.append(loss)
         loss_min: float = np.min(losses)
         loss_mean: float = float(np.mean(losses))
+        print(f"{label} loss: {loss_min}, {loss_mean}")
         loss_dict[label] = (loss_min, loss_mean)
 
     signal_config = CaptureSignalConfig()
