@@ -232,7 +232,10 @@ def main() -> None:
             signal_config.warble_chords.append(chord_type)
             do_iteration_and_log(chord_type.name, signal_config, 3)
 
-    iterate_with_added_warble()
+    try:
+        iterate_with_added_warble()
+    except KeyboardInterrupt:
+        print("Interrupted, aborting...")
 
     print()
     print("Summary:")
