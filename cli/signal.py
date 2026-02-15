@@ -145,6 +145,12 @@ def main() -> None:
         required=True,
     )
     arg_parser.add_argument(
+        "--repeat",
+        type=int,
+        default=3,
+        help="Number of times to repeat each stage of recording and training",
+    )
+    arg_parser.add_argument(
         "--samplerate",
         type=int,
         default=48000,
@@ -221,11 +227,11 @@ def main() -> None:
         loss_dict[label] = (loss_min, loss_mean)
 
     signal_config = CaptureSignalConfig()
-    do_iteration_and_log("default", signal_config, 3)
+    do_iteration_and_log("default", signal_config, args.repeat)
 
     signal_config.plucked_chords = []
     signal_config.warble_chords = []
-    do_iteration_and_log("blank", signal_config, 3)
+    do_iteration_and_log("blank", signal_config, args.repeat)
 
     def iterate_with_added_warble():
         original_warbles = signal_config.warble_chords.copy()
@@ -233,7 +239,7 @@ def main() -> None:
             signal_config.warble_chords = original_warbles.copy()
             signal_config.warble_chords.append(chord_type)
             signal_config.warble_chords.append(chord_type)
-            do_iteration_and_log(chord_type.name, signal_config, 3)
+            do_iteration_and_log(chord_type.name, signal_config, args.repeat)
 
     try:
         iterate_with_added_warble()
