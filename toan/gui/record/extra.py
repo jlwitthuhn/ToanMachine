@@ -99,7 +99,7 @@ class RecordExtraPage(QtWidgets.QWizardPage):
         test_wavs: list[UserWavDesc] = self.table.model().get_selected_test_wavs()
         test_ready_to_concat: list[np.ndarray] = []
         for this_wav in test_wavs:
-            this_signal = load_and_resample_wav(this_wav)
+            this_signal = load_and_resample_wav(self.context.sample_rate, this_wav.path)
             test_ready_to_concat.append(this_signal)
 
         if len(test_ready_to_concat) > 0:
