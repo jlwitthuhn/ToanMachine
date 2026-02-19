@@ -241,6 +241,14 @@ def main() -> None:
             signal_config.warble_chords.append(chord_type)
             do_iteration_and_log(chord_type.name, signal_config, args.repeat)
 
+    def iterate_with_added_plucks():
+        original_plucks = signal_config.plucked_chords.copy()
+        for chord_type in ChordType:
+            signal_config.plucked_chords = original_plucks.copy()
+            signal_config.plucked_chords.append(chord_type)
+            signal_config.plucked_chords.append(chord_type)
+            do_iteration_and_log(chord_type.name, signal_config, args.repeat)
+
     try:
         iterate_with_added_warble()
     except KeyboardInterrupt:
