@@ -98,9 +98,10 @@ class TrainTrainPage(QtWidgets.QWizardPage):
             self.progress_bar.setMaximum(self.context.progress_context.iters_total)
             self.progress_bar.setValue(self.context.progress_context.iters_done)
             self.progress_bar.repaint()
-            self.progress_desc_train.setText(
-                f"Training loss: {self.context.progress_context.loss_train:.5f}"
-            )
+            if self.context.progress_context.loss_train is not None:
+                self.progress_desc_train.setText(
+                    f"Training loss: {self.context.progress_context.loss_train:.5f}"
+                )
             if (
                 self.context.progress_context.summary is not None
                 and self.context.progress_context.summary.losses_test is not None
