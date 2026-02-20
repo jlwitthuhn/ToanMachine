@@ -246,7 +246,6 @@ def main() -> None:
         for chord_type in ChordType:
             signal_config.plucked_chords = original_plucks.copy()
             signal_config.plucked_chords.append(chord_type)
-            signal_config.plucked_chords.append(chord_type)
             do_iteration_and_log(chord_type.name, signal_config, args.repeat)
 
     try:
