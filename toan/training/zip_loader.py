@@ -31,13 +31,14 @@ class ZipLoaderContext:
 
 @dataclass
 class _PotentialClick:
-    sample_n: int = 0
+    index_begin: int = 0
+    index_peak: int = 0
     magnitude: float = 0.0
     width: int = 0
 
 
 def _find_clicks(signal: np.ndarray, raw_noise_floor: float) -> list[_PotentialClick]:
-    noise_threshold = raw_noise_floor * 4.0
+    noise_threshold = raw_noise_floor * 10.0
     result = []
     silence_samples_required = 500
     silence_samples_remaining = silence_samples_required
@@ -45,14 +46,15 @@ def _find_clicks(signal: np.ndarray, raw_noise_floor: float) -> list[_PotentialC
     for i in range(len(signal)):
         current_click.width += 1
         this_sample = signal[i]
-        if np.abs(this_sample) > noise_threshold:
+        this_sample_abs = np.abs(this_sample)
+        if this_sample_abs > noise_threshold:
             if silence_samples_remaining <= 0:
-                current_click = _PotentialClick(sample_n=i)
+                current_click = _PotentialClick(index_begin=i)
                 result.append(current_click)
             silence_samples_remaining = silence_samples_required
-            current_click.magnitude = np.fmax(
-                current_click.magnitude, np.abs(this_sample)
-            )
+            if this_sample_abs > current_click.magnitude:
+                current_click.magnitude = this_sample_abs
+                current_click.index_peak = i
         else:
             silence_samples_remaining -= 1
     return result
@@ -187,7 +189,7 @@ def run_zip_loader(context: ZipLoaderContext, input_file: str | io.BytesIO):
             # Grab the two 'biggest' clicks and use those
             maybe_measured_dry_clicks.sort(key=_sort_clicks)
             dry_click_indices = [
-                click.sample_n for click in maybe_measured_dry_clicks[-2:]
+                click.index_begin for click in maybe_measured_dry_clicks[-2:]
             ]
             dry_click_indices.sort()
 
@@ -201,7 +203,7 @@ def run_zip_loader(context: ZipLoaderContext, input_file: str | io.BytesIO):
 
             maybe_measured_wet_clicks.sort(key=_sort_clicks)
             wet_click_indices = [
-                click.sample_n for click in maybe_measured_wet_clicks[-2:]
+                click.index_begin for click in maybe_measured_wet_clicks[-2:]
             ]
             wet_click_indices.sort()
 
