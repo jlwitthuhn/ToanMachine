@@ -6,6 +6,7 @@ import io
 import json
 import threading
 import zipfile
+from dataclasses import dataclass
 
 import numpy as np
 from scipy.io import wavfile
@@ -28,19 +29,37 @@ class ZipLoaderContext:
     errored: bool = False
 
 
-def _find_clicks(signal: np.ndarray, raw_noise_floor: float) -> list[int]:
+@dataclass
+class _PotentialClick:
+    sample_n: int = 0
+    magnitude: float = 0.0
+    width: int = 0
+
+
+def _find_clicks(signal: np.ndarray, raw_noise_floor: float) -> list[_PotentialClick]:
     noise_threshold = raw_noise_floor * 4.0
-    click_indices = []
-    silence_samples_remaining = 0
+    result = []
+    silence_samples_required = 500
+    silence_samples_remaining = silence_samples_required
+    current_click = _PotentialClick()
     for i in range(len(signal)):
         this_sample = signal[i]
         if np.abs(this_sample) > noise_threshold:
             if silence_samples_remaining <= 0:
-                click_indices.append(i)
-            silence_samples_remaining = 500
+                current_click = _PotentialClick(sample_n=i)
+                result.append(current_click)
+            silence_samples_remaining = silence_samples_required
         else:
             silence_samples_remaining -= 1
-    return click_indices
+            current_click.width += 1
+            current_click.magnitude = np.fmax(
+                current_click.magnitude, np.abs(this_sample)
+            )
+    return result
+
+
+def _sort_clicks(click: _PotentialClick) -> float:
+    return click.width * click.magnitude
 
 
 def run_zip_loader(context: ZipLoaderContext, input_file: str | io.BytesIO):
@@ -156,19 +175,35 @@ def run_zip_loader(context: ZipLoaderContext, input_file: str | io.BytesIO):
             wet_noise_floor = np.max(np.abs(wet_silent))
             print_status(f"Wet noise floor: {wet_noise_floor}")
 
-            dry_click_indices = _find_clicks(dry_clicks, wet_noise_floor)
-            if len(dry_click_indices) != 2:
+            # Find all parts of the signal that exceed the noise threshold
+            maybe_measured_dry_clicks = _find_clicks(dry_clicks, wet_noise_floor)
+            if len(maybe_measured_dry_clicks) < 2:
                 print_status(
-                    f"Error: Found {len(dry_click_indices)} dry clicks, should be 2"
+                    f"Error: Found {len(maybe_measured_dry_clicks)} dry click(s), should be at least 2"
                 )
+                print_status(f"{maybe_measured_dry_clicks}")
                 return
 
-            wet_click_indices = _find_clicks(wet_clicks, wet_noise_floor)
-            if len(wet_click_indices) != 2:
+            # Grab the two 'biggest' clicks and use those
+            maybe_measured_dry_clicks.sort(key=_sort_clicks)
+            dry_click_indices = [
+                click.sample_n for click in maybe_measured_dry_clicks[-2:]
+            ]
+            dry_click_indices.sort()
+
+            maybe_measured_wet_clicks = _find_clicks(wet_clicks, wet_noise_floor)
+            if len(maybe_measured_wet_clicks) < 2:
                 print_status(
-                    f"Error: Found {len(wet_click_indices)} wet clicks, should be 2"
+                    f"Error: Found {len(maybe_measured_wet_clicks)} wet click(s), should be at least 2"
                 )
+                print_status(f"{maybe_measured_wet_clicks}")
                 return
+
+            maybe_measured_wet_clicks.sort(key=_sort_clicks)
+            wet_click_indices = [
+                click.sample_n for click in maybe_measured_wet_clicks[-2:]
+            ]
+            wet_click_indices.sort()
 
             # Click delta is the time between two clicks on a single track
             # Click delta delta is the difference between the 'Click deltas' of the wet and dry tracks
