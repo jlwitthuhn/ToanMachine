@@ -49,12 +49,12 @@ def _find_clicks(signal: np.ndarray, raw_noise_floor: float) -> list[_PotentialC
                 current_click = _PotentialClick(sample_n=i)
                 result.append(current_click)
             silence_samples_remaining = silence_samples_required
-        else:
-            silence_samples_remaining -= 1
-            current_click.width += 1
             current_click.magnitude = np.fmax(
                 current_click.magnitude, np.abs(this_sample)
             )
+        else:
+            silence_samples_remaining -= 1
+            current_click.width += 1
     return result
 
 
