@@ -43,6 +43,7 @@ def _find_clicks(signal: np.ndarray, raw_noise_floor: float) -> list[_PotentialC
     silence_samples_remaining = silence_samples_required
     current_click = _PotentialClick()
     for i in range(len(signal)):
+        current_click.width += 1
         this_sample = signal[i]
         if np.abs(this_sample) > noise_threshold:
             if silence_samples_remaining <= 0:
@@ -54,7 +55,6 @@ def _find_clicks(signal: np.ndarray, raw_noise_floor: float) -> list[_PotentialC
             )
         else:
             silence_samples_remaining -= 1
-            current_click.width += 1
     return result
 
 
