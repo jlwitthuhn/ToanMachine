@@ -23,6 +23,7 @@ def generate_generic_chord_pluck_scale(
     single_duration: float,
     offset_duration: float = 1.8e-3,
     decay: float = 0.99,
+    pre_smooth: int = 0,
 ) -> np.ndarray:
     begin_index = get_note_index_by_name(begin_note, begin_octave)
     end_index = get_note_index_by_name(end_note, end_octave)
@@ -37,7 +38,13 @@ def generate_generic_chord_pluck_scale(
         )
         root_frequency = increase_frequency_by_semitones(root_frequency, i)
         this_chord = generate_generic_chord_pluck(
-            sample_rate, shape, root_frequency, single_duration, offset_duration, decay
+            sample_rate,
+            shape,
+            root_frequency,
+            single_duration,
+            offset_duration,
+            decay,
+            pre_smooth,
         )
         chord_list.append(this_chord)
 
@@ -54,6 +61,7 @@ def generate_named_chord_pluck_scale(
     single_duration: float,
     offset_duration: float = 1.8e-3,
     decay: float = 0.99,
+    pre_smooth: int = 0,
 ) -> np.ndarray:
     shape = type.get_shape()
     return generate_generic_chord_pluck_scale(
@@ -66,4 +74,5 @@ def generate_named_chord_pluck_scale(
         single_duration,
         offset_duration,
         decay,
+        pre_smooth,
     )

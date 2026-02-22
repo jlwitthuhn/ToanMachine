@@ -33,6 +33,7 @@ def generate_chromatic_scale(
     steps: int,
     note_duration: float,
     sound_type: ScaleSound,
+    pluck_pre_smooth: int = 0,
 ) -> list[np.ndarray]:
     freqs = _generate_semitone_scale_frequencies(low_freq, steps - 1)
     result = []
@@ -42,7 +43,9 @@ def generate_chromatic_scale(
                 this_tone = generate_tone(sample_rate, freq, note_duration, True)
                 result.append(this_tone)
             case ScaleSound.PLUCK:
-                this_pluck = generate_pluck(sample_rate, freq, note_duration, 0.982)
+                this_pluck = generate_pluck(
+                    sample_rate, freq, note_duration, 0.982, pluck_pre_smooth
+                )
                 this_pluck = this_pluck / np.abs(this_pluck).max()
                 result.append(this_pluck)
             case _:

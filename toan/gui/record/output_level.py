@@ -137,7 +137,7 @@ class RecordOutputLevelPage(QtWidgets.QWizardPage):
         if self.generated_chords is None:
             d_root = get_note_frequency_by_name("D", 3, 440.0)
             d_chord_raw = generate_generic_chord_pluck(
-                self.context.sample_rate, [4, 7], d_root, 0.9, 1.8e-3, 0.992
+                self.context.sample_rate, [4, 7], d_root, 0.9, 1.8e-3, 0.992, 2
             )
             d_chord_2 = d_chord_raw * 0.70
             d_chord_3 = d_chord_2 * 0.70

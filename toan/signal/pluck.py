@@ -15,7 +15,11 @@ SPLIT_A = 0.60
 
 # Generate a pluck using a Karplus-Strong filter over random noise
 def generate_pluck(
-    sample_rate: int, frequency: float, duration: float, decay: float
+    sample_rate: int,
+    frequency: float,
+    duration: float,
+    decay: float,
+    pre_smooth: int = 0,
 ) -> np.ndarray:
     out_sample_count = int(duration * sample_rate)
     result = np.zeros(out_sample_count)
@@ -23,6 +27,9 @@ def generate_pluck(
     buffer_width = int(sample_rate / frequency)
 
     buffer = np.random.uniform(-1.0, 1.0, buffer_width)
+    for _ in range(pre_smooth):
+        for i in range(buffer_width):
+            buffer[i] = buffer[i] * SPLIT_A + buffer[i - 1] * (1.0 - SPLIT_A)
     buffer = buffer / np.max(np.abs(buffer))
 
     previous: float = 0.0
@@ -44,6 +51,7 @@ def generate_generic_chord_pluck(
     duration: float,
     offset_duration: float = 1.8e-3,
     decay: float = 0.99,
+    pre_smooth: int = 0,
 ) -> np.ndarray:
     frequencies: list[float] = [root_frequency]
     for extra_semitones in shape:
@@ -54,7 +62,7 @@ def generate_generic_chord_pluck(
     pluck_list: list[np.ndarray] = []
     for idx, frequency in enumerate(frequencies):
         offset = int(idx * offset_duration * sample_rate)
-        pluck_raw = generate_pluck(sample_rate, frequency, duration, decay)
+        pluck_raw = generate_pluck(sample_rate, frequency, duration, decay, pre_smooth)
         if offset == 0:
             pluck_list.append(pluck_raw)
         else:

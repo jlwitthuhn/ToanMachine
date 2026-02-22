@@ -23,6 +23,7 @@ class CaptureSignalConfig:
     noise_duration: float = 3.5
     pluck_note_duration: float = 0.70
     pluck_decay: float = 0.985
+    pluck_pre_smooth: int = 0
     warble_chords: list[ChordType] = field(
         default_factory=lambda: [
             ChordType.PerfectFifth,
@@ -127,7 +128,11 @@ def _generate_warble_block(
 
 
 def _generate_plucked_block(
-    sample_rate: int, chords: list[ChordType], note_duration: float, pluck_decay: float
+    sample_rate: int,
+    chords: list[ChordType],
+    note_duration: float,
+    pluck_decay: float,
+    pre_smooth: int = 0,
 ) -> np.ndarray:
     if len(chords) == 0:
         return np.zeros(1)
@@ -143,6 +148,7 @@ def _generate_plucked_block(
             note_duration,
             offset_duration,
             pluck_decay,
+            pre_smooth,
         )
 
     buffers = []
@@ -183,6 +189,7 @@ def generate_capture_signal(
         config.plucked_chords,
         config.pluck_note_duration,
         config.pluck_decay,
+        config.pluck_pre_smooth,
     )
     block_white_noise = _generate_white_noise_block(sample_rate, config.noise_duration)
 
