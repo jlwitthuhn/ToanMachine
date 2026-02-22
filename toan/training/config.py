@@ -15,7 +15,7 @@ class TrainingStageConfig:
     # If batch_size is 0, batch_size_list will be used
     batch_size: int = 0
     batch_size_list: list[tuple[float, int]] = field(
-        default_factory=lambda: [(0.0, 24), (0.4, 40), (0.8, 56), (0.95, 72)]
+        default_factory=lambda: [(0.0, 24), (0.4, 40), (0.8, 56)]
     )
     input_sample_width: int = 8192 + 4096
     learn_rate_hi: float = 3.0e-3
