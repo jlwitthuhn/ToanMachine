@@ -15,18 +15,22 @@ from toan.model.metadata import ModelMetadata
 
 
 class ZipLoaderContext:
-    messages_lock = threading.Lock()
-    messages_queue: list[str] = []
+    messages_lock: threading.Lock
+    messages_queue: list[str]
 
     signal_dry: np.ndarray | None = None
     signal_wet: np.ndarray | None = None
     signal_dry_test: np.ndarray | None = None
     signal_wet_test: np.ndarray | None = None
-    metadata: ModelMetadata
+    metadata: ModelMetadata | None = None
     sample_rate: int = 0
 
     complete: bool = False
     errored: bool = False
+
+    def __init__(self):
+        self.messages_lock = threading.Lock()
+        self.messages_queue = []
 
 
 @dataclass
