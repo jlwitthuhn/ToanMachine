@@ -20,7 +20,7 @@ from toan.signal.warble import generate_warble_chord
 class CaptureSignalConfig:
     sweep_duration: float = 12.0
     warble_duration: float = 6.0
-    noise_duration: float = 3.5
+    noise_duration: float = 8.0
     pluck_note_duration: float = 0.70
     pluck_decay: float = 0.985
     pluck_pre_smooth: int = 0
@@ -159,18 +159,11 @@ def _generate_plucked_block(
 
 
 def _generate_white_noise_block(sample_rate: int, duration: float) -> np.ndarray:
-    noise_samples_short = int(sample_rate * duration / 2)
-    white_noise_full = generate_white_noise(noise_samples_short)
-    white_noise_half = white_noise_full * 0.5
-    white_noise_quarter = white_noise_half * 0.5
-    gaussian_samples = int(sample_rate * duration)
-    white_noise_gaussian = generate_white_noise(
-        gaussian_samples
-    ) * generate_gaussian_pulse(gaussian_samples)
-    return concat_signals(
-        [white_noise_full, white_noise_half, white_noise_quarter, white_noise_gaussian],
-        sample_rate // 10,
-    )
+    samples = int(sample_rate * duration)
+    plateau_width = samples // 5
+    white_noise = generate_white_noise(samples)
+    pulse = generate_gaussian_pulse(samples, plateau_width)
+    return white_noise * pulse
 
 
 def generate_capture_signal(
