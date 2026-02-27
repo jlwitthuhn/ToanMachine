@@ -38,7 +38,7 @@ class _PotentialClick:
 
 
 def _find_clicks(signal: np.ndarray, raw_noise_floor: float) -> list[_PotentialClick]:
-    noise_threshold = raw_noise_floor * 10.0
+    noise_threshold = raw_noise_floor * 12.0
     result = []
     silence_samples_required = 500
     silence_samples_remaining = silence_samples_required
