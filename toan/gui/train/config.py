@@ -46,9 +46,9 @@ class TrainConfigPage(QtWidgets.QWizardPage):
 
         self.combo_size = QtWidgets.QComboBox(self)
         for allowed_model in [
-            ModelConfigPreset.NAM_STANDARD,
-            ModelConfigPreset.NAM_LITE,
-            ModelConfigPreset.NAM_FEATHER,
+            ModelConfigPreset.NAM_A1_STANDARD,
+            ModelConfigPreset.NAM_A1_LITE,
+            ModelConfigPreset.NAM_A1_FEATHER,
         ]:
             label = allowed_model.get_label()
             self.combo_size.addItem(label, allowed_model.value)

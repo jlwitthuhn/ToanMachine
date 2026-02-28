@@ -36,7 +36,7 @@ def main():
 
         train_context = TrainingProgressContext()
 
-        model_preset = ModelConfigPreset.NAM_STANDARD
+        model_preset = ModelConfigPreset.NAM_A1_STANDARD
         model_config = get_wavenet_config(model_preset)
         train_context.model_config = model_config
         train_context.metadata = zip_context.metadata

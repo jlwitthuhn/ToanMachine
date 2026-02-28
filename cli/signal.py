@@ -110,7 +110,9 @@ def do_iteration(
 
     print("Beginning training...")
     progress_context = TrainingProgressContext()
-    progress_context.model_config = get_wavenet_config(ModelConfigPreset.NAM_STANDARD)
+    progress_context.model_config = get_wavenet_config(
+        ModelConfigPreset.NAM_A1_STANDARD
+    )
     progress_context.metadata = zip_context.metadata
     progress_context.sample_rate = sample_rate
     progress_context.signal_dry_train = zip_context.signal_dry

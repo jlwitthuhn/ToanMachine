@@ -11,7 +11,7 @@ from toan.model.presets import ModelConfigPreset
 
 def get_wavenet_config(size_preset: ModelConfigPreset) -> NamWaveNetConfig:
     match size_preset:
-        case ModelConfigPreset.NAM_STANDARD:
+        case ModelConfigPreset.NAM_A1_STANDARD:
             return NamWaveNetConfig(
                 layers=[
                     NameWaveNetLayerGroupConfig(
@@ -60,7 +60,7 @@ def get_wavenet_config(size_preset: ModelConfigPreset) -> NamWaveNetConfig:
                     ),
                 ]
             )
-        case ModelConfigPreset.NAM_LITE:
+        case ModelConfigPreset.NAM_A1_LITE:
             return NamWaveNetConfig(
                 layers=[
                     NameWaveNetLayerGroupConfig(
@@ -109,7 +109,7 @@ def get_wavenet_config(size_preset: ModelConfigPreset) -> NamWaveNetConfig:
                     ),
                 ]
             )
-        case ModelConfigPreset.NAM_FEATHER:
+        case ModelConfigPreset.NAM_A1_FEATHER:
             return NamWaveNetConfig(
                 layers=[
                     NameWaveNetLayerGroupConfig(
@@ -158,7 +158,7 @@ def get_wavenet_config(size_preset: ModelConfigPreset) -> NamWaveNetConfig:
                     ),
                 ]
             )
-        case ModelConfigPreset.TOAN_STANDARD_PLUS:
+        case ModelConfigPreset.TOAN_A1_STANDARD_PLUS:
             return NamWaveNetConfig(
                 layers=[
                     NameWaveNetLayerGroupConfig(
