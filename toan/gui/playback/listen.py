@@ -8,7 +8,7 @@ import sounddevice as sd
 from PySide6 import QtWidgets
 
 from toan.gui.playback import PlaybackContext
-from toan.model.nam_wavenet import NamWaveNet
+from toan.model.nam_a1_wavenet import NamWaveNet
 from toan.soundio import SdChannel, generate_descriptions, get_input_devices
 
 LISTEN_TEXT = [

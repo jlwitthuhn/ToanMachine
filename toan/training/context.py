@@ -7,8 +7,8 @@ import threading
 import numpy as np
 
 from toan.model.metadata import ModelMetadata
-from toan.model.nam_wavenet import NamWaveNet
-from toan.model.nam_wavenet_config import NamWaveNetConfig
+from toan.model.nam_a1_wavenet import NamWaveNet
+from toan.model.nam_a1_wavenet_config import NamWaveNetConfig
 from toan.training import TrainingStageSummary
 
 

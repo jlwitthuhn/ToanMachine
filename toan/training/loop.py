@@ -10,7 +10,7 @@ from mlx import core as mx
 from mlx import nn as nn
 from mlx import optimizers as optimizers
 
-from toan.model.nam_wavenet import NamWaveNet
+from toan.model.nam_a1_wavenet import NamWaveNet
 from toan.training import LossFunction, TrainingStageSummary
 from toan.training.config import TrainingConfig, TrainingStageConfig
 from toan.training.context import TrainingProgressContext

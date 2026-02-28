@@ -10,7 +10,10 @@ from mlx import nn, utils
 
 from toan.model.activation import FastTanh, LeakyHardTanh
 from toan.model.metadata import ModelMetadata
-from toan.model.nam_wavenet_config import NameWaveNetLayerGroupConfig, NamWaveNetConfig
+from toan.model.nam_a1_wavenet_config import (
+    NameWaveNetLayerGroupConfig,
+    NamWaveNetConfig,
+)
 from toan.training import LossFunction
 
 # Based on code from Neural Amp Modeler

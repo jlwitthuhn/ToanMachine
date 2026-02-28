@@ -5,7 +5,7 @@
 from PySide6 import QtWidgets
 
 from toan.gui.train.context import TrainingGuiContext
-from toan.model.nam_wavenet_presets import get_wavenet_config
+from toan.model.nam_a1_wavenet_presets import get_wavenet_config
 from toan.model.presets import ModelConfigPreset
 
 

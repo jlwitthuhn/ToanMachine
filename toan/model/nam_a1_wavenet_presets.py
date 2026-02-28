@@ -2,7 +2,10 @@
 # https://www.gnu.org/licenses/gpl-3.0.en.html
 # SPDX-License-Identifier: GPL-3.0-only
 
-from toan.model.nam_wavenet_config import NameWaveNetLayerGroupConfig, NamWaveNetConfig
+from toan.model.nam_a1_wavenet_config import (
+    NameWaveNetLayerGroupConfig,
+    NamWaveNetConfig,
+)
 from toan.model.presets import ModelConfigPreset
 
 

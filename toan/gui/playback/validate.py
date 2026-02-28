@@ -8,8 +8,8 @@ from PySide6 import QtGui, QtWidgets
 
 from toan.gui.playback import PlaybackContext
 from toan.model.metadata import ModelMetadata
-from toan.model.nam_wavenet import NamWaveNet
-from toan.model.nam_wavenet_config import json_wavenet_config
+from toan.model.nam_a1_wavenet import NamWaveNet
+from toan.model.nam_a1_wavenet_config import json_wavenet_config
 
 
 class PlaybackValidatePage(QtWidgets.QWizardPage):

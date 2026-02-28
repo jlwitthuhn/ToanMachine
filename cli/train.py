@@ -10,7 +10,7 @@ from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser
 from matplotlib.figure import Figure
 from tqdm import tqdm
 
-from toan.model.nam_wavenet_presets import get_wavenet_config
+from toan.model.nam_a1_wavenet_presets import get_wavenet_config
 from toan.model.presets import ModelConfigPreset
 from toan.training.config import TrainingConfig
 from toan.training.context import TrainingProgressContext
