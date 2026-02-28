@@ -7,13 +7,13 @@ import threading
 import numpy as np
 
 from toan.model.metadata import ModelMetadata
-from toan.model.nam_a1_wavenet import NamWaveNet
-from toan.model.nam_a1_wavenet_config import NamWaveNetConfig
+from toan.model.nam_a1_wavenet import NamA1WaveNet
+from toan.model.nam_a1_wavenet_config import NamA1WaveNetConfig
 from toan.training import TrainingStageSummary
 
 
 class TrainingProgressContext:
-    model_config: NamWaveNetConfig | None = None
+    model_config: NamA1WaveNetConfig | None = None
     metadata: ModelMetadata | None = None
     sample_rate: int | None = None
 
@@ -28,7 +28,7 @@ class TrainingProgressContext:
     loss_train: float | None = None
     loss_test: float | None = None
 
-    model: NamWaveNet | None = None
+    model: NamA1WaveNet | None = None
     summary: TrainingStageSummary | None = None
 
     quit: bool = False

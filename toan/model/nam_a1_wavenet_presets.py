@@ -3,18 +3,18 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
 from toan.model.nam_a1_wavenet_config import (
-    NameWaveNetLayerGroupConfig,
-    NamWaveNetConfig,
+    NamA1WaveNetConfig,
+    NameA1WaveNetLayerGroupConfig,
 )
 from toan.model.presets import ModelConfigPreset
 
 
-def get_wavenet_config(size_preset: ModelConfigPreset) -> NamWaveNetConfig:
+def get_a1_wavenet_config(size_preset: ModelConfigPreset) -> NamA1WaveNetConfig | None:
     match size_preset:
         case ModelConfigPreset.NAM_A1_STANDARD:
-            return NamWaveNetConfig(
+            return NamA1WaveNetConfig(
                 layers=[
-                    NameWaveNetLayerGroupConfig(
+                    NameA1WaveNetLayerGroupConfig(
                         input_size=1,
                         condition_size=1,
                         head_size=8,
@@ -36,7 +36,7 @@ def get_wavenet_config(size_preset: ModelConfigPreset) -> NamWaveNetConfig:
                         gated=False,
                         head_bias=False,
                     ),
-                    NameWaveNetLayerGroupConfig(
+                    NameA1WaveNetLayerGroupConfig(
                         input_size=16,
                         condition_size=1,
                         head_size=1,
@@ -61,9 +61,9 @@ def get_wavenet_config(size_preset: ModelConfigPreset) -> NamWaveNetConfig:
                 ]
             )
         case ModelConfigPreset.NAM_A1_LITE:
-            return NamWaveNetConfig(
+            return NamA1WaveNetConfig(
                 layers=[
-                    NameWaveNetLayerGroupConfig(
+                    NameA1WaveNetLayerGroupConfig(
                         input_size=1,
                         condition_size=1,
                         head_size=6,
@@ -82,7 +82,7 @@ def get_wavenet_config(size_preset: ModelConfigPreset) -> NamWaveNetConfig:
                         gated=False,
                         head_bias=False,
                     ),
-                    NameWaveNetLayerGroupConfig(
+                    NameA1WaveNetLayerGroupConfig(
                         input_size=12,
                         condition_size=1,
                         head_size=1,
@@ -110,9 +110,9 @@ def get_wavenet_config(size_preset: ModelConfigPreset) -> NamWaveNetConfig:
                 ]
             )
         case ModelConfigPreset.NAM_A1_FEATHER:
-            return NamWaveNetConfig(
+            return NamA1WaveNetConfig(
                 layers=[
-                    NameWaveNetLayerGroupConfig(
+                    NameA1WaveNetLayerGroupConfig(
                         input_size=1,
                         condition_size=1,
                         head_size=4,
@@ -131,7 +131,7 @@ def get_wavenet_config(size_preset: ModelConfigPreset) -> NamWaveNetConfig:
                         gated=False,
                         head_bias=False,
                     ),
-                    NameWaveNetLayerGroupConfig(
+                    NameA1WaveNetLayerGroupConfig(
                         input_size=8,
                         condition_size=1,
                         head_size=1,
@@ -159,9 +159,9 @@ def get_wavenet_config(size_preset: ModelConfigPreset) -> NamWaveNetConfig:
                 ]
             )
         case ModelConfigPreset.TOAN_A1_STANDARD_PLUS:
-            return NamWaveNetConfig(
+            return NamA1WaveNetConfig(
                 layers=[
-                    NameWaveNetLayerGroupConfig(
+                    NameA1WaveNetLayerGroupConfig(
                         input_size=1,
                         condition_size=1,
                         head_size=12,
@@ -183,7 +183,7 @@ def get_wavenet_config(size_preset: ModelConfigPreset) -> NamWaveNetConfig:
                         gated=False,
                         head_bias=False,
                     ),
-                    NameWaveNetLayerGroupConfig(
+                    NameA1WaveNetLayerGroupConfig(
                         input_size=24,
                         condition_size=1,
                         head_size=1,
@@ -208,4 +208,4 @@ def get_wavenet_config(size_preset: ModelConfigPreset) -> NamWaveNetConfig:
                 ]
             )
         case _:
-            assert False
+            return None

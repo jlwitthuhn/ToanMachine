@@ -8,7 +8,7 @@ import sounddevice as sd
 from PySide6 import QtWidgets
 
 from toan.gui.playback import PlaybackContext
-from toan.model.nam_a1_wavenet import NamWaveNet
+from toan.model.nam_a1_wavenet import NamA1WaveNet
 from toan.soundio import SdChannel, generate_descriptions, get_input_devices
 
 LISTEN_TEXT = [
@@ -131,6 +131,6 @@ class PlaybackListenPage(QtWidgets.QWizardPage):
         )
 
 
-def _convert_complete_signal(raw_signal: np.ndarray, model: NamWaveNet) -> np.ndarray:
+def _convert_complete_signal(raw_signal: np.ndarray, model: NamA1WaveNet) -> np.ndarray:
     output = model(mx.array(raw_signal).reshape(1, -1))
     return np.array(output.squeeze())

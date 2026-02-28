@@ -10,7 +10,7 @@ from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser
 from matplotlib.figure import Figure
 from tqdm import tqdm
 
-from toan.model.nam_a1_wavenet_presets import get_wavenet_config
+from toan.model.nam_a1_wavenet_presets import get_a1_wavenet_config
 from toan.model.presets import ModelConfigPreset
 from toan.training.config import TrainingConfig
 from toan.training.context import TrainingProgressContext
@@ -37,7 +37,7 @@ def main():
         train_context = TrainingProgressContext()
 
         model_preset = ModelConfigPreset.NAM_A1_STANDARD
-        model_config = get_wavenet_config(model_preset)
+        model_config = get_a1_wavenet_config(model_preset)
         train_context.model_config = model_config
         train_context.metadata = zip_context.metadata
         train_context.sample_rate = zip_context.sample_rate

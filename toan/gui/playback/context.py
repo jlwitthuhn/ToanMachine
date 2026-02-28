@@ -2,10 +2,10 @@
 # https://www.gnu.org/licenses/gpl-3.0.en.html
 # SPDX-License-Identifier: GPL-3.0-only
 
-from toan.model.nam_a1_wavenet import NamWaveNet
+from toan.model.nam_a1_wavenet import NamA1WaveNet
 
 
 class PlaybackContext:
     nam_model_path: str | None = None
-    nam_model: NamWaveNet | None = None
+    nam_model: NamA1WaveNet | None = None
     sample_rate: int = 0

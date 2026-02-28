@@ -6,7 +6,7 @@ from dataclasses import dataclass, field
 
 
 @dataclass
-class NameWaveNetLayerGroupConfig:
+class NameA1WaveNetLayerGroupConfig:
     input_size: int
     condition_size: int
     head_size: int
@@ -23,8 +23,8 @@ class NameWaveNetLayerGroupConfig:
 
 
 @dataclass
-class NamWaveNetConfig:
-    layers: list[NameWaveNetLayerGroupConfig] = field(default_factory=list)
+class NamA1WaveNetConfig:
+    layers: list[NameA1WaveNetLayerGroupConfig] = field(default_factory=list)
     head_config: None = None
     head_scale: float = 0.02
 
@@ -42,7 +42,7 @@ class NamWaveNetConfig:
         return result
 
 
-def json_wavenet_config(config: dict) -> NamWaveNetConfig:
+def json_wavenet_config(config: dict) -> NamA1WaveNetConfig:
     if "layers" not in config or not isinstance(config["layers"], list):
         raise TypeError("root key 'layers' must be a list")
 
@@ -74,9 +74,9 @@ def json_wavenet_config(config: dict) -> NamWaveNetConfig:
         if "head_bias" not in layer or not isinstance(layer["head_bias"], bool):
             raise TypeError("layer key 'head_bias' must be a bool")
 
-    result = NamWaveNetConfig()
+    result = NamA1WaveNetConfig()
     for layer in layers:
-        out_layer = NameWaveNetLayerGroupConfig(
+        out_layer = NameA1WaveNetLayerGroupConfig(
             input_size=layer["input_size"],
             condition_size=layer["condition_size"],
             head_size=layer["head_size"],

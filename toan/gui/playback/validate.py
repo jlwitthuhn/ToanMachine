@@ -8,7 +8,7 @@ from PySide6 import QtGui, QtWidgets
 
 from toan.gui.playback import PlaybackContext
 from toan.model.metadata import ModelMetadata
-from toan.model.nam_a1_wavenet import NamWaveNet
+from toan.model.nam_a1_wavenet import NamA1WaveNet
 from toan.model.nam_a1_wavenet_config import json_wavenet_config
 
 
@@ -88,7 +88,7 @@ class PlaybackValidatePage(QtWidgets.QWizardPage):
             "Playback NAM model", "Playback make", "Playback model"
         )
 
-        model = NamWaveNet(model_config, metadata, self.context.sample_rate)
+        model = NamA1WaveNet(model_config, metadata, self.context.sample_rate)
         model_params = model.parameter_count
         self.text_edit.append(f"Model parameters: {model_params}")
 

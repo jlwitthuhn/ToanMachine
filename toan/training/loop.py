@@ -10,7 +10,7 @@ from mlx import core as mx
 from mlx import nn as nn
 from mlx import optimizers as optimizers
 
-from toan.model.nam_a1_wavenet import NamWaveNet
+from toan.model.nam_a1_wavenet import NamA1WaveNet
 from toan.training import LossFunction, TrainingStageSummary
 from toan.training.config import TrainingConfig, TrainingStageConfig
 from toan.training.context import TrainingProgressContext
@@ -19,7 +19,7 @@ from toan.training.data_loader import TrainingDataLoader
 
 def run_training_loop(context: TrainingProgressContext, config: TrainingConfig):
     assert len(config.stages) > 0
-    model = NamWaveNet(
+    model = NamA1WaveNet(
         context.model_config,
         context.metadata,
         context.sample_rate,

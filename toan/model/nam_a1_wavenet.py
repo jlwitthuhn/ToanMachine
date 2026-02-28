@@ -11,8 +11,8 @@ from mlx import nn, utils
 from toan.model.activation import FastTanh, LeakyHardTanh
 from toan.model.metadata import ModelMetadata
 from toan.model.nam_a1_wavenet_config import (
-    NameWaveNetLayerGroupConfig,
-    NamWaveNetConfig,
+    NamA1WaveNetConfig,
+    NameA1WaveNetLayerGroupConfig,
 )
 from toan.training import LossFunction
 
@@ -53,7 +53,7 @@ def _get_activation(activation: str) -> nn.Module:
 # Specialization to support exporting/importing to a single huge array
 # And also to transpose inputs to play nice with MLX dimension ordering
 # Functionally the same as normal conv1d
-class _NamConv1dLayer(nn.Conv1d):
+class _NamA1Conv1dLayer(nn.Conv1d):
     def export_nam_linear_weights(self) -> list[float]:
         result = []
         if self.weight is not None:
@@ -93,10 +93,10 @@ class _NamConv1dLayer(nn.Conv1d):
         return i
 
 
-class _NamWaveNetLayer(nn.Module):
+class _NamA1WaveNetLayer(nn.Module):
     channels: int
-    conv: _NamConv1dLayer
-    input_mixer: _NamConv1dLayer
+    conv: _NamA1Conv1dLayer
+    input_mixer: _NamA1Conv1dLayer
     activation: nn.Module
     activation_name: str
     gated: bool
@@ -113,13 +113,15 @@ class _NamWaveNetLayer(nn.Module):
         super().__init__()
         mid_channels = 2 * channels if gated else channels
         self.channels = channels
-        self.conv = _NamConv1dLayer(
+        self.conv = _NamA1Conv1dLayer(
             channels, mid_channels, kernel_size, dilation=dilation
         )
-        self.input_mixer = _NamConv1dLayer(condition_size, mid_channels, 1, bias=False)
+        self.input_mixer = _NamA1Conv1dLayer(
+            condition_size, mid_channels, 1, bias=False
+        )
         self.activation = _get_activation(activation)
         self.activation_name = activation
-        self.conv1x1 = _NamConv1dLayer(channels, channels, 1)
+        self.conv1x1 = _NamA1Conv1dLayer(channels, channels, 1)
         self.gated = gated
 
     def __call__(
@@ -154,20 +156,20 @@ class _NamWaveNetLayer(nn.Module):
         return i
 
 
-class _NamWaveNetLayerGroup(nn.Module):
-    config: NameWaveNetLayerGroupConfig
-    rechannel: _NamConv1dLayer
-    layers: list[_NamWaveNetLayer]
-    head_rechannel: _NamConv1dLayer
+class _NamA1WaveNetLayerGroup(nn.Module):
+    config: NameA1WaveNetLayerGroupConfig
+    rechannel: _NamA1Conv1dLayer
+    layers: list[_NamA1WaveNetLayer]
+    head_rechannel: _NamA1Conv1dLayer
 
-    def __init__(self, config: NameWaveNetLayerGroupConfig):
+    def __init__(self, config: NameA1WaveNetLayerGroupConfig):
         super().__init__()
         self.config = config
-        self.rechannel = _NamConv1dLayer(
+        self.rechannel = _NamA1Conv1dLayer(
             config.input_size, config.channels, 1, bias=False
         )
         self.layers = [
-            _NamWaveNetLayer(
+            _NamA1WaveNetLayer(
                 config.condition_size,
                 config.channels,
                 config.kernel_size,
@@ -177,7 +179,7 @@ class _NamWaveNetLayerGroup(nn.Module):
             )
             for dilation in config.dilations
         ]
-        self.head_rechannel = _NamConv1dLayer(
+        self.head_rechannel = _NamA1Conv1dLayer(
             config.channels, config.head_size, 1, bias=config.head_bias
         )
 
@@ -215,11 +217,11 @@ class _NamWaveNetLayerGroup(nn.Module):
         return 1 + (self.config.kernel_size - 1) * sum(self.config.dilations)
 
 
-class NamWaveNet(nn.Module):
-    layer_groups: list[_NamWaveNetLayerGroup]
+class NamA1WaveNet(nn.Module):
+    layer_groups: list[_NamA1WaveNetLayerGroup]
     head: None = None
 
-    config: NamWaveNetConfig
+    config: NamA1WaveNetConfig
     metadata: ModelMetadata
     sample_rate: int = 0
 
@@ -255,7 +257,7 @@ class NamWaveNet(nn.Module):
 
     def __init__(
         self,
-        config: NamWaveNetConfig,
+        config: NamA1WaveNetConfig,
         metadata: ModelMetadata,
         sample_rate: int,
         rng_seed: int = 0x35,
@@ -269,7 +271,7 @@ class NamWaveNet(nn.Module):
         self.metadata = metadata
         self.sample_rate = sample_rate
         self.layer_groups = [
-            _NamWaveNetLayerGroup(layer_config) for layer_config in config.layers
+            _NamA1WaveNetLayerGroup(layer_config) for layer_config in config.layers
         ]
         assert config.head_config is None
 

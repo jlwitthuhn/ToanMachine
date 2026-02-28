@@ -5,7 +5,7 @@
 from PySide6 import QtWidgets
 
 from toan.gui.train.context import TrainingGuiContext
-from toan.model.nam_a1_wavenet_presets import get_wavenet_config
+from toan.model.nam_a1_wavenet_presets import get_a1_wavenet_config
 from toan.model.presets import ModelConfigPreset
 
 
@@ -69,7 +69,7 @@ class TrainConfigPage(QtWidgets.QWizardPage):
         self.context.loaded_metadata.name = self.edit_model_name.text()
         self.context.loaded_metadata.gear_make = self.edit_device_make.text()
         self.context.loaded_metadata.gear_model = self.edit_device_model.text()
-        self.context.model_config = get_wavenet_config(
+        self.context.model_config = get_a1_wavenet_config(
             ModelConfigPreset(self.combo_size.currentData())
         )
         self.context.loaded_metadata.comment = self.edit_comment.text()

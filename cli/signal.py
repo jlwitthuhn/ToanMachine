@@ -12,7 +12,7 @@ from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser
 import numpy as np
 
 from toan.mix import concat_signals
-from toan.model.nam_a1_wavenet_presets import get_wavenet_config
+from toan.model.nam_a1_wavenet_presets import get_a1_wavenet_config
 from toan.model.presets import ModelConfigPreset
 from toan.music.chord import ChordType
 from toan.persistence import get_user_wav_list
@@ -110,7 +110,7 @@ def do_iteration(
 
     print("Beginning training...")
     progress_context = TrainingProgressContext()
-    progress_context.model_config = get_wavenet_config(
+    progress_context.model_config = get_a1_wavenet_config(
         ModelConfigPreset.NAM_A1_STANDARD
     )
     progress_context.metadata = zip_context.metadata
