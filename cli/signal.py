@@ -31,11 +31,20 @@ from toan.zip import create_training_zip
 
 @dataclass
 class _LossStats:
-    min: float
-    mean: float
+    min: float = math.inf
+    max: float = math.inf
+    std: float = math.inf
+    med: float = math.inf
+    mean: float = math.inf
 
     def as_formatted_str(self) -> str:
-        return "\n".join([f" min: {self.min}", f"mean: {self.mean}"])
+        vars = [f" min: {self.min}", f" max: {self.max}"]
+        if self.std < math.inf:
+            vars.append(f" std: {self.std}")
+        if self.med < math.inf:
+            vars.append(f" med: {self.med}")
+        vars.append(f"mean: {self.mean}")
+        return "\n".join(vars)
 
 
 def _parse_colon_syntax(device_str: str) -> SdChannel | None:
@@ -234,8 +243,12 @@ def main() -> None:
             )
             losses.append(loss)
         loss_min: float = np.min(losses)
+        loss_max: float = np.max(losses)
         loss_mean: float = float(np.mean(losses))
-        loss_stats = _LossStats(min=loss_min, mean=loss_mean)
+        loss_stats = _LossStats(min=loss_min, max=loss_max, mean=loss_mean)
+        if len(losses) >= 3:
+            loss_stats.std = float(np.std(losses))
+            loss_stats.med = float(np.median(losses))
         print(f"{label} summary:")
         print(loss_stats.as_formatted_str())
         loss_dict[label] = loss_stats
@@ -268,10 +281,12 @@ def main() -> None:
         print("Interrupted, aborting...")
 
     print()
-    print("\n++ Summary ++\n")
+    print("++ Summary ++")
+    print()
     for label, stats in loss_dict.items():
         print(f"{label}:")
         print(stats.as_formatted_str())
+        print()
 
 
 if __name__ == "__main__":
