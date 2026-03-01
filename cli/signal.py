@@ -8,6 +8,7 @@
 import math
 import time
 from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser
+from dataclasses import dataclass
 
 import numpy as np
 
@@ -26,6 +27,15 @@ from toan.training.loop import run_training_loop
 from toan.training.zip_loader import ZipLoaderContext, run_zip_loader
 from toan.wav import load_and_resample_wav
 from toan.zip import create_training_zip
+
+
+@dataclass
+class _LossStats:
+    min: float
+    mean: float
+
+    def as_formatted_str(self) -> str:
+        return "\n".join([f" min: {self.min}", f"mean: {self.mean}"])
 
 
 def _parse_colon_syntax(device_str: str) -> SdChannel | None:
@@ -203,7 +213,7 @@ def main() -> None:
 
     print("Beginning main loop...")
 
-    loss_dict: dict[str, tuple[float, float]] = {}
+    loss_dict: dict[str, _LossStats] = {}
 
     def do_iteration_and_log(
         label: str, capture_config: CaptureSignalConfig, count: int = 1
@@ -225,8 +235,10 @@ def main() -> None:
             losses.append(loss)
         loss_min: float = np.min(losses)
         loss_mean: float = float(np.mean(losses))
-        print(f"{label} loss: {loss_min}, {loss_mean}")
-        loss_dict[label] = (loss_min, loss_mean)
+        loss_stats = _LossStats(min=loss_min, mean=loss_mean)
+        print(f"{label} summary:")
+        print(loss_stats.as_formatted_str())
+        loss_dict[label] = loss_stats
 
     signal_config = CaptureSignalConfig()
     do_iteration_and_log("default", signal_config, args.repeat)
@@ -256,12 +268,10 @@ def main() -> None:
         print("Interrupted, aborting...")
 
     print()
-    print("Summary:")
-    for label, (loss_min, loss_mean) in loss_dict.items():
-        if loss_min < loss_mean:
-            print(f"{label:<12}: {loss_min:0.7f}, {loss_mean:0.7f}")
-        else:
-            print(f"{label:<12}: {loss_mean:0.7f}")
+    print("\n++ Summary ++\n")
+    for label, stats in loss_dict.items():
+        print(f"{label}:")
+        print(stats.as_formatted_str())
 
 
 if __name__ == "__main__":
