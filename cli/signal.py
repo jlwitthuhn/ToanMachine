@@ -93,7 +93,7 @@ def do_iteration(
         test_offset = len(signal_dry)
         signal_dry = concat_signals([signal_dry, extra_signal_test], sample_rate // 2)
 
-    record_attempts = 4
+    record_attempts = 5
     zip_context: ZipLoaderContext | None = None
     for i in range(record_attempts):
         print(f"Beginning recording attempt {i}...")
@@ -123,11 +123,13 @@ def do_iteration(
         run_zip_loader(zip_context, zip_buffer)
         zip_buffer.close()
 
-        if zip_context.errored:
-            print("Failed to load zip file, replaying log...")
-            for line in zip_context.messages_queue:
-                print(f">> {line}")
-            continue
+        if not zip_context.errored:
+            # Stop looping on success
+            break
+
+        print("Failed to load zip file, replaying log...")
+        for line in zip_context.messages_queue:
+            print(f">> {line}")
 
     if zip_context is None or zip_context.errored:
         print(
