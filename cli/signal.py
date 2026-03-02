@@ -93,38 +93,47 @@ def do_iteration(
         test_offset = len(signal_dry)
         signal_dry = concat_signals([signal_dry, extra_signal_test], sample_rate // 2)
 
-    print("Beginning recording...")
-    record_controller = RecordWetController(
-        sample_rate, signal_dry, channel_in, channel_out
-    )
-    record_controller.start()
+    record_attempts = 4
+    zip_context: ZipLoaderContext | None = None
+    for i in range(record_attempts):
+        print(f"Beginning recording attempt {i}...")
+        record_controller = RecordWetController(
+            sample_rate, signal_dry, channel_in, channel_out
+        )
+        record_controller.start()
 
-    while not record_controller.is_complete():
-        time.sleep(0.0)
-    signal_wet = record_controller.get_recorded_signal()
-    record_controller.close()
-    print(f"Recording complete, got {len(signal_wet)} samples")
+        while not record_controller.is_complete():
+            time.sleep(0.0)
+        signal_wet = record_controller.get_recorded_signal()
+        record_controller.close()
+        print(f"Recording complete, got {len(signal_wet)} samples")
 
-    print("Packaging recording...")
-    zip_buffer = create_training_zip(
-        sample_rate,
-        signal_dry,
-        signal_wet,
-        "Test Make",
-        "Test Model",
-        test_offset,
-    )
+        print("Packaging recording...")
+        zip_buffer = create_training_zip(
+            sample_rate,
+            signal_dry,
+            signal_wet,
+            "Test Make",
+            "Test Model",
+            test_offset,
+        )
 
-    print("Loading zip file...")
-    zip_context = ZipLoaderContext()
-    run_zip_loader(zip_context, zip_buffer)
-    zip_buffer.close()
+        print("Loading zip file...")
+        zip_context = ZipLoaderContext()
+        run_zip_loader(zip_context, zip_buffer)
+        zip_buffer.close()
 
-    if zip_context.errored:
-        print("Failed to load zip file, replaying log...")
-        for line in zip_context.messages_queue:
-            print(f">> {line}")
-        return math.inf
+        if zip_context.errored:
+            print("Failed to load zip file, replaying log...")
+            for line in zip_context.messages_queue:
+                print(f">> {line}")
+            continue
+
+    if zip_context is None or zip_context.errored:
+        print(
+            f"Failed to load zip file after {record_attempts} attempts, reporting 100 loss"
+        )
+        return 100
     assert zip_context.complete
 
     print("Beginning training...")
