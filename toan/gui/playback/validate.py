@@ -147,6 +147,7 @@ class PlaybackValidatePage(QtWidgets.QWizardPage):
         except TypeError as e:
             self.text_edit.append("Error: a2 wavenet config has invalid contents")
             self.text_edit.append(f"> {e.__str__()}")
+            return
         except:
             self.text_edit.append(
                 "Error: encountered unknown error while parsing a2 wavenet config"
