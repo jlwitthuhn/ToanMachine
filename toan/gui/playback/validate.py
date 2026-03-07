@@ -10,6 +10,7 @@ from toan.gui.playback import PlaybackContext
 from toan.model.metadata import ModelMetadata
 from toan.model.nam_a1_wavenet import NamA1WaveNet
 from toan.model.nam_a1_wavenet_config import json_a1_wavenet_config
+from toan.model.nam_a2_wavenet_config import json_a2_wavenet_config
 
 
 class PlaybackValidatePage(QtWidgets.QWizardPage):
@@ -95,7 +96,7 @@ class PlaybackValidatePage(QtWidgets.QWizardPage):
         try:
             model_config = json_a1_wavenet_config(nam_json["config"])
         except:
-            self.text_edit.append("Error: wavenet config is not valid")
+            self.text_edit.append("Error: a1 wavenet config is not valid")
             return
 
         self.text_edit.append("Creating model...")
@@ -140,5 +141,11 @@ class PlaybackValidatePage(QtWidgets.QWizardPage):
             return
 
         self.text_edit.append("Loading config...")
+
+        try:
+            model_config = json_a2_wavenet_config(nam_json["config"])
+        except:
+            self.text_edit.append("Error: a1 wavenet config is not valid")
+            return
 
         raise NotImplemented
