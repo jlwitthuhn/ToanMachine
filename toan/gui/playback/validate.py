@@ -9,7 +9,7 @@ from PySide6 import QtGui, QtWidgets
 from toan.gui.playback import PlaybackContext
 from toan.model.metadata import ModelMetadata
 from toan.model.nam_a1_wavenet import NamA1WaveNet
-from toan.model.nam_a1_wavenet_config import json_wavenet_config
+from toan.model.nam_a1_wavenet_config import json_a1_wavenet_config
 
 
 class PlaybackValidatePage(QtWidgets.QWizardPage):
@@ -51,6 +51,10 @@ class PlaybackValidatePage(QtWidgets.QWizardPage):
             self.text_edit.append("Error: Root json object must be dict")
             return
 
+        if "version" not in nam_json or not isinstance(nam_json["version"], str):
+            self.text_edit.append("Error: Root key 'version' must be str")
+            return
+
         if "sample_rate" not in nam_json or not isinstance(
             nam_json["sample_rate"], int
         ):
@@ -58,6 +62,18 @@ class PlaybackValidatePage(QtWidgets.QWizardPage):
             return
         self.context.sample_rate = nam_json["sample_rate"]
 
+        json_version = nam_json["version"]
+        if json_version == "0.5.4":
+            self._init_a1(nam_json)
+        elif json_version == "0.6.0":
+            self._init_a2(nam_json)
+        else:
+            self.text_edit.append(f"Error: Unsupported version: {json_version}")
+
+    def isComplete(self):
+        return self.context.nam_model is not None
+
+    def _init_a1(self, nam_json: dict):
         if "architecture" not in nam_json:
             self.text_edit.append("Error: Architecture is not specified")
             return
@@ -77,7 +93,7 @@ class PlaybackValidatePage(QtWidgets.QWizardPage):
         self.text_edit.append("Loading config...")
 
         try:
-            model_config = json_wavenet_config(nam_json["config"])
+            model_config = json_a1_wavenet_config(nam_json["config"])
         except:
             self.text_edit.append("Error: wavenet config is not valid")
             return
@@ -106,5 +122,23 @@ class PlaybackValidatePage(QtWidgets.QWizardPage):
         self.context.nam_model = model
         self.completeChanged.emit()
 
-    def isComplete(self):
-        return self.context.nam_model is not None
+    def _init_a2(self, nam_json: dict):
+        if "architecture" not in nam_json:
+            self.text_edit.append("Error: Architecture is not specified")
+            return
+
+        arch = nam_json["architecture"]
+        if not isinstance(arch, str):
+            self.text_edit.append("Error: Architecture is not a string")
+            return
+        if arch != "WaveNet":
+            self.text_edit.append(f"Error: Unsupported architecture: {arch}")
+            return
+
+        if "config" not in nam_json:
+            self.text_edit.append("Error: Model config is not specified")
+            return
+
+        self.text_edit.append("Loading config...")
+
+        raise NotImplemented

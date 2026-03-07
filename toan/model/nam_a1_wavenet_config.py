@@ -1,12 +1,13 @@
 # This file is part of Toan Machine and is licensed under the GPLv3
 # https://www.gnu.org/licenses/gpl-3.0.en.html
 # SPDX-License-Identifier: GPL-3.0-only
+
 import dataclasses
 from dataclasses import dataclass, field
 
 
 @dataclass
-class NameA1WaveNetLayerGroupConfig:
+class NamA1WaveNetLayerGroupConfig:
     input_size: int
     condition_size: int
     head_size: int
@@ -24,7 +25,7 @@ class NameA1WaveNetLayerGroupConfig:
 
 @dataclass
 class NamA1WaveNetConfig:
-    layers: list[NameA1WaveNetLayerGroupConfig] = field(default_factory=list)
+    layers: list[NamA1WaveNetLayerGroupConfig] = field(default_factory=list)
     head_config: None = None
     head_scale: float = 0.02
 
@@ -42,7 +43,7 @@ class NamA1WaveNetConfig:
         return result
 
 
-def json_wavenet_config(config: dict) -> NamA1WaveNetConfig:
+def json_a1_wavenet_config(config: dict) -> NamA1WaveNetConfig:
     if "layers" not in config or not isinstance(config["layers"], list):
         raise TypeError("root key 'layers' must be a list")
 
@@ -76,7 +77,7 @@ def json_wavenet_config(config: dict) -> NamA1WaveNetConfig:
 
     result = NamA1WaveNetConfig()
     for layer in layers:
-        out_layer = NameA1WaveNetLayerGroupConfig(
+        out_layer = NamA1WaveNetLayerGroupConfig(
             input_size=layer["input_size"],
             condition_size=layer["condition_size"],
             head_size=layer["head_size"],

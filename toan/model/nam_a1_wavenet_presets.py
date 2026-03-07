@@ -4,7 +4,7 @@
 
 from toan.model.nam_a1_wavenet_config import (
     NamA1WaveNetConfig,
-    NameA1WaveNetLayerGroupConfig,
+    NamA1WaveNetLayerGroupConfig,
 )
 from toan.model.presets import ModelConfigPreset
 
@@ -14,7 +14,7 @@ def get_a1_wavenet_config(size_preset: ModelConfigPreset) -> NamA1WaveNetConfig 
         case ModelConfigPreset.NAM_A1_STANDARD:
             return NamA1WaveNetConfig(
                 layers=[
-                    NameA1WaveNetLayerGroupConfig(
+                    NamA1WaveNetLayerGroupConfig(
                         input_size=1,
                         condition_size=1,
                         head_size=8,
@@ -36,7 +36,7 @@ def get_a1_wavenet_config(size_preset: ModelConfigPreset) -> NamA1WaveNetConfig 
                         gated=False,
                         head_bias=False,
                     ),
-                    NameA1WaveNetLayerGroupConfig(
+                    NamA1WaveNetLayerGroupConfig(
                         input_size=16,
                         condition_size=1,
                         head_size=1,
@@ -63,7 +63,7 @@ def get_a1_wavenet_config(size_preset: ModelConfigPreset) -> NamA1WaveNetConfig 
         case ModelConfigPreset.NAM_A1_LITE:
             return NamA1WaveNetConfig(
                 layers=[
-                    NameA1WaveNetLayerGroupConfig(
+                    NamA1WaveNetLayerGroupConfig(
                         input_size=1,
                         condition_size=1,
                         head_size=6,
@@ -82,7 +82,7 @@ def get_a1_wavenet_config(size_preset: ModelConfigPreset) -> NamA1WaveNetConfig 
                         gated=False,
                         head_bias=False,
                     ),
-                    NameA1WaveNetLayerGroupConfig(
+                    NamA1WaveNetLayerGroupConfig(
                         input_size=12,
                         condition_size=1,
                         head_size=1,
@@ -112,7 +112,7 @@ def get_a1_wavenet_config(size_preset: ModelConfigPreset) -> NamA1WaveNetConfig 
         case ModelConfigPreset.NAM_A1_FEATHER:
             return NamA1WaveNetConfig(
                 layers=[
-                    NameA1WaveNetLayerGroupConfig(
+                    NamA1WaveNetLayerGroupConfig(
                         input_size=1,
                         condition_size=1,
                         head_size=4,
@@ -131,7 +131,7 @@ def get_a1_wavenet_config(size_preset: ModelConfigPreset) -> NamA1WaveNetConfig 
                         gated=False,
                         head_bias=False,
                     ),
-                    NameA1WaveNetLayerGroupConfig(
+                    NamA1WaveNetLayerGroupConfig(
                         input_size=8,
                         condition_size=1,
                         head_size=1,
@@ -161,7 +161,7 @@ def get_a1_wavenet_config(size_preset: ModelConfigPreset) -> NamA1WaveNetConfig 
         case ModelConfigPreset.TOAN_A1_STANDARD_PLUS:
             return NamA1WaveNetConfig(
                 layers=[
-                    NameA1WaveNetLayerGroupConfig(
+                    NamA1WaveNetLayerGroupConfig(
                         input_size=1,
                         condition_size=1,
                         head_size=12,
@@ -183,7 +183,7 @@ def get_a1_wavenet_config(size_preset: ModelConfigPreset) -> NamA1WaveNetConfig 
                         gated=False,
                         head_bias=False,
                     ),
-                    NameA1WaveNetLayerGroupConfig(
+                    NamA1WaveNetLayerGroupConfig(
                         input_size=24,
                         condition_size=1,
                         head_size=1,

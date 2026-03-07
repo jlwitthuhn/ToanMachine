@@ -12,7 +12,7 @@ from toan.model.activation import FastTanh, LeakyHardTanh
 from toan.model.metadata import ModelMetadata
 from toan.model.nam_a1_wavenet_config import (
     NamA1WaveNetConfig,
-    NameA1WaveNetLayerGroupConfig,
+    NamA1WaveNetLayerGroupConfig,
 )
 from toan.training import LossFunction
 
@@ -157,12 +157,12 @@ class _NamA1WaveNetLayer(nn.Module):
 
 
 class _NamA1WaveNetLayerGroup(nn.Module):
-    config: NameA1WaveNetLayerGroupConfig
+    config: NamA1WaveNetLayerGroupConfig
     rechannel: _NamA1Conv1dLayer
     layers: list[_NamA1WaveNetLayer]
     head_rechannel: _NamA1Conv1dLayer
 
-    def __init__(self, config: NameA1WaveNetLayerGroupConfig):
+    def __init__(self, config: NamA1WaveNetLayerGroupConfig):
         super().__init__()
         self.config = config
         self.rechannel = _NamA1Conv1dLayer(
