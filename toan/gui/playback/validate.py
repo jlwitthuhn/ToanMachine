@@ -144,8 +144,15 @@ class PlaybackValidatePage(QtWidgets.QWizardPage):
 
         try:
             model_config = json_a2_wavenet_config(nam_json["config"])
+        except TypeError as e:
+            self.text_edit.append("Error: a2 wavenet config has invalid contents")
+            self.text_edit.append(f"> {e.__str__()}")
         except:
-            self.text_edit.append("Error: a1 wavenet config is not valid")
+            self.text_edit.append(
+                "Error: encountered unknown error while parsing a2 wavenet config"
+            )
             return
+
+        print(model_config)
 
         raise NotImplemented
