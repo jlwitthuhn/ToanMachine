@@ -61,3 +61,33 @@ class LeakyHardTanh(nn.Module):
             return (x - self.max_val) * self.max_slope + self.max_val
         else:
             return x
+
+
+def get_activation_module(activation: str) -> nn.Module:
+    match activation:
+        case "Fasttanh":
+            return FastTanh()
+        case "Hardswish":
+            return nn.Hardswish()
+        case "Hardtanh":
+            return nn.HardTanh()
+        case "LeakyHardtanh":
+            warnings.warn("Creating leaky hard tanh with default config")
+            return LeakyHardTanh()
+        case "LeakyReLU":
+            warnings.warn("Creating leaky relu with default config")
+            return nn.LeakyReLU()
+        case "PReLU":
+            # This will need to be implemented as a per-channel activation
+            # where each channel has a different init value
+            warnings.warn("Creating prelu with default config")
+            return nn.PReLU()
+        case "ReLU":
+            return nn.ReLU()
+        case "Sigmoid":
+            return nn.Sigmoid()
+        case "SiLU":
+            return nn.SiLU()
+        case "Tanh":
+            return nn.Tanh()
+    assert False

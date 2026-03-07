@@ -8,7 +8,7 @@ import warnings
 import mlx.core as mx
 from mlx import nn, utils
 
-from toan.model.activation import FastTanh, LeakyHardTanh
+from toan.model.activation import FastTanh, LeakyHardTanh, get_activation_module
 from toan.model.metadata import ModelMetadata
 from toan.model.nam_a1_wavenet_config import (
     NamA1WaveNetConfig,
@@ -18,36 +18,6 @@ from toan.training import LossFunction
 
 # Based on code from Neural Amp Modeler
 # https://github.com/sdatkinson/neural-amp-modeler/blob/e054002e48cd102b0993811d69e8172db4a91597/nam/models/wavenet.py
-
-
-def _get_activation(activation: str) -> nn.Module:
-    match activation:
-        case "Fasttanh":
-            return FastTanh()
-        case "Hardswish":
-            return nn.Hardswish()
-        case "Hardtanh":
-            return nn.HardTanh()
-        case "LeakyHardtanh":
-            warnings.warn("Creating leaky hard tanh with default config")
-            return LeakyHardTanh()
-        case "LeakyReLU":
-            warnings.warn("Creating leaky relu with default config")
-            return nn.LeakyReLU()
-        case "PReLU":
-            # This will need to be implemented as a per-channel activation
-            # where each channel has a different init value
-            warnings.warn("Creating prelu with default config")
-            return nn.PReLU()
-        case "ReLU":
-            return nn.ReLU()
-        case "Sigmoid":
-            return nn.Sigmoid()
-        case "SiLU":
-            return nn.SiLU()
-        case "Tanh":
-            return nn.Tanh()
-    assert False
 
 
 # Specialization to support exporting/importing to a single huge array
@@ -119,7 +89,7 @@ class _NamA1WaveNetLayer(nn.Module):
         self.input_mixer = _NamA1Conv1dLayer(
             condition_size, mid_channels, 1, bias=False
         )
-        self.activation = _get_activation(activation)
+        self.activation = get_activation_module(activation)
         self.activation_name = activation
         self.conv1x1 = _NamA1Conv1dLayer(channels, channels, 1)
         self.gated = gated
