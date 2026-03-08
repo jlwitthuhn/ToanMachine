@@ -10,6 +10,7 @@ from toan.gui.playback import PlaybackContext
 from toan.model.metadata import ModelMetadata
 from toan.model.nam_a1_wavenet import NamA1WaveNet
 from toan.model.nam_a1_wavenet_config import json_a1_wavenet_config
+from toan.model.nam_a2_wavenet import NamA2WaveNet
 from toan.model.nam_a2_wavenet_config import json_a2_wavenet_config
 
 
@@ -101,13 +102,10 @@ class PlaybackValidatePage(QtWidgets.QWizardPage):
 
         self.text_edit.append("Creating model...")
 
-        metadata = ModelMetadata(
-            "Playback NAM model", "Playback make", "Playback model"
-        )
+        metadata = ModelMetadata("Playback A1 NAM model", "Toan Machine", "Test model")
 
         model = NamA1WaveNet(model_config, metadata, self.context.sample_rate)
-        model_params = model.parameter_count
-        self.text_edit.append(f"Model parameters: {model_params}")
+        self.text_edit.append(f"Model parameters: {model.parameter_count}")
 
         if "weights" not in nam_json or not isinstance(nam_json["weights"], list):
             self.text_edit.append("Error: Model weights are not specified")
@@ -154,6 +152,15 @@ class PlaybackValidatePage(QtWidgets.QWizardPage):
             )
             return
 
-        print(model_config)
+        if "weights" not in nam_json or not isinstance(nam_json["weights"], list):
+            self.text_edit.append("Error: model weights are not specified")
+            return
+        self.text_edit.append(f"Found {len(nam_json["weights"])} weights")
+
+        self.text_edit.append("Creating model...")
+
+        metadata = ModelMetadata("Playback A2 NAM model", "Toan Machine", "Test model")
+        model = NamA2WaveNet(model_config, metadata, self.context.sample_rate)
+        self.text_edit.append(f"Model parameters: {model.parameter_count}")
 
         raise NotImplemented

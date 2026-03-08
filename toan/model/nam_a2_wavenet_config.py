@@ -188,7 +188,7 @@ def json_a2_wavenet_config(config: dict) -> NamA2WaveNetConfig:
     head_scale = _get_typed_value(config, "head_scale", float)
 
     return NamA2WaveNetConfig(
-        layers=layers,
+        layers=config_layers,
         head=head,
         head_scale=head_scale,
     )
