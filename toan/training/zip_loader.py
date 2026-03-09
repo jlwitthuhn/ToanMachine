@@ -6,13 +6,12 @@ import io
 import json
 import threading
 import zipfile
-from dataclasses import dataclass
 
 import numpy as np
 from scipy.io import wavfile
 
 from toan.model.metadata import ModelMetadata
-from toan.signal.analysis import find_dry_clicks
+from toan.signal.analysis import find_dry_clicks, find_wet_clicks
 
 
 class ZipLoaderContext:
@@ -32,41 +31,6 @@ class ZipLoaderContext:
     def __init__(self):
         self.messages_lock = threading.Lock()
         self.messages_queue = []
-
-
-@dataclass
-class _PotentialClick:
-    index_begin: int = 0
-    index_peak: int = 0
-    magnitude: float = 0.0
-    width: int = 0
-
-
-def _find_clicks(signal: np.ndarray, raw_noise_floor: float) -> list[_PotentialClick]:
-    noise_threshold = raw_noise_floor * 12.0
-    result = []
-    silence_samples_required = 500
-    silence_samples_remaining = silence_samples_required
-    current_click = _PotentialClick()
-    for i in range(len(signal)):
-        current_click.width += 1
-        this_sample = signal[i]
-        this_sample_abs = np.abs(this_sample)
-        if this_sample_abs > noise_threshold:
-            if silence_samples_remaining <= 0:
-                current_click = _PotentialClick(index_begin=i)
-                result.append(current_click)
-            silence_samples_remaining = silence_samples_required
-            if this_sample_abs > current_click.magnitude:
-                current_click.magnitude = this_sample_abs
-                current_click.index_peak = i
-        else:
-            silence_samples_remaining -= 1
-    return result
-
-
-def _sort_clicks(click: _PotentialClick) -> float:
-    return click.width * click.magnitude
 
 
 def run_zip_loader(context: ZipLoaderContext, input_file: str | io.BytesIO):
@@ -174,47 +138,30 @@ def run_zip_loader(context: ZipLoaderContext, input_file: str | io.BytesIO):
             # Input file is half a second of silence, a click, quarter second silence, click, half second silence
             # Use the first 1 1/4 seconds to sync wet/dry tracks
             dry_clicks_signal = dry_signal[: 5 * dry_sample_rate // 4]
-
-            wet_silent = wet_signal[wet_sample_rate // 8 : 3 * wet_sample_rate // 8]
-            wet_clicks = wet_signal[3 * wet_sample_rate // 8 : 5 * wet_sample_rate // 4]
-            wet_noise_floor = np.max(np.abs(wet_silent))
-            print_status(f"Wet noise floor: {wet_noise_floor}")
+            wet_clicks_signal = wet_signal[: 5 * wet_sample_rate // 4]
+            wet_quiet_samples = 3 * wet_sample_rate // 8
 
             dry_clicks = find_dry_clicks(dry_clicks_signal)
             if dry_clicks is None:
                 print_status("Error: Failed to find clicks in dry signal")
                 return
 
-            # FIXME: Adjust dry clicks so the offset matches up with wet
-            # Soon both will use a buffer of the same size so this isn't needed
-            dry_clicks.first_click -= 3 * dry_sample_rate // 8
-
-            maybe_measured_wet_clicks = _find_clicks(wet_clicks, wet_noise_floor)
-            if len(maybe_measured_wet_clicks) < 2:
-                print_status(
-                    f"Error: Found {len(maybe_measured_wet_clicks)} wet click(s), should be at least 2"
-                )
-                print_status(f"{maybe_measured_wet_clicks}")
+            wet_clicks = find_wet_clicks(wet_clicks_signal, wet_quiet_samples)
+            if wet_clicks is None:
+                print_status("Error: Failed to find clicks in wet signal")
                 return
-
-            maybe_measured_wet_clicks.sort(key=_sort_clicks)
-            wet_click_indices = [
-                click.index_begin for click in maybe_measured_wet_clicks[-2:]
-            ]
-            wet_click_indices.sort()
 
             # Click delta is the time between two clicks on a single track
             # Click delta delta is the difference between the 'Click deltas' of the wet and dry tracks
-            wet_click_delta = wet_click_indices[1] - wet_click_indices[0]
-            click_delta_delta = abs(dry_clicks.delta - wet_click_delta)
+            click_delta_delta = abs(dry_clicks.delta - wet_clicks.delta)
             print_status(f"Click delta delta: {click_delta_delta}")
 
             if click_delta_delta > 4:
                 print_status("Error: Click delta delta is greater than 4")
                 return
 
-            latency_samples_a = wet_click_indices[0] - dry_clicks.first_click
-            latency_samples_b = wet_click_indices[1] - (
+            latency_samples_a = wet_clicks.first_click - dry_clicks.first_click
+            latency_samples_b = (wet_clicks.first_click + wet_clicks.delta) - (
                 dry_clicks.first_click + dry_clicks.delta
             )
             latency_samples = min(latency_samples_a, latency_samples_b)
