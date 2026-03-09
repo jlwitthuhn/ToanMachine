@@ -165,7 +165,7 @@ class NamA2WaveNet(nn.Module):
 
     layer_groups: list[_NamA2WaveNetLayerGroup]
     head: None = None
-    head_scale: float = 1.0
+    head_scale: mx.array
 
     def __init__(
         self,
@@ -185,7 +185,7 @@ class NamA2WaveNet(nn.Module):
         self.layer_groups = [
             _NamA2WaveNetLayerGroup(layer_config) for layer_config in config.layers
         ]
-        self.head_scale = config.head_scale
+        self.head_scale = mx.array(config.head_scale)
 
         mx.random.state = rng_state
 
