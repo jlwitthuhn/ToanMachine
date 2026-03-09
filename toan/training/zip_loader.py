@@ -12,6 +12,7 @@ import numpy as np
 from scipy.io import wavfile
 
 from toan.model.metadata import ModelMetadata
+from toan.signal.analysis import find_dry_clicks
 
 
 class ZipLoaderContext:
@@ -171,31 +172,22 @@ def run_zip_loader(context: ZipLoaderContext, input_file: str | io.BytesIO):
                 return
 
             # Input file is half a second of silence, a click, quarter second silence, click, half second silence
-            dry_silent = dry_signal[dry_sample_rate // 8 : 3 * dry_sample_rate // 8]
-            dry_clicks = dry_signal[3 * dry_sample_rate // 8 : 5 * dry_sample_rate // 4]
-            dry_noise_floor = np.max(np.abs(dry_silent))
-            print_status(f"Dry noise floor: {dry_noise_floor}")
+            # Use the first 1 1/4 seconds to sync wet/dry tracks
+            dry_clicks_signal = dry_signal[: 5 * dry_sample_rate // 4]
 
             wet_silent = wet_signal[wet_sample_rate // 8 : 3 * wet_sample_rate // 8]
             wet_clicks = wet_signal[3 * wet_sample_rate // 8 : 5 * wet_sample_rate // 4]
             wet_noise_floor = np.max(np.abs(wet_silent))
             print_status(f"Wet noise floor: {wet_noise_floor}")
 
-            # Find all parts of the signal that exceed the noise threshold
-            maybe_measured_dry_clicks = _find_clicks(dry_clicks, wet_noise_floor)
-            if len(maybe_measured_dry_clicks) < 2:
-                print_status(
-                    f"Error: Found {len(maybe_measured_dry_clicks)} dry click(s), should be at least 2"
-                )
-                print_status(f"{maybe_measured_dry_clicks}")
+            dry_clicks = find_dry_clicks(dry_clicks_signal)
+            if dry_clicks is None:
+                print_status("Error: Failed to find clicks in dry signal")
                 return
 
-            # Grab the two 'biggest' clicks and use those
-            maybe_measured_dry_clicks.sort(key=_sort_clicks)
-            dry_click_indices = [
-                click.index_begin for click in maybe_measured_dry_clicks[-2:]
-            ]
-            dry_click_indices.sort()
+            # FIXME: Adjust dry clicks so the offset matches up with wet
+            # Soon both will use a buffer of the same size so this isn't needed
+            dry_clicks.first_click -= 3 * dry_sample_rate // 8
 
             maybe_measured_wet_clicks = _find_clicks(wet_clicks, wet_noise_floor)
             if len(maybe_measured_wet_clicks) < 2:
@@ -213,17 +205,18 @@ def run_zip_loader(context: ZipLoaderContext, input_file: str | io.BytesIO):
 
             # Click delta is the time between two clicks on a single track
             # Click delta delta is the difference between the 'Click deltas' of the wet and dry tracks
-            dry_click_delta = dry_click_indices[1] - dry_click_indices[0]
             wet_click_delta = wet_click_indices[1] - wet_click_indices[0]
-            click_delta_delta = abs(dry_click_delta - wet_click_delta)
+            click_delta_delta = abs(dry_clicks.delta - wet_click_delta)
             print_status(f"Click delta delta: {click_delta_delta}")
 
             if click_delta_delta > 4:
                 print_status("Error: Click delta delta is greater than 4")
                 return
 
-            latency_samples_a = wet_click_indices[0] - dry_click_indices[0]
-            latency_samples_b = wet_click_indices[1] - dry_click_indices[1]
+            latency_samples_a = wet_click_indices[0] - dry_clicks.first_click
+            latency_samples_b = wet_click_indices[1] - (
+                dry_clicks.first_click + dry_clicks.delta
+            )
             latency_samples = min(latency_samples_a, latency_samples_b)
             print_status(f"Recording latency: {latency_samples} samples")
 
