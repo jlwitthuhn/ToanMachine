@@ -162,5 +162,6 @@ class PlaybackValidatePage(QtWidgets.QWizardPage):
         metadata = ModelMetadata("Playback A2 NAM model", "Toan Machine", "Test model")
         model = NamA2WaveNet(model_config, metadata, self.context.sample_rate)
         self.text_edit.append(f"Model parameters: {model.parameter_count}")
+        model.debug_print_size()
 
         raise NotImplemented

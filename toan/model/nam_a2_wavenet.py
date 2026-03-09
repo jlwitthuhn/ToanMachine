@@ -76,6 +76,27 @@ class _NamA2WaveNetLayer(nn.Module):
                 groups=head_1x1_config.groups,
             )
 
+    @property
+    def parameter_count(self) -> int:
+        return sum(p.size for _, p in utils.tree_flatten(self.parameters()))
+
+    def debug_print_size(self):
+        def count_module_params(module: nn.Module) -> int:
+            return sum(p.size for _, p in utils.tree_flatten(module.parameters()))
+
+        print(f">>> layer: {self.parameter_count}")
+        print(f">>>> conv: {count_module_params(self.conv)}")
+        print(f">>>> input_mixer: {count_module_params(self.input_mixer)}")
+        print(f">>>> activation: {count_module_params(self.activation)}")
+        if self.layer1x1 is not None:
+            print(f">>>> layer1x1: {count_module_params(self.layer1x1)}")
+        else:
+            print(f">>>> layer1x1: 0")
+        if self.head1x1 is not None:
+            print(f">>>> head1x1: {count_module_params(self.head1x1)}")
+        else:
+            print(f">>>> head1x1: 0")
+
 
 class _NamA2WaveNetLayerGroup(nn.Module):
     config: NamA2WaveNetLayerGroupConfig
@@ -128,6 +149,15 @@ class _NamA2WaveNetLayerGroup(nn.Module):
             bias=config.head_bias,
         )
 
+    @property
+    def parameter_count(self) -> int:
+        return sum(p.size for _, p in utils.tree_flatten(self.parameters()))
+
+    def debug_print_size(self):
+        print(f">> layergroup: {self.parameter_count}")
+        for layer in self.layers:
+            layer.debug_print_size()
+
 
 class NamA2WaveNet(nn.Module):
     config: NamA2WaveNetConfig
@@ -162,3 +192,9 @@ class NamA2WaveNet(nn.Module):
     @property
     def parameter_count(self) -> int:
         return sum(p.size for _, p in utils.tree_flatten(self.parameters()))
+
+    def debug_print_size(self):
+        print("++ A2 Model Size ++")
+        print(f"> root: {self.parameter_count}")
+        for layer_group in self.layer_groups:
+            layer_group.debug_print_size()
