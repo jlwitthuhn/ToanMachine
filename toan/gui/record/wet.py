@@ -6,7 +6,7 @@ from PySide6 import QtCore, QtWidgets
 
 from toan.gui.record import RecordingContext
 from toan.mix import concat_signals
-from toan.signal import generate_capture_signal
+from toan.signal.capture_signal import generate_capture_signal
 from toan.soundio.record_wet import RecordWetController, RecordWetProgress
 
 RECORD_TEXT = [

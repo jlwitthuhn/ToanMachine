@@ -17,8 +17,7 @@ from toan.model.nam_a1_wavenet_presets import get_a1_wavenet_config
 from toan.model.presets import ModelConfigPreset
 from toan.music.chord import ChordType
 from toan.persistence import get_user_wav_list
-from toan.signal import generate_capture_signal
-from toan.signal.capture_signal import CaptureSignalConfig
+from toan.signal.capture_signal import CaptureSignalConfig, generate_capture_signal
 from toan.soundio import SdChannel, get_input_devices, get_output_devices
 from toan.soundio.record_wet import RecordWetController
 from toan.training.config import TrainingConfig

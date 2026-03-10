@@ -10,7 +10,7 @@ from toan.gui.playback import PlaybackWizard
 from toan.gui.record import RecordWizard
 from toan.gui.sound_manager import SoundManager
 from toan.gui.train import TrainingWizard
-from toan.signal import generate_capture_signal
+from toan.signal.capture_signal import generate_capture_signal
 
 
 def _clicked_play_training_signal():
