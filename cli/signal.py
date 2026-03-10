@@ -269,11 +269,7 @@ def main() -> None:
         loss_dict[label] = loss_stats
 
     signal_config = CaptureSignalConfig()
-    do_iteration_and_log("default", signal_config, args.repeat)
-
-    signal_config.plucked_chords = []
-    signal_config.warble_chords = []
-    do_iteration_and_log("blank", signal_config, args.repeat)
+    # do_iteration_and_log("default", signal_config, args.repeat)
 
     def iterate_with_added_warble():
         original_warbles = signal_config.warble_chords.copy()
@@ -292,8 +288,26 @@ def main() -> None:
             signal_config.plucked_chords.append(new_chord)
             do_iteration_and_log(chord_type.name, signal_config, args.repeat)
 
+    def iterate_with_applied_effect():
+        original_warbles = signal_config.warble_chords.copy()
+        for i in range(len(original_warbles)):
+            for effect_type in EffectType:
+                signal_config.warble_chords = original_warbles.copy()
+                signal_config.warble_chords[i].effect = effect_type
+                do_iteration_and_log(
+                    f"Warble-{i}-{effect_type.name}", signal_config, args.repeat
+                )
+        original_plucks = signal_config.plucked_chords.copy()
+        for i in range(len(original_plucks)):
+            for effect_type in EffectType:
+                signal_config.plucked_chords = original_plucks.copy()
+                signal_config.plucked_chords[i].effect = effect_type
+                do_iteration_and_log(
+                    f"Pluck-{i}-{effect_type.name}", signal_config, args.repeat
+                )
+
     try:
-        iterate_with_added_warble()
+        iterate_with_applied_effect()
     except KeyboardInterrupt:
         print("Interrupted, aborting...")
 
