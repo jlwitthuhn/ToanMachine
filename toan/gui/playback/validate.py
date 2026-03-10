@@ -183,4 +183,10 @@ class PlaybackValidatePage(QtWidgets.QWizardPage):
         self.text_edit.append(f"Model parameters: {model.parameter_count}")
         model.debug_print_size()
 
+        if model.parameter_count != len(nam_json["weights"]):
+            self.text_edit.append(
+                "Error: Mismatch between number of loaded weights and model parameters"
+            )
+            return
+
         raise NotImplemented
