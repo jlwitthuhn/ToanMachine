@@ -8,12 +8,19 @@ import numpy as np
 
 from toan.mix import concat_signals
 from toan.music.chord import ChordType
+from toan.signal.effect import EffectType
 from toan.signal.generator.chirp import generate_chirp
 from toan.signal.generator.gaussian import generate_gaussian_pulse
 from toan.signal.generator.noise import generate_white_noise
 from toan.signal.generator.pluck_scale import generate_named_chord_pluck_scale
 from toan.signal.generator.trig import generate_cosine_wave, generate_sine_wave
 from toan.signal.generator.warble import generate_warble_chord
+
+
+@dataclass
+class ChordWithEffects:
+    chord: ChordType
+    effect: EffectType
 
 
 @dataclass
@@ -24,24 +31,24 @@ class CaptureSignalConfig:
     pluck_note_duration: float = 0.70
     pluck_decay: float = 0.985
     pluck_pre_smooth: int = 0
-    warble_chords: list[ChordType] = field(
+    warble_chords: list[ChordWithEffects] = field(
         default_factory=lambda: [
-            ChordType.PerfectFifth,
-            ChordType.DiminishedTriad,
-            ChordType.MajorTriad,
-            ChordType.MinorSeventh,
-            ChordType.GuitarStrings,
+            ChordWithEffects(ChordType.PerfectFifth, EffectType.Nothing),
+            ChordWithEffects(ChordType.DiminishedTriad, EffectType.Nothing),
+            ChordWithEffects(ChordType.MajorTriad, EffectType.Nothing),
+            ChordWithEffects(ChordType.MinorSeventh, EffectType.Nothing),
+            ChordWithEffects(ChordType.GuitarStrings, EffectType.Nothing),
         ]
     )
-    plucked_chords: list[ChordType] = field(
+    plucked_chords: list[ChordWithEffects] = field(
         default_factory=lambda: [
-            ChordType.RootOnly,
-            ChordType.Tritone,
-            ChordType.MajorTriad,
-            ChordType.MinorTriad,
-            ChordType.MajorSeventhTetrad,
-            ChordType.MinorNinthPentad,
-            ChordType.GuitarStrings,
+            ChordWithEffects(ChordType.RootOnly, EffectType.Nothing),
+            ChordWithEffects(ChordType.Tritone, EffectType.Nothing),
+            ChordWithEffects(ChordType.MajorTriad, EffectType.Nothing),
+            ChordWithEffects(ChordType.MinorTriad, EffectType.Nothing),
+            ChordWithEffects(ChordType.MajorSeventhTetrad, EffectType.Nothing),
+            ChordWithEffects(ChordType.MinorNinthPentad, EffectType.Nothing),
+            ChordWithEffects(ChordType.GuitarStrings, EffectType.Nothing),
         ]
     )
     rand_seed: int = 0x35
@@ -109,7 +116,7 @@ def _generate_sweep_block(sample_rate: int, duration: float) -> np.ndarray:
 
 
 def _generate_warble_block(
-    sample_rate: int, chords: list[ChordType], duration: float
+    sample_rate: int, chords: list[ChordWithEffects], duration: float
 ) -> np.ndarray:
     if len(chords) == 0:
         return np.zeros(1)
@@ -121,7 +128,8 @@ def _generate_warble_block(
     modulation = generate_gaussian_pulse(buffer_size, buffer_size // 3)
     chord_buffers = []
     for chord in chords:
-        this_chord_buffer = generate_warble_signal(chord)
+        this_chord_buffer = generate_warble_signal(chord.chord)
+        # TODO: Apply effect here
         assert len(modulation) == len(this_chord_buffer)
         chord_buffers.append(this_chord_buffer * modulation)
     return concat_signals(chord_buffers, sample_rate // 4)
@@ -129,7 +137,7 @@ def _generate_warble_block(
 
 def _generate_plucked_block(
     sample_rate: int,
-    chords: list[ChordType],
+    chords: list[ChordWithEffects],
     note_duration: float,
     pluck_decay: float,
     pre_smooth: int = 0,
@@ -154,7 +162,8 @@ def _generate_plucked_block(
     buffers = []
     for i, chord in enumerate(chords):
         offset = i * 0.6e-3
-        buffers.append(generate_plucked_scale(chord, offset))
+        buffers.append(generate_plucked_scale(chord.chord, offset))
+        # TODO: Apply effects here
     return concat_signals(buffers, sample_rate // 4)
 
 

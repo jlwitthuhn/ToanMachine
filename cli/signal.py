@@ -17,7 +17,12 @@ from toan.model.nam_a1_wavenet_presets import get_a1_wavenet_config
 from toan.model.presets import ModelConfigPreset
 from toan.music.chord import ChordType
 from toan.persistence import get_user_wav_list
-from toan.signal.capture_signal import CaptureSignalConfig, generate_capture_signal
+from toan.signal.capture_signal import (
+    CaptureSignalConfig,
+    ChordWithEffects,
+    generate_capture_signal,
+)
+from toan.signal.effect import EffectType
 from toan.soundio import SdChannel, get_input_devices, get_output_devices
 from toan.soundio.record_wet import RecordWetController
 from toan.training.config import TrainingConfig
@@ -274,15 +279,17 @@ def main() -> None:
         original_warbles = signal_config.warble_chords.copy()
         for chord_type in ChordType:
             signal_config.warble_chords = original_warbles.copy()
-            signal_config.warble_chords.append(chord_type)
-            signal_config.warble_chords.append(chord_type)
+            new_chord = ChordWithEffects(chord_type, EffectType.Nothing)
+            signal_config.warble_chords.append(new_chord)
+            signal_config.warble_chords.append(new_chord)
             do_iteration_and_log(chord_type.name, signal_config, args.repeat)
 
     def iterate_with_added_plucks():
         original_plucks = signal_config.plucked_chords.copy()
         for chord_type in ChordType:
             signal_config.plucked_chords = original_plucks.copy()
-            signal_config.plucked_chords.append(chord_type)
+            new_chord = ChordWithEffects(chord_type, EffectType.Nothing)
+            signal_config.plucked_chords.append(new_chord)
             do_iteration_and_log(chord_type.name, signal_config, args.repeat)
 
     try:
