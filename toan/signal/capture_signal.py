@@ -8,12 +8,12 @@ import numpy as np
 
 from toan.mix import concat_signals
 from toan.music.chord import ChordType
-from toan.signal.chirp import generate_chirp
-from toan.signal.gaussian import generate_gaussian_pulse
-from toan.signal.noise import generate_white_noise
-from toan.signal.pluck_scale import generate_named_chord_pluck_scale
-from toan.signal.trig import generate_cosine_wave, generate_sine_wave
-from toan.signal.warble import generate_warble_chord
+from toan.signal.generator.chirp import generate_chirp
+from toan.signal.generator.gaussian import generate_gaussian_pulse
+from toan.signal.generator.noise import generate_white_noise
+from toan.signal.generator.pluck_scale import generate_named_chord_pluck_scale
+from toan.signal.generator.trig import generate_cosine_wave, generate_sine_wave
+from toan.signal.generator.warble import generate_warble_chord
 
 
 @dataclass

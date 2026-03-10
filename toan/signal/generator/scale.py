@@ -7,8 +7,8 @@ from enum import Enum
 
 import numpy as np
 
-from toan.signal.pluck import generate_pluck
-from toan.signal.tone import generate_tone
+from toan.signal.generator.pluck import generate_pluck
+from toan.signal.generator.tone import generate_tone
 
 
 def _generate_semitone_scale_frequencies(

@@ -7,7 +7,7 @@ import numpy as np
 
 from toan.music.chord import ChordType
 from toan.music.frequency import increase_frequency_by_semitones
-from toan.signal.trig import generate_sine_wave
+from toan.signal.generator.trig import generate_sine_wave
 
 BIG_CYCLES_PER_SECOND = 3.0
 

@@ -2,15 +2,13 @@
 # https://www.gnu.org/licenses/gpl-3.0.en.html
 # SPDX-License-Identifier: GPL-3.0-only
 
-import math
-
 import numpy as np
 
 from toan.mix import concat_signals
 from toan.music import get_note_frequency_by_name, get_note_index_by_name
 from toan.music.chord import ChordType
 from toan.music.frequency import increase_frequency_by_semitones
-from toan.signal.pluck import generate_generic_chord_pluck
+from toan.signal.generator.pluck import generate_generic_chord_pluck
 
 
 def generate_generic_chord_pluck_scale(
