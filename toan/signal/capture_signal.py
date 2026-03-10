@@ -8,7 +8,7 @@ import numpy as np
 
 from toan.mix import concat_signals
 from toan.music.chord import ChordType
-from toan.signal.effect import EffectType
+from toan.signal.effect import EffectType, apply_effect
 from toan.signal.generator.chirp import generate_chirp
 from toan.signal.generator.gaussian import generate_gaussian_pulse
 from toan.signal.generator.noise import generate_white_noise
@@ -129,7 +129,7 @@ def _generate_warble_block(
     chord_buffers = []
     for chord in chords:
         this_chord_buffer = generate_warble_signal(chord.chord)
-        # TODO: Apply effect here
+        apply_effect(this_chord_buffer, sample_rate, chord.effect)
         assert len(modulation) == len(this_chord_buffer)
         chord_buffers.append(this_chord_buffer * modulation)
     return concat_signals(chord_buffers, sample_rate // 4)
@@ -162,8 +162,9 @@ def _generate_plucked_block(
     buffers = []
     for i, chord in enumerate(chords):
         offset = i * 0.6e-3
-        buffers.append(generate_plucked_scale(chord.chord, offset))
-        # TODO: Apply effects here
+        this_chord_buffer = generate_plucked_scale(chord.chord, offset)
+        apply_effect(this_chord_buffer, sample_rate, chord.effect)
+        buffers.append(this_chord_buffer)
     return concat_signals(buffers, sample_rate // 4)
 
 
