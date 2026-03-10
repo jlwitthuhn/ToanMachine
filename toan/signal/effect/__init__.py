@@ -12,8 +12,9 @@ from toan.signal.effect.delay import effect_delay
 
 class EffectType(Enum):
     Nothing = enum.auto()
-    Delay01 = enum.auto()
-    Delay02 = enum.auto()
+    Delay0100 = enum.auto()
+    Delay0200 = enum.auto()
+    Delay0400 = enum.auto()
 
 
 def apply_effect(
@@ -22,9 +23,11 @@ def apply_effect(
     match effect:
         case EffectType.Nothing:
             pass
-        case EffectType.Delay01:
-            effect_delay(signal, sample_rate, 0.5)
-        case EffectType.Delay02:
-            effect_delay(signal, sample_rate // 2, 0.5)
+        case EffectType.Delay0100:
+            effect_delay(signal, int(sample_rate * 0.1), 0.5)
+        case EffectType.Delay0200:
+            effect_delay(signal, int(sample_rate * 0.2), 0.5)
+        case EffectType.Delay0400:
+            effect_delay(signal, int(sample_rate * 0.4), 0.5)
     if normalize:
         signal /= np.max(np.abs(signal))
