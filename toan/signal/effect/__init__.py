@@ -15,6 +15,9 @@ class EffectType(Enum):
     Delay0100 = enum.auto()
     Delay0200 = enum.auto()
     Delay0400 = enum.auto()
+    FeedbackDelay0100 = enum.auto()
+    FeedbackDelay0200 = enum.auto()
+    FeedbackDelay0400 = enum.auto()
 
 
 def apply_effect(
@@ -24,10 +27,16 @@ def apply_effect(
         case EffectType.Nothing:
             pass
         case EffectType.Delay0100:
-            effect_delay(signal, int(sample_rate * 0.1), 0.5)
+            effect_delay(signal, int(sample_rate * 0.1), 0.5, False)
         case EffectType.Delay0200:
-            effect_delay(signal, int(sample_rate * 0.2), 0.5)
+            effect_delay(signal, int(sample_rate * 0.2), 0.5, False)
         case EffectType.Delay0400:
-            effect_delay(signal, int(sample_rate * 0.4), 0.5)
+            effect_delay(signal, int(sample_rate * 0.4), 0.5, False)
+        case EffectType.FeedbackDelay0100:
+            effect_delay(signal, int(sample_rate * 0.1), 0.4, True)
+        case EffectType.FeedbackDelay0200:
+            effect_delay(signal, int(sample_rate * 0.2), 0.4, True)
+        case EffectType.FeedbackDelay0400:
+            effect_delay(signal, int(sample_rate * 0.4), 0.4, True)
     if normalize:
         signal /= np.max(np.abs(signal))
