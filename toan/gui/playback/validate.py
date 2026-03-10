@@ -157,6 +157,25 @@ class PlaybackValidatePage(QtWidgets.QWizardPage):
             return
         self.text_edit.append(f"Found {len(nam_json["weights"])} weights")
 
+        for layer in model_config.layers:
+            if layer.gating_mode not in ["none"]:
+                self.text_edit.append(
+                    f"Error: unsupported gating mode: {layer.gating_mode}"
+                )
+                return
+            film_active = (
+                layer.conv_pre_film.active
+                or layer.conv_post_film
+                or layer.input_mixin_pre_film.active
+                or layer.input_mixin_post_film.active
+                or layer.activation_pre_film.active
+                or layer.activation_post_film.active
+                or layer.layer1x1_post_film.active
+                or layer.head1x1_post_film.active
+            )
+            if film_active:
+                self.text_edit.append("Error: film is not supported")
+
         self.text_edit.append("Creating model...")
 
         metadata = ModelMetadata("Playback A2 NAM model", "Toan Machine", "Test model")

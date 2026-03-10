@@ -44,6 +44,7 @@ class _NamA2WaveNetLayer(nn.Module):
         layer_1x1_config: NamA2WaveNetLayer1x1Config,
         groups_input: int,
         groups_input_mixin: int,
+        gating_mode: str,
     ):
         super().__init__()
 
@@ -135,6 +136,7 @@ class _NamA2WaveNetLayerGroup(nn.Module):
                 config.layer1x1,
                 config.groups_input,
                 config.groups_input_mixin,
+                config.gating_mode,
             )
             for i in range(len(config.dilations))
         ]
