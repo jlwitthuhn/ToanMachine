@@ -8,6 +8,7 @@ from enum import Enum
 import numpy as np
 
 from toan.signal.effect.delay import effect_delay
+from toan.signal.effect.vibrato import effect_vibrato
 
 
 class EffectType(Enum):
@@ -18,6 +19,9 @@ class EffectType(Enum):
     FeedbackDelay0100 = enum.auto()
     FeedbackDelay0200 = enum.auto()
     FeedbackDelay0400 = enum.auto()
+    Vibrato5Hz = enum.auto()
+    Vibrato8Hz = enum.auto()
+    Flanger4Hz = enum.auto()
 
 
 def apply_effect(
@@ -38,5 +42,11 @@ def apply_effect(
             effect_delay(signal, int(sample_rate * 0.2), 0.4, True)
         case EffectType.FeedbackDelay0400:
             effect_delay(signal, int(sample_rate * 0.4), 0.4, True)
+        case EffectType.Vibrato5Hz:
+            effect_vibrato(signal, sample_rate, 5.0, 0.002)
+        case EffectType.Vibrato8Hz:
+            effect_vibrato(signal, sample_rate, 8.0, 0.002)
+        case EffectType.Flanger4Hz:
+            effect_vibrato(signal, sample_rate, 4.0, 0.001, 0.5)
     if normalize:
         signal /= np.max(np.abs(signal))
