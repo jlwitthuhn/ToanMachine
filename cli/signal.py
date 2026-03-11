@@ -296,6 +296,9 @@ def main() -> None:
         for i in range(len(original_warbles)):
             for effect_type in effects:
                 signal_config.warble_chords = copy.deepcopy(original_warbles)
+                if signal_config.warble_chords[i].effect == effect_type:
+                    # This config is the same as 'base', skip it
+                    continue
                 signal_config.warble_chords[i].effect = effect_type
                 do_iteration_and_log(
                     f"Warble-{i}-{effect_type.name}", signal_config, args.repeat
@@ -308,6 +311,9 @@ def main() -> None:
         for i in range(len(original_plucks)):
             for effect_type in effects:
                 signal_config.plucked_chords = copy.deepcopy(original_plucks.copy())
+                if signal_config.plucked_chords[i].effect == effect_type:
+                    # This config is the same as 'base', skip it
+                    continue
                 signal_config.plucked_chords[i].effect = effect_type
                 do_iteration_and_log(
                     f"Pluck-{i}-{effect_type.name}", signal_config, args.repeat
