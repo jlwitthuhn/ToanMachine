@@ -6,8 +6,12 @@ import numpy as np
 
 
 def effect_vibrato(
-    signal: np.ndarray, sample_rate: int, vibrato_frequency: float, depth: float
-):
+    signal: np.ndarray,
+    sample_rate: int,
+    vibrato_frequency: float,
+    depth: float,
+    dry_mix: float = 0.0,
+) -> None:
     t = np.arange(len(signal)) / sample_rate
     delay_samples_max = depth * sample_rate
     delay_samples = delay_samples_max * np.sin(2.0 * np.pi * vibrato_frequency * t)
@@ -16,6 +20,7 @@ def effect_vibrato(
     indices_pre = np.floor(indices_float).astype(int)
     indices_post = indices_pre + 1
     indices_frac = indices_float - indices_pre
-    signal[:] = (
+    wet_signal = (
         indices_frac * signal[indices_post] + (1 - indices_frac) * signal[indices_pre]
     )
+    signal[:] = dry_mix * signal + (1.0 - dry_mix) * wet_signal
