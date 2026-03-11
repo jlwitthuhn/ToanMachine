@@ -289,29 +289,33 @@ def main() -> None:
             signal_config.plucked_chords.append(new_chord)
             do_iteration_and_log(chord_type.name, signal_config, args.repeat)
 
-    def iterate_warble_effect():
+    def iterate_warble_effect(effects: list[EffectType] | None = None):
+        if effects is None:
+            effects = [effect_type for effect_type in EffectType]
         original_warbles = copy.deepcopy(signal_config.warble_chords)
         for i in range(len(original_warbles)):
-            for effect_type in EffectType:
+            for effect_type in effects:
                 signal_config.warble_chords = copy.deepcopy(original_warbles)
                 signal_config.warble_chords[i].effect = effect_type
                 do_iteration_and_log(
                     f"Warble-{i}-{effect_type.name}", signal_config, args.repeat
                 )
 
-    def iterate_plucked_effect():
+    def iterate_plucked_effect(effects: list[EffectType] | None = None):
+        if effects is None:
+            effects = [effect_type for effect_type in EffectType]
         original_plucks = copy.deepcopy(signal_config.plucked_chords)
         for i in range(len(original_plucks)):
-            for effect_type in EffectType:
+            for effect_type in effects:
                 signal_config.plucked_chords = copy.deepcopy(original_plucks.copy())
                 signal_config.plucked_chords[i].effect = effect_type
                 do_iteration_and_log(
                     f"Pluck-{i}-{effect_type.name}", signal_config, args.repeat
                 )
 
-    def iterate_with_applied_effect():
-        iterate_warble_effect()
-        iterate_plucked_effect()
+    def iterate_with_applied_effect(effects: list[EffectType] | None = None):
+        iterate_warble_effect(effects)
+        iterate_plucked_effect(effects)
 
     try:
         iterate_with_applied_effect()
