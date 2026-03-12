@@ -289,11 +289,18 @@ def main() -> None:
             signal_config.plucked_chords.append(new_chord)
             do_iteration_and_log(chord_type.name, signal_config, args.repeat)
 
-    def iterate_warble_effect(effects: list[EffectType] | None = None):
+    def iterate_warble_effect(
+        effects: list[EffectType] | None = None, skip_effected: bool = True
+    ) -> None:
         if effects is None:
             effects = [effect_type for effect_type in EffectType]
         original_warbles = copy.deepcopy(signal_config.warble_chords)
         for i in range(len(original_warbles)):
+            if (
+                skip_effected
+                and signal_config.warble_chords[i].effect != EffectType.Nothing
+            ):
+                continue
             for effect_type in effects:
                 signal_config.warble_chords = copy.deepcopy(original_warbles)
                 if signal_config.warble_chords[i].effect == effect_type:
@@ -304,11 +311,18 @@ def main() -> None:
                     f"Warble-{i}-{effect_type.name}", signal_config, args.repeat
                 )
 
-    def iterate_plucked_effect(effects: list[EffectType] | None = None):
+    def iterate_plucked_effect(
+        effects: list[EffectType] | None = None, skip_effected: bool = True
+    ) -> None:
         if effects is None:
             effects = [effect_type for effect_type in EffectType]
         original_plucks = copy.deepcopy(signal_config.plucked_chords)
         for i in range(len(original_plucks)):
+            if (
+                skip_effected
+                and signal_config.warble_chords[i].effect != EffectType.Nothing
+            ):
+                continue
             for effect_type in effects:
                 signal_config.plucked_chords = copy.deepcopy(original_plucks.copy())
                 if signal_config.plucked_chords[i].effect == effect_type:
@@ -319,9 +333,11 @@ def main() -> None:
                     f"Pluck-{i}-{effect_type.name}", signal_config, args.repeat
                 )
 
-    def iterate_with_applied_effect(effects: list[EffectType] | None = None):
-        iterate_warble_effect(effects)
-        iterate_plucked_effect(effects)
+    def iterate_with_applied_effect(
+        effects: list[EffectType] | None = None, skip_effected: bool = True
+    ) -> None:
+        iterate_warble_effect(effects, skip_effected)
+        iterate_plucked_effect(effects, skip_effected)
 
     try:
         iterate_with_applied_effect()
