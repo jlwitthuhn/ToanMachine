@@ -9,6 +9,7 @@ from toan.model.activation import get_activation_module
 from toan.model.metadata import ModelMetadata
 from toan.model.nam_a1_wavenet import _NamA1Conv1dLayer
 from toan.model.nam_a2_wavenet_config import (
+    NamA2ActivationDetails,
     NamA2WaveNetConfig,
     NamA2WaveNetHead1x1Config,
     NamA2WaveNetLayer1x1Config,
@@ -38,7 +39,7 @@ class _NamA2WaveNetLayer(nn.Module):
         channels: int,
         kernel_size: int,
         dilation: int,
-        activation: nn.Module,
+        activation: NamA2ActivationDetails,
         bottleneck: int,
         head_1x1_config: NamA2WaveNetHead1x1Config,
         layer_1x1_config: NamA2WaveNetLayer1x1Config,
@@ -60,7 +61,7 @@ class _NamA2WaveNetLayer(nn.Module):
         self.input_mixer = _NamA2Conv1dLayer(
             condition_size, mid_channels, 1, bias=False, groups=groups_input_mixin
         )
-        self.activation = activation
+        self.activation = get_activation_module(activation.type)
 
         if layer_1x1_config.active:
             self.layer1x1 = _NamA2Conv1dLayer(
@@ -111,11 +112,6 @@ class _NamA2WaveNetLayerGroup(nn.Module):
 
         self.config = config
 
-        activations = [
-            get_activation_module(config.activation.type)
-            for _ in range(len(config.dilations))
-        ]
-
         self.rechannel = _NamA2Conv1dLayer(
             config.input_size, config.channels, 1, bias=False
         )
@@ -130,7 +126,7 @@ class _NamA2WaveNetLayerGroup(nn.Module):
                 config.channels,
                 config.kernel_size,
                 config.dilations[i],
-                activations[i],
+                config.activation,
                 real_bottleneck,
                 config.head1x1,
                 config.layer1x1,
