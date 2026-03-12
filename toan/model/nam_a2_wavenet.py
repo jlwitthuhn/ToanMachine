@@ -24,12 +24,35 @@ class _NamA2Conv1dLayer(_NamA1Conv1dLayer):
     pass
 
 
+class _NamA2WrappedActivation(nn.Module):
+    gate_type: str
+    primary: nn.Module
+    secondary: nn.Module | None
+
+    def __init__(
+        self,
+        primary_config: NamA2ActivationDetails,
+        secondary_name: str,
+        gating_mode: str,
+    ):
+        super().__init__()
+        self.gate_type = gating_mode
+
+        self.primary = get_activation_module(primary_config.type)
+        if gating_mode == "none":
+            pass
+        elif gating_mode == "gated":
+            self.secondary = get_activation_module(secondary_name)
+        else:
+            raise ValueError(f"Unknown gating mode: {gating_mode}")
+
+
 class _NamA2WaveNetLayer(nn.Module):
     bottleneck: int
 
     conv: _NamA2Conv1dLayer
     input_mixer: _NamA2Conv1dLayer
-    activation: nn.Module
+    activation: _NamA2WrappedActivation
     layer1x1: nn.Module | None = None
     head1x1: nn.Module | None = None
 
@@ -40,6 +63,7 @@ class _NamA2WaveNetLayer(nn.Module):
         kernel_size: int,
         dilation: int,
         activation: NamA2ActivationDetails,
+        secondary_activation: str,
         bottleneck: int,
         head_1x1_config: NamA2WaveNetHead1x1Config,
         layer_1x1_config: NamA2WaveNetLayer1x1Config,
@@ -54,14 +78,22 @@ class _NamA2WaveNetLayer(nn.Module):
 
         self.bottleneck = bottleneck
 
-        mid_channels = bottleneck
+        if gating_mode == "none":
+            mid_channels = bottleneck
+        elif gating_mode == "gated":
+            mid_channels = 2 * bottleneck
+        else:
+            raise ValueError(f"Unknown gating mode: {gating_mode}")
+
         self.conv = _NamA2Conv1dLayer(
             channels, mid_channels, kernel_size, dilation=dilation, groups=groups_input
         )
         self.input_mixer = _NamA2Conv1dLayer(
             condition_size, mid_channels, 1, bias=False, groups=groups_input_mixin
         )
-        self.activation = get_activation_module(activation.type)
+        self.activation = _NamA2WrappedActivation(
+            activation, secondary_activation, gating_mode
+        )
 
         if layer_1x1_config.active:
             self.layer1x1 = _NamA2Conv1dLayer(
@@ -127,6 +159,7 @@ class _NamA2WaveNetLayerGroup(nn.Module):
                 config.kernel_size,
                 config.dilations[i],
                 config.activation,
+                config.secondary_activation,
                 real_bottleneck,
                 config.head1x1,
                 config.layer1x1,

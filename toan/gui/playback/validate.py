@@ -158,7 +158,7 @@ class PlaybackValidatePage(QtWidgets.QWizardPage):
         self.text_edit.append(f"Found {len(nam_json["weights"])} weights")
 
         for layer in model_config.layers:
-            if layer.gating_mode not in ["none"]:
+            if layer.gating_mode not in ["none", "gated"]:
                 self.text_edit.append(
                     f"Error: unsupported gating mode: {layer.gating_mode}"
                 )
@@ -181,12 +181,12 @@ class PlaybackValidatePage(QtWidgets.QWizardPage):
         metadata = ModelMetadata("Playback A2 NAM model", "Toan Machine", "Test model")
         model = NamA2WaveNet(model_config, metadata, self.context.sample_rate)
         self.text_edit.append(f"Model parameters: {model.parameter_count}")
-        model.debug_print_size()
 
         if model.parameter_count != len(nam_json["weights"]):
             self.text_edit.append(
                 "Error: Mismatch between number of loaded weights and model parameters"
             )
+            model.debug_print_size()
             return
 
         raise NotImplemented
