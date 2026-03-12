@@ -116,7 +116,7 @@ class PlaybackValidatePage(QtWidgets.QWizardPage):
         self.text_edit.append(f"Profile parameters: {weight_count}")
 
         model.import_nam_linear_weights(weights)
-        self.text_edit.append("Model successfully loaded")
+        self.text_edit.append("A1 model successfully loaded")
 
         self.context.nam_model = model
         self.completeChanged.emit()
@@ -189,4 +189,7 @@ class PlaybackValidatePage(QtWidgets.QWizardPage):
             model.debug_print_size()
             return
 
-        raise NotImplemented
+        self.text_edit.append("A2 model successfully loaded")
+
+        self.context.nam_model = model
+        self.completeChanged.emit()
