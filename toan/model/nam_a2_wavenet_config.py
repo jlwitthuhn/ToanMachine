@@ -13,14 +13,14 @@ class NamA2ActivationDetails:
 @dataclass
 class NamA2FilmConfig:
     active: bool
-    shift: bool
+    shift: bool = False
 
 
 @dataclass
 class NamA2WaveNetHead1x1Config:
     active: bool
-    groups: int
-    out_channels: int
+    groups: int = 1
+    out_channels: int = 1
 
 
 @dataclass
@@ -35,17 +35,17 @@ class NamA2WaveNetLayerGroupConfig:
     condition_size: int
     head_size: int
     channels: int
-    bottleneck: int
+    bottleneck: int | None
     kernel_size: int
     dilations: list[int]
     activation: NamA2ActivationDetails
-    gating_mode: str
+    gating_mode: str | None
     head_bias: bool
     groups_input: int
     groups_input_mixin: int
     layer1x1: NamA2WaveNetLayer1x1Config
     head1x1: NamA2WaveNetHead1x1Config
-    secondary_activation: str
+    secondary_activation: str | None
     conv_pre_film: NamA2FilmConfig
     conv_post_film: NamA2FilmConfig
     input_mixin_pre_film: NamA2FilmConfig
