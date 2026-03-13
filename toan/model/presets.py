@@ -11,6 +11,7 @@ class ModelConfigPreset(Enum):
     NAM_A1_FEATHER = 2
     NAM_A1_NANO = 3
     TOAN_A1_STANDARD_PLUS = 4
+    TOAN_A2_TEST = 5
 
     def get_label(self) -> str:
         match self:
@@ -24,5 +25,7 @@ class ModelConfigPreset(Enum):
                 return "NAM A1 Nano"
             case ModelConfigPreset.TOAN_A1_STANDARD_PLUS:
                 return "Toan A1 Standard Plus - 30493p"
+            case ModelConfigPreset.TOAN_A2_TEST:
+                return "Toan A2 Test"
             case _:
                 assert False

@@ -208,4 +208,4 @@ def get_a1_wavenet_config(size_preset: ModelConfigPreset) -> NamA1WaveNetConfig 
                 ]
             )
         case _:
-            return None
+            raise NotImplementedError
