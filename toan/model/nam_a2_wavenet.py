@@ -17,7 +17,7 @@ from toan.model.nam_a2_wavenet_config import (
 )
 
 # Based on code from Neural Amp Modeler
-# https://github.com/sdatkinson/NeuralAmpModelerCore/blob/v0.4.0/NAM/wavenet.h
+# https://github.com/sdatkinson/neural-amp-modeler/tree/main/nam/models/wavenet
 
 
 class _NamA2Conv1dLayer(_NamA1Conv1dLayer):
@@ -45,6 +45,14 @@ class _NamA2WrappedActivation(nn.Module):
             self.secondary = get_activation_module(secondary_name)
         else:
             raise ValueError(f"Unknown gating mode: {gating_mode}")
+
+    def __call__(self, x: mx.array) -> mx.array:
+        if self.gate_type == "none":
+            return self.primary(x)
+        else:
+            assert self.secondary is not None
+            x1, x2 = x.split(2, axis=2)
+            return self.primary(x1) * self.secondary(x2)
 
 
 class _NamA2WaveNetLayer(nn.Module):
@@ -113,6 +121,32 @@ class _NamA2WaveNetLayer(nn.Module):
     @property
     def parameter_count(self) -> int:
         return sum(p.size for _, p in utils.tree_flatten(self.parameters()))
+
+    def __call__(
+        self, x: mx.array, h: mx.array, out_length: int
+    ) -> tuple[mx.array, mx.array]:
+        conv_input = x
+        zconv = self.conv(conv_input)
+
+        mixin_input = h
+        mix_out = self.input_mixer(mixin_input)[:, -zconv.shape[1] :, :]
+
+        z1len = min(zconv.shape[1], mix_out.shape[1])
+        z1 = zconv[:, -z1len:, :] + mix_out[:, -z1len:, :]
+        post_activation = self.activation(z1)
+
+        layer_output = post_activation
+        if self.layer1x1 is not None:
+            layer_output = self.layer1x1(layer_output)
+
+        head_output = post_activation
+        if self.head1x1 is not None:
+            head_output = self.head1x1(head_output)[:, -out_length:, :]
+        else:
+            head_output = head_output[:, -out_length:, :]
+
+        residual = x[:, -layer_output.shape[1] :, :] + layer_output
+        return residual, head_output
 
     def debug_print_size(self):
         def count_module_params(module: nn.Module) -> int:
@@ -184,6 +218,26 @@ class _NamA2WaveNetLayerGroup(nn.Module):
     def parameter_count(self) -> int:
         return sum(p.size for _, p in utils.tree_flatten(self.parameters()))
 
+    @property
+    def receptive_field(self) -> int:
+        return 1 + (self.config.kernel_size - 1) * sum(self.config.dilations)
+
+    def __call__(
+        self, x: mx.array, c: mx.array, head_input: mx.array | None
+    ) -> tuple[mx.array, mx.array]:
+        # Index 2 in original script
+        out_length = min(x.shape[1], c.shape[1]) - (self.receptive_field - 1)
+        x = self.rechannel(x)
+        for layer in self.layers:
+            x, head_term = layer(x, c, out_length)
+            head_input = (
+                head_term
+                if head_input is None
+                # '-out_length' was originally indexed to third dimension
+                else head_input[:, -out_length:, :] + head_term
+            )
+        return self.head_rechannel(head_input), x
+
     def debug_print_size(self):
         print(f">> layergroup: {self.parameter_count}")
         for layer in self.layers:
@@ -223,6 +277,23 @@ class NamA2WaveNet(nn.Module):
     @property
     def parameter_count(self) -> int:
         return sum(p.size for _, p in utils.tree_flatten(self.parameters()))
+
+    def _forward(self, x: mx.array) -> mx.array:
+        c = x
+        y, head_input = x, None
+        for layer_group in self.layer_groups:
+            head_input, y = layer_group(y, c, head_input=head_input)
+        head_input = self.config.head_scale * head_input
+        return head_input
+
+    def __call__(self, x: mx.array) -> mx.array:
+        if x.ndim == 2:
+            # In original NAM source this adds a middle dimension instead
+            # We add a third dimension because that is what MLX conv modules want
+            x = x[:, :, None]
+        y = self._forward(x)
+        assert y.shape[2] == 1
+        return y[:, :, 0]
 
     def debug_print_size(self):
         print("++ A2 Model Size ++")
