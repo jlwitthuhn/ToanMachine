@@ -11,6 +11,9 @@ from mlx import nn as nn
 from mlx import optimizers as optimizers
 
 from toan.model.nam_a1_wavenet import NamA1WaveNet
+from toan.model.nam_a1_wavenet_config import NamA1WaveNetConfig
+from toan.model.nam_a2_wavenet import NamA2WaveNet
+from toan.model.nam_a2_wavenet_config import NamA2WaveNetConfig
 from toan.training import LossFunction, TrainingStageSummary
 from toan.training.config import TrainingConfig, TrainingStageConfig
 from toan.training.context import TrainingProgressContext
@@ -19,12 +22,23 @@ from toan.training.data_loader import TrainingDataLoader
 
 def run_training_loop(context: TrainingProgressContext, config: TrainingConfig):
     assert len(config.stages) > 0
-    model = NamA1WaveNet(
-        context.model_config,
-        context.metadata,
-        context.sample_rate,
-        rng_seed=config.rng_seed,
-    )
+    if isinstance(context.model_config, NamA1WaveNetConfig):
+        model = NamA1WaveNet(
+            context.model_config,
+            context.metadata,
+            context.sample_rate,
+            rng_seed=config.rng_seed,
+        )
+    elif isinstance(context.model_config, NamA2WaveNetConfig):
+        model = NamA2WaveNet(
+            context.model_config,
+            context.metadata,
+            context.sample_rate,
+            rng_seed=config.rng_seed,
+        )
+        raise NotImplementedError
+    else:
+        assert False
     mx.eval(model.parameters())
 
     np_rng_state = np.random.get_state()

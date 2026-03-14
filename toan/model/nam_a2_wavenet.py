@@ -39,7 +39,7 @@ class _NamA2WrappedActivation(nn.Module):
         self.gate_type = gating_mode
 
         self.primary = get_activation_module(primary_config.type)
-        if gating_mode == "none":
+        if gating_mode is None or gating_mode == "none":
             pass
         elif gating_mode == "gated":
             self.secondary = get_activation_module(secondary_name)
@@ -86,7 +86,7 @@ class _NamA2WaveNetLayer(nn.Module):
 
         self.bottleneck = bottleneck
 
-        if gating_mode == "none":
+        if gating_mode is None or gating_mode == "none":
             mid_channels = bottleneck
         elif gating_mode == "gated":
             mid_channels = 2 * bottleneck

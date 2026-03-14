@@ -9,11 +9,12 @@ import numpy as np
 from toan.model.metadata import ModelMetadata
 from toan.model.nam_a1_wavenet import NamA1WaveNet
 from toan.model.nam_a1_wavenet_config import NamA1WaveNetConfig
+from toan.model.nam_a2_wavenet_config import NamA2WaveNetConfig
 from toan.training import TrainingStageSummary
 
 
 class TrainingProgressContext:
-    model_config: NamA1WaveNetConfig | None = None
+    model_config: NamA1WaveNetConfig | NamA2WaveNetConfig | None = None
     metadata: ModelMetadata | None = None
     sample_rate: int | None = None
 

@@ -158,54 +158,5 @@ def get_a1_wavenet_config(size_preset: ModelConfigPreset) -> NamA1WaveNetConfig 
                     ),
                 ]
             )
-        case ModelConfigPreset.TOAN_A1_STANDARD_PLUS:
-            return NamA1WaveNetConfig(
-                layers=[
-                    NamA1WaveNetLayerGroupConfig(
-                        input_size=1,
-                        condition_size=1,
-                        head_size=12,
-                        channels=24,
-                        kernel_size=3,
-                        dilations=[
-                            1,
-                            2,
-                            4,
-                            8,
-                            16,
-                            32,
-                            64,
-                            128,
-                            256,
-                            512,
-                        ],
-                        activation="Tanh",
-                        gated=False,
-                        head_bias=False,
-                    ),
-                    NamA1WaveNetLayerGroupConfig(
-                        input_size=24,
-                        condition_size=1,
-                        head_size=1,
-                        channels=12,
-                        kernel_size=3,
-                        dilations=[
-                            1,
-                            2,
-                            4,
-                            8,
-                            16,
-                            32,
-                            64,
-                            128,
-                            256,
-                            512,
-                        ],
-                        activation="Tanh",
-                        gated=False,
-                        head_bias=True,
-                    ),
-                ]
-            )
         case _:
             return None
