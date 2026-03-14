@@ -72,10 +72,8 @@ def get_activation_module(activation: str) -> nn.Module:
         case "Hardtanh":
             return nn.HardTanh()
         case "LeakyHardtanh":
-            warnings.warn("Creating leaky hard tanh with default config")
             return LeakyHardTanh()
         case "LeakyReLU":
-            warnings.warn("Creating leaky relu with default config")
             return nn.LeakyReLU()
         case "PReLU":
             # This will need to be implemented as a per-channel activation
