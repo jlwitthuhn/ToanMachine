@@ -314,6 +314,16 @@ class NamA2WaveNet(nn.Module):
             case _:
                 assert False
 
+    def loss_esr(self, inputs: mx.array, targets: mx.array) -> mx.array:
+        outputs = self(inputs)
+        eps = 1e-6
+        delta2 = (targets - outputs) ** 2
+        target2 = targets**2
+        delta2_mean = delta2.mean(axis=-1)
+        target2_mean = target2.mean(axis=-1)
+        loss_per_batch_item = delta2_mean / (target2_mean + eps)
+        return loss_per_batch_item.mean()
+
     def loss_mse(self, inputs: mx.array, targets: mx.array) -> mx.array:
         outputs = self(inputs)
         delta = targets - outputs
