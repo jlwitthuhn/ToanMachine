@@ -2,11 +2,14 @@
 # https://www.gnu.org/licenses/gpl-3.0.en.html
 # SPDX-License-Identifier: GPL-3.0-only
 
+import math
 import os
 import threading
 import time
 from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser
+from dataclasses import dataclass
 
+import numpy as np
 from matplotlib.figure import Figure
 from tqdm import tqdm
 
@@ -16,6 +19,24 @@ from toan.training.config import TrainingConfig
 from toan.training.context import TrainingProgressContext
 from toan.training.loop import run_training_loop
 from toan.training.zip_loader import ZipLoaderContext, run_zip_loader
+
+
+@dataclass
+class _LossStats:
+    min: float = math.inf
+    max: float = math.inf
+    std: float = math.inf
+    med: float = math.inf
+    mean: float = math.inf
+
+    def as_formatted_str(self) -> str:
+        vars = [f" min: {self.min}", f" max: {self.max}"]
+        if self.std < math.inf:
+            vars.append(f" std: {self.std}")
+        if self.med < math.inf:
+            vars.append(f" med: {self.med}")
+        vars.append(f"mean: {self.mean}")
+        return "\n".join(vars)
 
 
 def main():
@@ -31,7 +52,9 @@ def main():
     zip_context = ZipLoaderContext()
     run_zip_loader(zip_context, args.zip_path)
 
-    def train_model(name: str, train_config: TrainingConfig):
+    def do_iteration(
+        name: str, train_config: TrainingConfig, save_model: bool = True, index: int = 1
+    ) -> float:
         print(f"Beginning training for {name}")
 
         train_context = TrainingProgressContext()
@@ -67,20 +90,48 @@ def main():
                     progress_bar.update(train_context.iters_done - progress_bar.n)
                 time.sleep(1.0)
 
-        print("Training complete, saving model...")
-        model_root_path = f"./output/{name}"
-        graph_path = f"{model_root_path}/graph.png"
-        os.makedirs(model_root_path, exist_ok=True)
-        fig: Figure = train_context.summary.generate_loss_graph(3)
-        fig.savefig(graph_path)
-        model_path = f"{model_root_path}/model.nam"
-        with open(model_path, "w") as file:
-            file.write(train_context.model.export_nam_json_str())
+        if save_model:
+            print("Training complete, saving model...")
+            model_root_path = f"./output/{name}"
+            graph_path = f"{model_root_path}/graph.png"
+            os.makedirs(model_root_path, exist_ok=True)
+            fig: Figure = train_context.summary.generate_loss_graph(3)
+            fig.savefig(graph_path)
+            model_path = f"{model_root_path}/model.nam"
+            with open(model_path, "w") as file:
+                file.write(train_context.model.export_nam_json_str())
+
+        return train_context.loss_test
+
+    loss_dict: dict[str, _LossStats] = {}
+
+    def do_iteration_and_log(
+        label: str,
+        train_config: TrainingConfig,
+        save_model: bool = True,
+        count: int = 1,
+    ):
+        losses: list[float] = []
+        original_seed = train_config.rng_seed
+        for i in range(count):
+            train_config.rng_seed = original_seed + i
+            loss = do_iteration(label, train_config, save_model, i)
+            losses.append(loss)
+        loss_min: float = np.min(losses)
+        loss_max: float = np.max(losses)
+        loss_mean: float = float(np.mean(losses))
+        loss_stats = _LossStats(min=loss_min, max=loss_max, mean=loss_mean)
+        if len(losses) >= 3:
+            loss_stats.std = float(np.std(losses))
+            loss_stats.med = float(np.median(losses))
+        print(f"{label} summary:")
+        print(loss_stats.as_formatted_str())
+        loss_dict[label] = loss_stats
 
     # Copy paste the below bit to do multiple training runs with different configs
 
     train_config = TrainingConfig()
-    train_model("default", train_config)
+    do_iteration_and_log("default", train_config, False, 2)
 
 
 if __name__ == "__main__":
