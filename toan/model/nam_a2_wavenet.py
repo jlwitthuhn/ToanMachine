@@ -15,6 +15,7 @@ from toan.model.nam_a2_wavenet_config import (
     NamA2WaveNetLayer1x1Config,
     NamA2WaveNetLayerGroupConfig,
 )
+from toan.training import LossFunction
 
 # Based on code from Neural Amp Modeler
 # https://github.com/sdatkinson/neural-amp-modeler/tree/main/nam/models/wavenet
@@ -27,7 +28,7 @@ class _NamA2Conv1dLayer(_NamA1Conv1dLayer):
 class _NamA2WrappedActivation(nn.Module):
     gate_type: str
     primary: nn.Module
-    secondary: nn.Module | None
+    secondary: nn.Module | None = None
 
     def __init__(
         self,
@@ -47,7 +48,7 @@ class _NamA2WrappedActivation(nn.Module):
             raise ValueError(f"Unknown gating mode: {gating_mode}")
 
     def __call__(self, x: mx.array) -> mx.array:
-        if self.gate_type == "none":
+        if self.gate_type is None or self.gate_type == "none":
             return self.primary(x)
         else:
             assert self.secondary is not None
@@ -278,6 +279,12 @@ class NamA2WaveNet(nn.Module):
     def parameter_count(self) -> int:
         return sum(p.size for _, p in utils.tree_flatten(self.parameters()))
 
+    @property
+    def receptive_field(self) -> int:
+        return 1 + sum(
+            [(layer_group.receptive_field - 1) for layer_group in self.layer_groups]
+        )
+
     def _forward(self, x: mx.array) -> mx.array:
         c = x
         y, head_input = x, None
@@ -294,6 +301,26 @@ class NamA2WaveNet(nn.Module):
         y = self._forward(x)
         assert y.shape[2] == 1
         return y[:, :, 0]
+
+    def loss(self, inputs: mx.array, targets: mx.array, func: LossFunction) -> mx.array:
+        match func:
+            case LossFunction.MSE:
+                return self.loss_mse(inputs, targets)
+            case LossFunction.RMSE:
+                return self.loss_rmse(inputs, targets)
+            case LossFunction.ESR:
+                return self.loss_esr(inputs, targets)
+            case _:
+                assert False
+
+    def loss_mse(self, inputs: mx.array, targets: mx.array) -> mx.array:
+        outputs = self(inputs)
+        delta = targets - outputs
+        delta2 = delta**2
+        return delta2.mean()
+
+    def loss_rmse(self, inputs: mx.array, targets: mx.array) -> mx.array:
+        return mx.sqrt(self.loss_mse(inputs, targets))
 
     def debug_print_size(self):
         print("++ A2 Model Size ++")

@@ -36,7 +36,6 @@ def run_training_loop(context: TrainingProgressContext, config: TrainingConfig):
             context.sample_rate,
             rng_seed=config.rng_seed,
         )
-        raise NotImplementedError
     else:
         assert False
     mx.eval(model.parameters())
