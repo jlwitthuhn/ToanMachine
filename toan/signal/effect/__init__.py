@@ -19,9 +19,10 @@ class EffectType(Enum):
     FeedbackDelay0100 = enum.auto()
     FeedbackDelay0200 = enum.auto()
     FeedbackDelay0400 = enum.auto()
-    Vibrato5Hz = enum.auto()
-    Vibrato8Hz = enum.auto()
+    Vibrato4Hz = enum.auto()
+    Vibrato7Hz = enum.auto()
     Flanger4Hz = enum.auto()
+    Flanger7Hz = enum.auto()
 
 
 def apply_effect(
@@ -42,11 +43,13 @@ def apply_effect(
             effect_delay(signal, int(sample_rate * 0.2), 0.4, True)
         case EffectType.FeedbackDelay0400:
             effect_delay(signal, int(sample_rate * 0.4), 0.4, True)
-        case EffectType.Vibrato5Hz:
-            effect_vibrato(signal, sample_rate, 5.0, 0.002)
-        case EffectType.Vibrato8Hz:
-            effect_vibrato(signal, sample_rate, 8.0, 0.002)
+        case EffectType.Vibrato4Hz:
+            effect_vibrato(signal, sample_rate, 4.0, 0.002)
+        case EffectType.Vibrato7Hz:
+            effect_vibrato(signal, sample_rate, 7.0, 0.002)
         case EffectType.Flanger4Hz:
             effect_vibrato(signal, sample_rate, 4.0, 0.001, 0.5)
+        case EffectType.Flanger4Hz:
+            effect_vibrato(signal, sample_rate, 7.0, 0.001, 0.5)
     if normalize:
         signal /= np.max(np.abs(signal))
