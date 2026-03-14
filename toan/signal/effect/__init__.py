@@ -49,7 +49,7 @@ def apply_effect(
             effect_vibrato(signal, sample_rate, 7.0, 0.002)
         case EffectType.Flanger4Hz:
             effect_vibrato(signal, sample_rate, 4.0, 0.001, 0.5)
-        case EffectType.Flanger4Hz:
+        case EffectType.Flanger7Hz:
             effect_vibrato(signal, sample_rate, 7.0, 0.001, 0.5)
     if normalize:
         signal /= np.max(np.abs(signal))
