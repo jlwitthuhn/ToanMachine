@@ -26,29 +26,30 @@ class ChordWithEffects:
 @dataclass
 class CaptureSignalConfig:
     sweep_duration: float = 12.0
-    warble_duration: float = 6.0
+    warble_duration: float = 6.5
     noise_duration: float = 8.0
-    pluck_note_duration: float = 0.70
-    pluck_decay: float = 0.985
-    pluck_pre_smooth: int = 0
+    pluck_note_duration: float = 0.65
+    pluck_decay: float = 0.982
+    pluck_pre_smooth: int = 1
     warble_chords: list[ChordWithEffects] = field(
         default_factory=lambda: [
-            ChordWithEffects(ChordType.PerfectFifth, EffectType.Nothing),
-            ChordWithEffects(ChordType.DiminishedTriad, EffectType.Nothing),
-            ChordWithEffects(ChordType.MajorTriad, EffectType.Nothing),
-            ChordWithEffects(ChordType.MinorSeventh, EffectType.Nothing),
-            ChordWithEffects(ChordType.GuitarStrings, EffectType.Nothing),
+            ChordWithEffects(ChordType.Tritone, EffectType.Flanger4Hz),
+            ChordWithEffects(ChordType.MajorSeventh, EffectType.Nothing),
+            ChordWithEffects(ChordType.Octave, EffectType.Nothing),
+            ChordWithEffects(ChordType.AugmentedTriad, EffectType.Nothing),
+            ChordWithEffects(ChordType.MinorTriad, EffectType.Nothing),
+            ChordWithEffects(ChordType.AugmentedMajorSeventhTetrad, EffectType.Nothing),
+            ChordWithEffects(ChordType.DiminishedSeventhTetrad, EffectType.Nothing),
+            ChordWithEffects(ChordType.DiminishedSeventhTetrad, EffectType.Nothing),
+            ChordWithEffects(ChordType.MinorMajorSeventhTetrad, EffectType.Nothing),
         ]
     )
     plucked_chords: list[ChordWithEffects] = field(
         default_factory=lambda: [
-            ChordWithEffects(ChordType.RootOnly, EffectType.Nothing),
-            ChordWithEffects(ChordType.Tritone, EffectType.Nothing),
+            ChordWithEffects(ChordType.MajorSixth, EffectType.Nothing),
+            ChordWithEffects(ChordType.MinorThird, EffectType.Nothing),
             ChordWithEffects(ChordType.MajorTriad, EffectType.Nothing),
-            ChordWithEffects(ChordType.MinorTriad, EffectType.Nothing),
-            ChordWithEffects(ChordType.MajorSeventhTetrad, EffectType.Nothing),
-            ChordWithEffects(ChordType.MinorNinthPentad, EffectType.Nothing),
-            ChordWithEffects(ChordType.GuitarStrings, EffectType.Nothing),
+            ChordWithEffects(ChordType.DominantSeventhTetrad, EffectType.Nothing),
         ]
     )
     rand_seed: int = 0x35
