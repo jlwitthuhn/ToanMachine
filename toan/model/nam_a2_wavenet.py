@@ -251,7 +251,7 @@ class NamA2WaveNet(nn.Module):
 
     layer_groups: list[_NamA2WaveNetLayerGroup]
     head: None = None
-    head_scale: mx.array
+    head_scale: float = 0.02
 
     def __init__(
         self,
@@ -271,13 +271,14 @@ class NamA2WaveNet(nn.Module):
         self.layer_groups = [
             _NamA2WaveNetLayerGroup(layer_config) for layer_config in config.layers
         ]
-        self.head_scale = mx.array(config.head_scale)
+        self.head_scale = config.head_scale
 
         mx.random.state = rng_state
 
     @property
     def parameter_count(self) -> int:
-        return sum(p.size for _, p in utils.tree_flatten(self.parameters()))
+        # +1 for head_scale which is not really a parameter
+        return sum(p.size for _, p in utils.tree_flatten(self.parameters())) + 1
 
     @property
     def receptive_field(self) -> int:
