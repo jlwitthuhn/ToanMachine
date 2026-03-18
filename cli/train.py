@@ -14,8 +14,9 @@ from matplotlib.figure import Figure
 from tqdm import tqdm
 
 from toan.model.nam_a1_wavenet_presets import get_a1_wavenet_config
+from toan.model.nam_a2_wavenet_presets import get_a2_wavenet_config
 from toan.model.presets import ModelConfigPreset
-from toan.training.config import TrainingConfig
+from toan.training.config import TrainingConfig, get_a2_default_config
 from toan.training.context import TrainingProgressContext
 from toan.training.loop import run_training_loop
 from toan.training.zip_loader import ZipLoaderContext, run_zip_loader
@@ -55,12 +56,12 @@ def main():
     def do_iteration(
         name: str, train_config: TrainingConfig, save_model: bool = True, index: int = 1
     ) -> float:
-        print(f"Beginning training for {name}")
+        print(f"Iteration {index}")
 
         train_context = TrainingProgressContext()
 
-        model_preset = ModelConfigPreset.NAM_A1_STANDARD
-        model_config = get_a1_wavenet_config(model_preset)
+        model_preset = ModelConfigPreset.TOAN_A2_TEST
+        model_config = get_a2_wavenet_config(model_preset)
         train_context.model_config = model_config
         train_context.metadata = zip_context.metadata
         train_context.sample_rate = zip_context.sample_rate
@@ -101,7 +102,10 @@ def main():
             with open(model_path, "w") as file:
                 file.write(train_context.model.export_nam_json_str())
 
-        return train_context.loss_test
+        if train_context.metadata.loss_test_mse is not None:
+            return train_context.metadata.loss_test_mse
+        else:
+            return train_context.loss_train
 
     loss_dict: dict[str, _LossStats] = {}
 
@@ -111,6 +115,7 @@ def main():
         save_model: bool = True,
         count: int = 1,
     ):
+        print(f"Beginning training for {label}")
         losses: list[float] = []
         original_seed = train_config.rng_seed
         for i in range(count):
@@ -130,8 +135,17 @@ def main():
 
     # Copy paste the below bit to do multiple training runs with different configs
 
-    train_config = TrainingConfig()
-    do_iteration_and_log("default", train_config, False, 2)
+    train_config = get_a2_default_config()
+    iter_count = 5
+    do_iteration_and_log("default", train_config, False, iter_count)
+
+    print()
+    print("++ Summary ++")
+    print()
+    for label, stats in loss_dict.items():
+        print(f"{label}:")
+        print(stats.as_formatted_str())
+        print()
 
 
 if __name__ == "__main__":
