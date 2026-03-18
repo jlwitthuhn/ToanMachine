@@ -42,7 +42,7 @@ class TrainingConfig:
         return total
 
 
-def get_a2_default_config() -> TrainingConfig:
+def get_a2_training_config() -> TrainingConfig:
     config = TrainingConfig()
     the_stage = config.stages[0]
     the_stage.steps_warmup = 200

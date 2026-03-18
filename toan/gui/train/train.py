@@ -9,7 +9,8 @@ from PySide6 import QtCore, QtWidgets
 
 from toan.formatting import format_seconds_as_mmss
 from toan.gui.train import TrainingGuiContext
-from toan.training.config import TrainingConfig
+from toan.model.nam_a2_wavenet_config import NamA2WaveNetConfig
+from toan.training.config import TrainingConfig, get_a2_training_config
 from toan.training.loop import run_training_loop
 
 TRAIN_TEXT = [
@@ -66,6 +67,7 @@ class TrainTrainPage(QtWidgets.QWizardPage):
         layout.addWidget(self.progress_desc_train)
 
     def initializePage(self):
+        is_a2: bool = isinstance(self.context.model_config, NamA2WaveNetConfig)
         # Copy all needed data from gui context to thread context before starting
         self.context.progress_context.model_config = self.context.model_config
         self.context.progress_context.metadata = self.context.loaded_metadata
@@ -77,7 +79,11 @@ class TrainTrainPage(QtWidgets.QWizardPage):
         self.context.progress_context.signal_wet_train = self.context.signal_wet
 
         def thread_func():
-            run_training_loop(self.context.progress_context, TrainingConfig())
+            if is_a2:
+                train_config = get_a2_training_config()
+            else:
+                train_config = TrainingConfig()
+            run_training_loop(self.context.progress_context, train_config)
 
         self.context.quit_training = False
         self.timestamp_begin = datetime.datetime.now()

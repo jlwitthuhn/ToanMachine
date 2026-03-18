@@ -16,7 +16,7 @@ from tqdm import tqdm
 from toan.model.nam_a1_wavenet_presets import get_a1_wavenet_config
 from toan.model.nam_a2_wavenet_presets import get_a2_wavenet_config
 from toan.model.presets import ModelConfigPreset
-from toan.training.config import TrainingConfig, get_a2_default_config
+from toan.training.config import TrainingConfig, get_a2_training_config
 from toan.training.context import TrainingProgressContext
 from toan.training.loop import run_training_loop
 from toan.training.zip_loader import ZipLoaderContext, run_zip_loader
@@ -135,7 +135,7 @@ def main():
 
     # Copy paste the below bit to do multiple training runs with different configs
 
-    train_config = get_a2_default_config()
+    train_config = get_a2_training_config()
     iter_count = 5
     do_iteration_and_log("default", train_config, False, iter_count)
 
