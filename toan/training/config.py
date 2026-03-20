@@ -48,6 +48,6 @@ def get_a2_training_config() -> TrainingConfig:
     the_stage.steps_warmup = 200
     the_stage.steps_main = 1800
     the_stage.test_interval = 100
-    the_stage.learn_rate_hi = 7.5e-3
-    the_stage.learn_rate_lo = 1.0e-3
+    the_stage.learn_rate_hi = 6.0e-3
+    the_stage.learn_rate_lo = 1.5e-3
     return config
