@@ -14,7 +14,7 @@ from dataclasses import dataclass
 import numpy as np
 
 from toan.mix import concat_signals
-from toan.model.nam_a1_wavenet_presets import get_a1_wavenet_config
+from toan.model.nam_a2_wavenet_presets import get_a2_wavenet_config
 from toan.model.presets import ModelConfigPreset
 from toan.music.chord import ChordType
 from toan.persistence import load_user_wav_list
@@ -26,7 +26,7 @@ from toan.signal.capture_signal import (
 from toan.signal.effect import EffectType
 from toan.soundio import SdChannel, get_input_devices, get_output_devices
 from toan.soundio.record_wet import RecordWetController
-from toan.training.config import TrainingConfig
+from toan.training.config import TrainingConfig, get_a2_training_config
 from toan.training.context import TrainingProgressContext
 from toan.training.loop import run_training_loop
 from toan.training.zip_loader import ZipLoaderContext, run_zip_loader
@@ -150,8 +150,8 @@ def do_iteration(
 
     print("Beginning training...")
     progress_context = TrainingProgressContext()
-    progress_context.model_config = get_a1_wavenet_config(
-        ModelConfigPreset.NAM_A1_STANDARD
+    progress_context.model_config = get_a2_wavenet_config(
+        ModelConfigPreset.TOAN_A2_TEST
     )
     progress_context.metadata = zip_context.metadata
     progress_context.sample_rate = sample_rate
@@ -252,7 +252,7 @@ def main() -> None:
     ) -> None:
         if train_extra_in is None:
             train_extra_in = train_wav_extra
-        train_config = TrainingConfig()
+        train_config = get_a2_training_config()
         for stage in train_config.stages:
             stage.test_interval = 0
         losses: list[float] = []
