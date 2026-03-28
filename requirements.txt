@@ -1,8 +1,8 @@
 matplotlib == 3.10.8
-mlx == 0.31.0
+mlx == 0.31.1
 numpy == 2.4.3
-platformdirs == 4.9.2
-pyside6-essentials == 6.10.2
+platformdirs == 4.9.4
+pyside6-essentials == 6.11.0
 scipy == 1.17.1
 sounddevice == 0.5.5
 tqdm == 4.67.3
