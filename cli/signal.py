@@ -86,10 +86,15 @@ def do_iteration(
     channel_out: SdChannel,
     signal_config: CaptureSignalConfig,
     training_config: TrainingConfig,
+    extra_signal_train: np.ndarray | None,
     extra_signal_test: np.ndarray | None,
 ) -> float:
     print("Generating signal...")
     signal_dry = generate_capture_signal(sample_rate, signal_config)
+    if extra_signal_train is not None:
+        print(f"Adding extra training signal of {len(extra_signal_train)} samples...")
+        assert extra_signal_train.ndim == 1
+        signal_dry = concat_signals([signal_dry, extra_signal_train], sample_rate // 2)
 
     test_offset = 0
     if extra_signal_test is not None:
@@ -196,7 +201,12 @@ def main() -> None:
     arg_parser.add_argument(
         "--testwavs",
         type=str,
-        help="Comma separated list of test wavs",
+        help="Comma separated list of testing wavs",
+    )
+    arg_parser.add_argument(
+        "--trainwavs",
+        type=str,
+        help="Comma separated list of training wavs",
     )
     args = arg_parser.parse_args()
 
@@ -218,7 +228,7 @@ def main() -> None:
         print(f"Failed to find output device: {output_err}")
         return
 
-    test_signal = None
+    test_wav_extra = None
     if args.testwavs is not None:
         print("Loading test wavs...")
         wav_set = set(args.testwavs.split(","))
@@ -229,12 +239,34 @@ def main() -> None:
                 paths.append(user_wav.path)
                 wav_set.remove(user_wav.filename)
         if len(wav_set) > 0:
-            print(f"Warning: Could not find {wav_set}")
+            print(f"Warning: Could not find test wav {wav_set}")
         signal_list: list[np.ndarray] = []
         for wav_path in paths:
             signal_list.append(load_and_resample_wav(args.samplerate, wav_path))
-        test_signal = concat_signals(signal_list, args.samplerate // 4)
-        test_signal = test_signal.astype(np.float32) / np.abs(test_signal).max()
+        test_wav_extra = concat_signals(signal_list, args.samplerate // 4)
+        test_wav_extra = (
+            test_wav_extra.astype(np.float32) / np.abs(test_wav_extra).max()
+        )
+
+    train_wav_extra = None
+    if args.testwavs is not None:
+        print("Loading test wavs...")
+        wav_set = set(args.testwavs.split(","))
+        available_wavs = get_user_wav_list()
+        paths: list[str] = []
+        for user_wav in available_wavs:
+            if user_wav.filename in wav_set:
+                paths.append(user_wav.path)
+                wav_set.remove(user_wav.filename)
+        if len(wav_set) > 0:
+            print(f"Warning: Could not find test wav {wav_set}")
+        signal_list: list[np.ndarray] = []
+        for wav_path in paths:
+            signal_list.append(load_and_resample_wav(args.samplerate, wav_path))
+        train_wav_extra = concat_signals(signal_list, args.samplerate // 4)
+        train_wav_extra = (
+            train_wav_extra.astype(np.float32) / np.abs(train_wav_extra).max()
+        )
 
     print("Beginning main loop...")
 
@@ -255,7 +287,8 @@ def main() -> None:
                 output_channel,
                 capture_config,
                 train_config,
-                test_signal,
+                train_wav_extra,
+                test_wav_extra,
             )
             losses.append(loss)
         loss_min: float = np.min(losses)
