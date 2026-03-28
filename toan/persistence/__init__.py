@@ -7,8 +7,12 @@ import warnings
 from dataclasses import dataclass
 from pathlib import Path
 
+import numpy as np
 import platformdirs
 from scipy.io import wavfile
+
+from toan.mix import concat_signals
+from toan.wav import load_and_resample_wav
 
 
 @dataclass
@@ -46,3 +50,14 @@ def get_user_wav_list() -> list[UserWavDesc]:
         duration = len(wav_data) / sample_rate
         result.append(UserWavDesc(str(path), file.name, sample_rate, duration))
     return result
+
+
+def load_user_wav_list(sample_rate: int, file_names: list[str]) -> np.ndarray:
+    wav_dir = get_user_wav_dir()
+    signal_list: list[np.ndarray] = []
+    for file_name in file_names:
+        file_path = os.path.join(wav_dir, file_name)
+        file_signal = load_and_resample_wav(sample_rate, file_path)
+        file_signal = file_signal.astype(np.float32) / np.abs(file_signal).max()
+        signal_list.append(file_signal)
+    return concat_signals(signal_list, sample_rate // 4)

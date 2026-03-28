@@ -17,7 +17,7 @@ from toan.mix import concat_signals
 from toan.model.nam_a1_wavenet_presets import get_a1_wavenet_config
 from toan.model.presets import ModelConfigPreset
 from toan.music.chord import ChordType
-from toan.persistence import get_user_wav_list
+from toan.persistence import load_user_wav_list
 from toan.signal.capture_signal import (
     CaptureSignalConfig,
     ChordWithEffects,
@@ -94,7 +94,7 @@ def do_iteration(
     if extra_signal_train is not None:
         print(f"Adding extra training signal of {len(extra_signal_train)} samples...")
         assert extra_signal_train.ndim == 1
-        signal_dry = concat_signals([signal_dry, extra_signal_train], sample_rate // 2)
+        signal_dry = concat_signals([signal_dry, extra_signal_train], sample_rate // 4)
 
     test_offset = 0
     if extra_signal_test is not None:
@@ -231,42 +231,14 @@ def main() -> None:
     test_wav_extra = None
     if args.testwavs is not None:
         print("Loading test wavs...")
-        wav_set = set(args.testwavs.split(","))
-        available_wavs = get_user_wav_list()
-        paths: list[str] = []
-        for user_wav in available_wavs:
-            if user_wav.filename in wav_set:
-                paths.append(user_wav.path)
-                wav_set.remove(user_wav.filename)
-        if len(wav_set) > 0:
-            print(f"Warning: Could not find test wav {wav_set}")
-        signal_list: list[np.ndarray] = []
-        for wav_path in paths:
-            signal_list.append(load_and_resample_wav(args.samplerate, wav_path))
-        test_wav_extra = concat_signals(signal_list, args.samplerate // 4)
-        test_wav_extra = (
-            test_wav_extra.astype(np.float32) / np.abs(test_wav_extra).max()
-        )
+        filenames = args.testwavs.split(",")
+        test_wav_extra = load_user_wav_list(args.samplerate, filenames)
 
     train_wav_extra = None
-    if args.testwavs is not None:
-        print("Loading test wavs...")
-        wav_set = set(args.testwavs.split(","))
-        available_wavs = get_user_wav_list()
-        paths: list[str] = []
-        for user_wav in available_wavs:
-            if user_wav.filename in wav_set:
-                paths.append(user_wav.path)
-                wav_set.remove(user_wav.filename)
-        if len(wav_set) > 0:
-            print(f"Warning: Could not find test wav {wav_set}")
-        signal_list: list[np.ndarray] = []
-        for wav_path in paths:
-            signal_list.append(load_and_resample_wav(args.samplerate, wav_path))
-        train_wav_extra = concat_signals(signal_list, args.samplerate // 4)
-        train_wav_extra = (
-            train_wav_extra.astype(np.float32) / np.abs(train_wav_extra).max()
-        )
+    if args.trainwavs is not None:
+        print("Loading train wavs...")
+        filenames = args.trainwavs.split(",")
+        train_wav_extra = load_user_wav_list(args.samplerate, filenames)
 
     print("Beginning main loop...")
 
@@ -303,7 +275,7 @@ def main() -> None:
         loss_dict[label] = loss_stats
 
     signal_config = CaptureSignalConfig()
-    # do_iteration_and_log("default", signal_config, args.repeat)
+    do_iteration_and_log("default", signal_config, args.repeat)
 
     def iterate_with_added_warble():
         original_warbles = signal_config.warble_chords.copy()
