@@ -245,8 +245,13 @@ def main() -> None:
     loss_dict: dict[str, _LossStats] = {}
 
     def do_iteration_and_log(
-        label: str, capture_config: CaptureSignalConfig, count: int = 1
+        label: str,
+        capture_config: CaptureSignalConfig,
+        count: int = 1,
+        train_extra_in: np.ndarray | None = None,
     ) -> None:
+        if train_extra_in is None:
+            train_extra_in = train_wav_extra
         train_config = TrainingConfig()
         for stage in train_config.stages:
             stage.test_interval = 0
@@ -259,7 +264,7 @@ def main() -> None:
                 output_channel,
                 capture_config,
                 train_config,
-                train_wav_extra,
+                train_extra_in,
                 test_wav_extra,
             )
             losses.append(loss)
@@ -343,6 +348,11 @@ def main() -> None:
     ) -> None:
         iterate_warble_effect(effects, skip_effected)
         iterate_plucked_effect(effects, skip_effected)
+
+    def iterate_with_training_wav(file_names: list[str]) -> None:
+        for file_name in file_names:
+            train_extra = load_user_wav_list(args.samplerate, [file_name])
+            do_iteration_and_log(file_name, signal_config, args.repeat, train_extra)
 
     try:
         iterate_with_applied_effect()
