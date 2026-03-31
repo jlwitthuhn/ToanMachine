@@ -6,7 +6,7 @@ from PySide6 import QtCore
 from PySide6.QtGui import Qt
 
 from toan.formatting import format_seconds_as_mmss
-from toan.persistence import UserWavDesc
+from toan.persistence.user_wav import UserWavDesc
 
 
 class WavFileModel(QtCore.QAbstractTableModel):

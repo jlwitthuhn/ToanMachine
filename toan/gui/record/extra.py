@@ -2,16 +2,12 @@
 # https://www.gnu.org/licenses/gpl-3.0.en.html
 # SPDX-License-Identifier: GPL-3.0-only
 
-import warnings
-
 import numpy as np
 from PySide6 import QtWidgets
-from scipy.io import wavfile
-from scipy.signal import resample
 
 from toan.gui.record import RecordingContext
 from toan.mix import concat_signals
-from toan.persistence import UserWavDesc, get_user_wav_list
+from toan.persistence.user_wav import UserWavDesc, get_user_wav_list
 from toan.qt import WavFileModel
 from toan.wav import load_and_resample_wav
 

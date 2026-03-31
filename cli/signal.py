@@ -17,7 +17,7 @@ from toan.mix import concat_signals
 from toan.model.nam_a2_wavenet_presets import get_a2_wavenet_config
 from toan.model.presets import ModelConfigPreset
 from toan.music.chord import ChordType
-from toan.persistence import load_user_wav_list
+from toan.persistence.user_wav import load_user_wav_list
 from toan.signal.capture_signal import (
     CaptureSignalConfig,
     ChordWithEffects,
@@ -30,7 +30,6 @@ from toan.training.config import TrainingConfig, get_a2_training_config
 from toan.training.context import TrainingProgressContext
 from toan.training.loop import run_training_loop
 from toan.training.zip_loader import ZipLoaderContext, run_zip_loader
-from toan.wav import load_and_resample_wav
 from toan.zip import create_training_zip
 
 

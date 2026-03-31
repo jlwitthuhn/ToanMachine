@@ -7,7 +7,7 @@ import sys
 from PySide6 import QtWidgets
 
 from toan.gui.main_window import MainWindow
-from toan.persistence import create_user_wav_dir
+from toan.persistence.user_wav import create_user_wav_dir
 
 
 def run_qt_gui() -> None:

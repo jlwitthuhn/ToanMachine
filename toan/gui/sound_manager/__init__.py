@@ -7,7 +7,7 @@ from pathlib import Path
 from PySide6 import QtWidgets
 from scipy.io import wavfile
 
-from toan.persistence import UserWavDesc, get_user_wav_dir, get_user_wav_list
+from toan.persistence.user_wav import UserWavDesc, get_user_wav_dir, get_user_wav_list
 from toan.qt import WavFileModel
 
 SOUND_TEXT = [
