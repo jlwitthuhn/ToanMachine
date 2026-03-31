@@ -8,6 +8,7 @@ import numpy as np
 
 from toan.mix import concat_signals
 from toan.music.chord import ChordType
+from toan.persistence.builtin_wav import BuiltinWav, get_builtin_wav_signal
 from toan.signal.effect import EffectType, apply_effect
 from toan.signal.generator.chirp import generate_chirp
 from toan.signal.generator.gaussian import generate_gaussian_pulse
@@ -52,6 +53,7 @@ class CaptureSignalConfig:
             ChordWithEffects(ChordType.DominantSeventhTetrad, EffectType.Nothing),
         ]
     )
+    builtin_wavs: list[BuiltinWav] = field(default_factory=lambda: [])
     rand_seed: int = 0x35
 
 
@@ -177,6 +179,16 @@ def _generate_white_noise_block(sample_rate: int, duration: float) -> np.ndarray
     return white_noise * pulse
 
 
+def _generate_builtin_wav_block(sample_rate: int, wavs: list[BuiltinWav]) -> np.ndarray:
+    if len(wavs) == 0:
+        return np.zeros(1)
+    buffers = []
+    for wav in wavs:
+        this_signal = get_builtin_wav_signal(sample_rate, wav)
+        buffers.append(this_signal)
+    return concat_signals(buffers, sample_rate // 4)
+
+
 def generate_capture_signal(
     sample_rate: int, config: CaptureSignalConfig = CaptureSignalConfig()
 ) -> np.ndarray:
@@ -196,6 +208,7 @@ def generate_capture_signal(
         config.pluck_pre_smooth,
     )
     block_white_noise = _generate_white_noise_block(sample_rate, config.noise_duration)
+    block_builtin_wavs = _generate_builtin_wav_block(sample_rate, config.builtin_wavs)
 
     signal_train = concat_signals(
         [
@@ -204,6 +217,7 @@ def generate_capture_signal(
             block_warble,
             block_plucked,
             block_white_noise,
+            block_builtin_wavs,
         ],
         sample_rate // 4,
     )

@@ -1,0 +1,1 @@
+This directory holds wav files that are shipped as part of Toan Machine. These file names are hard-coded into the program and adding more files here will do nothing unless you also modify the code.
