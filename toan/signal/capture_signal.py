@@ -53,7 +53,11 @@ class CaptureSignalConfig:
             ChordWithEffects(ChordType.DominantSeventhTetrad, EffectType.Nothing),
         ]
     )
-    builtin_wavs: list[BuiltinWav] = field(default_factory=lambda: [])
+    builtin_wavs: list[BuiltinWav] = field(
+        default_factory=lambda: [
+            BuiltinWav.T3K_GUITAR_CREAM,
+        ]
+    )
     rand_seed: int = 0x35
 
 

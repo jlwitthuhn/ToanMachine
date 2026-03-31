@@ -11,7 +11,7 @@ from toan.wav import load_and_resample_wav
 
 
 class BuiltinWav(enum.Enum):
-    DUMMY = 0
+    T3K_GUITAR_CREAM = 0
 
 
 def _get_builtin_wav_dir() -> Path:
@@ -22,8 +22,8 @@ def _get_builtin_wav_dir() -> Path:
 
 def _get_builtin_wav_filename(type: BuiltinWav) -> str:
     match type:
-        case BuiltinWav.DUMMY:
-            return "dummy.wav"
+        case BuiltinWav.T3K_GUITAR_CREAM:
+            return "t3k_guitar_cream.wav"
         case _:
             raise NotImplementedError
 
@@ -31,4 +31,5 @@ def _get_builtin_wav_filename(type: BuiltinWav) -> str:
 def get_builtin_wav_signal(sample_rate: int, type: BuiltinWav) -> np.ndarray:
     file_name = _get_builtin_wav_filename(type)
     file_path = _get_builtin_wav_dir().joinpath(file_name).resolve()
-    return load_and_resample_wav(sample_rate, str(file_path))
+    signal = load_and_resample_wav(sample_rate, str(file_path))
+    return signal / np.max(np.abs(signal))

@@ -1,1 +1,3 @@
 This directory holds wav files that are shipped as part of Toan Machine. These file names are hard-coded into the program and adding more files here will do nothing unless you also modify the code.
+
+Files beginning with 't3k_' are sourced from Tone3000's neural-amp-modeler-wasm. See '[repo root]/third_party/neural-amp-modeler-wasm' for details.
