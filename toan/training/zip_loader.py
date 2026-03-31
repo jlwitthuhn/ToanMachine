@@ -146,7 +146,9 @@ def run_zip_loader(context: ZipLoaderContext, input_file: str | io.BytesIO):
                 print_status("Error: Failed to find clicks in dry signal")
                 return
 
-            wet_clicks = find_wet_clicks(wet_clicks_signal, wet_quiet_samples)
+            wet_clicks = find_wet_clicks(
+                wet_clicks_signal, wet_quiet_samples, dry_clicks.delta
+            )
             if wet_clicks is None:
                 print_status("Error: Failed to find clicks in wet signal")
                 return
