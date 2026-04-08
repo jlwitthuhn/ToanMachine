@@ -55,6 +55,7 @@ class CaptureSignalConfig:
     )
     builtin_wavs: list[BuiltinWav] = field(
         default_factory=lambda: [
+            BuiltinWav.T3K_BASS_ROLLIN,
             BuiltinWav.T3K_GUITAR_CREAM,
         ]
     )

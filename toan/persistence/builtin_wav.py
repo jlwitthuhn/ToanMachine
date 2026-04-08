@@ -11,7 +11,8 @@ from toan.wav import load_and_resample_wav
 
 
 class BuiltinWav(enum.Enum):
-    T3K_GUITAR_CREAM = 0
+    T3K_BASS_ROLLIN = enum.auto()
+    T3K_GUITAR_CREAM = enum.auto()
 
 
 def _get_builtin_wav_dir() -> Path:
@@ -22,6 +23,8 @@ def _get_builtin_wav_dir() -> Path:
 
 def _get_builtin_wav_filename(type: BuiltinWav) -> str:
     match type:
+        case BuiltinWav.T3K_BASS_ROLLIN:
+            return "t3k_bass_rollin.flac"
         case BuiltinWav.T3K_GUITAR_CREAM:
             return "t3k_guitar_cream.flac"
         case _:
