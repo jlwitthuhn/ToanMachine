@@ -5,4 +5,5 @@ platformdirs == 4.9.4
 pyside6-essentials == 6.11.0
 scipy == 1.17.1
 sounddevice == 0.5.5
+soundfile == 0.13.1
 tqdm == 4.67.3
