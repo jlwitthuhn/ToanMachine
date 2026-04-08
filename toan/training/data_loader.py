@@ -47,7 +47,9 @@ class TrainingDataLoader:
             if maybe < len(signal_wet):
                 dry_begin = dry_begin_from_wet_begin(this_wet_begin)
                 assert dry_begin >= 0
-                self.dry_begin_points.append(dry_begin)
+                this_segment = signal_dry[dry_begin : dry_begin + self.dry_width]
+                if np.max(np.abs(this_segment)) > 1e-4:
+                    self.dry_begin_points.append(dry_begin)
             this_wet_begin = maybe
 
         # Same thing but scan backwards from the end, this will probably be a different offset
@@ -56,8 +58,10 @@ class TrainingDataLoader:
         while this_wet_begin > 0:
             maybe = dry_begin_from_wet_begin(this_wet_begin)
             if maybe >= 0:
-                self.dry_begin_points.append(maybe)
-            this_wet_begin = maybe
+                this_segment = signal_dry[maybe : maybe + self.dry_width]
+                if np.max(np.abs(this_segment)) > 1e-4:
+                    self.dry_begin_points.append(maybe)
+            this_wet_begin -= self.wet_width
 
     def make_batch(self, batch_size: int) -> tuple[mx.array, mx.array]:
         input_list: list[mx.array] = []
