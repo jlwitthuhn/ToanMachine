@@ -23,7 +23,7 @@ def _get_builtin_wav_dir() -> Path:
 def _get_builtin_wav_filename(type: BuiltinWav) -> str:
     match type:
         case BuiltinWav.T3K_GUITAR_CREAM:
-            return "t3k_guitar_cream.wav"
+            return "t3k_guitar_cream.flac"
         case _:
             raise NotImplementedError
 
