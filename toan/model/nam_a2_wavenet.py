@@ -311,18 +311,32 @@ class NamA2WaveNet(nn.Module):
                 return self.loss_rmse(inputs, targets)
             case LossFunction.ESR:
                 return self.loss_esr(inputs, targets)
+            case LossFunction.SoftESR_04:
+                return self.loss_esr_soft(inputs, targets, 4.0)
             case _:
                 assert False
 
-    def loss_esr(self, inputs: mx.array, targets: mx.array) -> mx.array:
+    def loss_esr(
+        self, inputs: mx.array, targets: mx.array, eps: float = 1e-6
+    ) -> mx.array:
         outputs = self(inputs)
-        eps = 1e-6
         delta2 = (targets - outputs) ** 2
         target2 = targets**2
         delta2_mean = delta2.mean(axis=-1)
         target2_mean = target2.mean(axis=-1)
         loss_per_batch_item = delta2_mean / (target2_mean + eps)
         return loss_per_batch_item.mean()
+
+    # ESR-derivative
+    # the signal at 0 contributes `ratio` times as much
+    # loss compared to abs(signal) at 1
+    def loss_esr_soft(
+        self, inputs: mx.array, targets: mx.array, ratio: float
+    ) -> mx.array:
+        # D^2 / (1.0^2 + N) * R = D^2 / N
+        # simplifies to N = 1 / (R - 1)
+        assert ratio > 1.0
+        return self.loss_esr(inputs, targets, eps=1.0 / (ratio - 1.0))
 
     def loss_mse(self, inputs: mx.array, targets: mx.array) -> mx.array:
         outputs = self(inputs)

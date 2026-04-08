@@ -15,6 +15,7 @@ class LossFunction(Enum):
     MSE = enum.auto()
     RMSE = enum.auto()
     ESR = enum.auto()
+    SoftESR_04 = enum.auto()
 
 
 @dataclass
