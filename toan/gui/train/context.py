@@ -21,4 +21,4 @@ class TrainingGuiContext:
     signal_dry_test: np.ndarray | None = None
     signal_wet_test: np.ndarray | None = None
 
-    progress_context: TrainingProgressContext = TrainingProgressContext()
+    progress_context: TrainingProgressContext | None = None

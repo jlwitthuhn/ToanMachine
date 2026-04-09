@@ -11,6 +11,7 @@ from toan.formatting import format_seconds_as_mmss
 from toan.gui.train import TrainingGuiContext
 from toan.model.nam_a2_wavenet_config import NamA2WaveNetConfig
 from toan.training.config import TrainingConfig, get_a2_training_config
+from toan.training.context import TrainingProgressContext
 from toan.training.loop import run_training_loop
 
 TRAIN_TEXT = [
@@ -32,6 +33,7 @@ class TrainTrainPage(QtWidgets.QWizardPage):
     def __init__(self, parent, context: TrainingGuiContext):
         super().__init__(parent)
         self.context = context
+        self.context.progress_context = TrainingProgressContext()
         self.context.progress_lock = threading.Lock()
         self.refresh_timer = QtCore.QTimer()
         self.refresh_timer.setInterval(150)
