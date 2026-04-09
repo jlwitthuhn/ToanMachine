@@ -25,7 +25,6 @@ class TrainModelConfigPage(QtWidgets.QWizardPage):
         super().__init__(parent)
         self.context = context
 
-        self.setCommitPage(True)
         self.setTitle("Model Configuration")
         layout = QtWidgets.QFormLayout(self)
 
