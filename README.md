@@ -1,11 +1,12 @@
 # Toan Machine
 
-Toan Machine is a tool to assist with training a model for use with [Neural Amp Modeler](https://www.neuralampmodeler.com/). All code is licensed under the terms of the [GPLv3](./LICENSE).
+Toan Machine is intended to be the one program you need to train a high-quality [Neural Amp Modeler](https://www.neuralampmodeler.com/) model. All code is licensed under the terms of the [GPLv3](./LICENSE).
 
-This utility allows a user to:
-* Record a test signal passing through some piece of equipment (pedal, amp, etc.)
-* From a recorded signal, train a NAM neural net to replicate that equipment.
-* Load an existing NAM file to hear how it sounds.
+The main design philosophy behind this project is to create an interface that directly guides an inexperienced user to creating a solid setup that can make great captures. This includes:
+* Record wet/dry signal directly within Toan Machine, no DAW required.
+* Interactive volume/gain calibration to ensure there is no clipping and the pedal/amp input is high enough to create the desired distortion.
+* Recording wet/dry pair and metadata are bundled together as a single zip file. It is impossible to mix up your tracks or load incorrect metadata.
+* Users can inject their own guitar DI into the training signal as validation data to answer the question "How accurate is this capture for my guitar specifically?".
 
 Toan Machine is currently built on MLX and will only work on Apple-Silicon-based Macs.
 
