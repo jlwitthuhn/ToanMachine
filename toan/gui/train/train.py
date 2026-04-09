@@ -81,11 +81,7 @@ class TrainTrainPage(QtWidgets.QWizardPage):
         self.context.progress_context.signal_wet_train = self.context.signal_wet
 
         def thread_func():
-            if is_a2:
-                train_config = get_a2_training_config()
-            else:
-                train_config = TrainingConfig()
-            run_training_loop(self.context.progress_context, train_config)
+            run_training_loop(self.context.progress_context, self.context.train_config)
 
         self.context.quit_training = False
         self.timestamp_begin = datetime.datetime.now()
