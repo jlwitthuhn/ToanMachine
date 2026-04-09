@@ -26,7 +26,7 @@ class ChordWithEffects:
 
 @dataclass
 class CaptureSignalConfig:
-    sweep_duration: float = 12.0
+    sweep_duration: float = 10.0
     warble_duration: float = 6.5
     noise_duration: float = 8.0
     pluck_note_duration: float = 0.65
