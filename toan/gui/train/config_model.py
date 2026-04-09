@@ -10,7 +10,7 @@ from toan.model.nam_a2_wavenet_presets import get_a2_wavenet_config
 from toan.model.presets import ModelConfigPreset
 
 
-class TrainConfigPage(QtWidgets.QWizardPage):
+class TrainModelConfigPage(QtWidgets.QWizardPage):
     context: TrainingGuiContext
 
     edit_model_name: QtWidgets.QLineEdit
@@ -25,7 +25,7 @@ class TrainConfigPage(QtWidgets.QWizardPage):
         self.context = context
 
         self.setCommitPage(True)
-        self.setTitle("Configuration")
+        self.setTitle("Model Configuration")
         layout = QtWidgets.QFormLayout(self)
 
         self.edit_model_name = QtWidgets.QLineEdit(self)

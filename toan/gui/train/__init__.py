@@ -4,7 +4,7 @@
 
 from PySide6 import QtCore, QtWidgets
 
-from toan.gui.train.config import TrainConfigPage
+from toan.gui.train.config_model import TrainModelConfigPage
 from toan.gui.train.context import TrainingGuiContext
 from toan.gui.train.graph import TrainGraphPage
 from toan.gui.train.input import TrainInputFilePage
@@ -24,7 +24,7 @@ class TrainingWizard(QtWidgets.QWizard):
         self.addPage(TrainIntroPage(self))
         self.addPage(TrainInputFilePage(self, self.context))
         self.addPage(TrainValidatePage(self, self.context))
-        self.addPage(TrainConfigPage(self, self.context))
+        self.addPage(TrainModelConfigPage(self, self.context))
         self.addPage(TrainTrainPage(self, self.context))
         self.addPage(TrainGraphPage(self, self.context))
 
