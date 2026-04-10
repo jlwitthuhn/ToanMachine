@@ -65,6 +65,7 @@ class TrainValidatePage(QtWidgets.QWizardPage):
                 self.context.signal_wet = self.thread_context.signal_wet
                 self.context.signal_dry_test = self.thread_context.signal_dry_test
                 self.context.signal_wet_test = self.thread_context.signal_wet_test
+                self.context.signal_wet_sweep = self.thread_context.signal_wet_sweep
                 self.context.loaded_metadata = self.thread_context.metadata
                 self.context.sample_rate = self.thread_context.sample_rate
                 self.thread_context = None

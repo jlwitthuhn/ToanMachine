@@ -6,12 +6,14 @@ from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg
 from PySide6 import QtWidgets
 
 from toan.gui.train import TrainingGuiContext
+from toan.signal.analysis import generate_spectrogram
 
 
 class TrainGraphPage(QtWidgets.QWizardPage):
     context: TrainingGuiContext
 
-    graph: FigureCanvasQTAgg
+    graph_loss: FigureCanvasQTAgg
+    graph_spec_real: FigureCanvasQTAgg
 
     def __init__(self, parent, context: TrainingGuiContext):
         super().__init__(parent)
@@ -24,16 +26,25 @@ class TrainGraphPage(QtWidgets.QWizardPage):
 
         loss_widget = QtWidgets.QWidget()
         loss_layout = QtWidgets.QVBoxLayout(loss_widget)
-        self.graph = FigureCanvasQTAgg()
-        loss_layout.addWidget(self.graph)
-
+        self.graph_loss = FigureCanvasQTAgg()
+        loss_layout.addWidget(self.graph_loss)
         tab_root.addTab(loss_widget, "Loss")
+
+        spec_real_widget = QtWidgets.QWidget()
+        spec_real_layout = QtWidgets.QVBoxLayout(spec_real_widget)
+        self.graph_spec_real = FigureCanvasQTAgg()
+        spec_real_layout.addWidget(self.graph_spec_real)
+        tab_root.addTab(spec_real_widget, "Spectrogram (Real)")
 
         layout.addWidget(tab_root)
 
     def initializePage(self):
-        figure = self.context.progress_context.summary.generate_loss_graph(5)
-        self.graph.figure = figure
+        self.graph_loss.figure = (
+            self.context.progress_context.summary.generate_loss_graph(5)
+        )
+        self.graph_spec_real.figure = generate_spectrogram(
+            self.context.sample_rate, self.context.signal_wet_sweep
+        )
 
     def validatePage(self) -> bool:
         file_path, _ = QtWidgets.QFileDialog.getSaveFileName(filter="Nam Files (*.nam)")

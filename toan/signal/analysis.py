@@ -5,6 +5,8 @@ import math
 from dataclasses import dataclass
 
 import numpy as np
+import scipy
+from matplotlib import pyplot as plt
 
 
 @dataclass
@@ -103,3 +105,22 @@ def find_wet_clicks(
         if best_score == 0:
             break
     return best_match
+
+
+def generate_spectrogram(sample_rate: int, signal: np.ndarray) -> plt.Figure:
+    freq, t, Sxx = scipy.signal.spectrogram(
+        signal,
+        sample_rate,
+        window="hann",
+        nperseg=2048,
+        noverlap=1024,
+    )
+
+    fig, ax = plt.subplots()
+    ax.set_title("Spectrogram")
+
+    mesh = ax.pcolormesh(t, freq, Sxx, shading="gouraud")
+    ax.set_xlabel("Seconds")
+    ax.set_ylabel("Frequency")
+    fig.colorbar(mesh, ax=ax)
+    return fig

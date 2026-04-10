@@ -22,6 +22,7 @@ class ZipLoaderContext:
     signal_wet: np.ndarray | None = None
     signal_dry_test: np.ndarray | None = None
     signal_wet_test: np.ndarray | None = None
+    signal_wet_sweep: np.ndarray | None = None
     metadata: ModelMetadata | None = None
     sample_rate: int = 0
 
@@ -209,7 +210,6 @@ def run_zip_loader(context: ZipLoaderContext, input_file: str | io.BytesIO):
 
             sweep_begin_real = sweep_begin - dry_sample_rate
             sweep_end_real = sweep_end - dry_sample_rate
-            context.signal_wet_sweep = dry_signal[sweep_begin_real:sweep_end_real]
 
             # Trim the end so we have a 1:1 mapping between the two
             train_trimmed_size = min(len(train_dry), len(train_wet))
@@ -235,6 +235,7 @@ def run_zip_loader(context: ZipLoaderContext, input_file: str | io.BytesIO):
             context.signal_wet = train_wet
             context.signal_dry_test = test_dry
             context.signal_wet_test = test_wet
+            context.signal_wet_sweep = wet_signal[sweep_begin_real:sweep_end_real]
 
             gear_make = config_json["device_make"]
             gear_model = config_json["device_model"]
