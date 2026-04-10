@@ -40,28 +40,20 @@ class TrainingDataLoader:
             return result
 
         # Scan forward from the first valid wet sample
-        wet_begin_first = self.dry_width - self.wet_width
-        this_wet_begin = wet_begin_first
-        while this_wet_begin < len(signal_wet):
-            maybe = this_wet_begin + self.wet_width
-            if maybe < len(signal_wet):
+        def append_to_dry_point_list(offset: int):
+            wet_begin_first = offset + self.dry_width - self.wet_width
+            this_wet_begin = wet_begin_first
+            while this_wet_begin < len(signal_wet) - self.wet_width:
                 dry_begin = dry_begin_from_wet_begin(this_wet_begin)
                 assert dry_begin >= 0
+                assert dry_begin + self.dry_width <= len(signal_dry)
                 this_segment = signal_dry[dry_begin : dry_begin + self.dry_width]
                 if np.max(np.abs(this_segment)) > 1e-4:
                     self.dry_begin_points.append(dry_begin)
-            this_wet_begin = maybe
+                this_wet_begin += self.wet_width
 
-        # Same thing but scan backwards from the end, this will probably be a different offset
-        wet_begin_last = len(self.signal_wet) - self.wet_width
-        this_wet_begin = wet_begin_last
-        while this_wet_begin > 0:
-            maybe = dry_begin_from_wet_begin(this_wet_begin)
-            if maybe >= 0:
-                this_segment = signal_dry[maybe : maybe + self.dry_width]
-                if np.max(np.abs(this_segment)) > 1e-4:
-                    self.dry_begin_points.append(maybe)
-            this_wet_begin -= self.wet_width
+        append_to_dry_point_list(0)
+        append_to_dry_point_list(self.wet_width // 2)
 
     def make_batch(self, batch_size: int) -> tuple[mx.array, mx.array]:
         input_list: list[mx.array] = []
