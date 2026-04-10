@@ -14,6 +14,7 @@ class TrainGraphPage(QtWidgets.QWizardPage):
 
     graph_loss: FigureCanvasQTAgg
     graph_spec_real: FigureCanvasQTAgg
+    graph_spec_real_loaded: bool = False
 
     def __init__(self, parent, context: TrainingGuiContext):
         super().__init__(parent)
@@ -23,6 +24,7 @@ class TrainGraphPage(QtWidgets.QWizardPage):
         layout = QtWidgets.QVBoxLayout(self)
 
         tab_root = QtWidgets.QTabWidget()
+        tab_root.currentChanged.connect(self.clicked_tab)
 
         loss_widget = QtWidgets.QWidget()
         loss_layout = QtWidgets.QVBoxLayout(loss_widget)
@@ -42,9 +44,6 @@ class TrainGraphPage(QtWidgets.QWizardPage):
         self.graph_loss.figure = (
             self.context.progress_context.summary.generate_loss_graph(5)
         )
-        self.graph_spec_real.figure = generate_spectrogram(
-            self.context.sample_rate, self.context.signal_wet_sweep
-        )
 
     def validatePage(self) -> bool:
         file_path, _ = QtWidgets.QFileDialog.getSaveFileName(filter="Nam Files (*.nam)")
@@ -56,3 +55,12 @@ class TrainGraphPage(QtWidgets.QWizardPage):
             file.write(self.context.progress_context.model.export_nam_json_str())
 
         return True
+
+    def clicked_tab(self, index: int) -> None:
+        if index == 1 and not self.graph_spec_real_loaded:
+            self.graph_spec_real.figure = generate_spectrogram(
+                self.context.sample_rate, self.context.signal_wet_sweep
+            )
+            self.graph_spec_real.draw_idle()
+            self.graph_spec_real.flush_events()
+            self.graph_spec_real_loaded = True
