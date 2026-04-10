@@ -7,6 +7,7 @@ from dataclasses import dataclass
 import numpy as np
 import scipy
 from matplotlib import pyplot as plt
+from scipy.constants import femto
 
 
 @dataclass
@@ -112,9 +113,12 @@ def generate_spectrogram(sample_rate: int, signal: np.ndarray) -> plt.Figure:
         signal,
         sample_rate,
         window="hann",
-        nperseg=2048,
-        noverlap=1024,
+        nperseg=1024,
+        noverlap=256,
     )
+
+    print(len(freq))
+    print(len(t))
 
     fig, ax = plt.subplots()
     ax.set_title("Spectrogram")
