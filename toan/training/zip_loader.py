@@ -91,10 +91,29 @@ def run_zip_loader(context: ZipLoaderContext, input_file: str | io.BytesIO):
             ):
                 print_status("Error: config.json does not contain key 'test_offset'")
                 return
-
             test_data_offset = config_json["test_offset"]
             if test_data_offset > 0:
                 print_status("Recording contains test data")
+
+            if "sweep_begin" not in config_json or not isinstance(
+                config_json["sweep_begin"], int
+            ):
+                print_status("Error: config.json does not contain key 'sweep_begin'")
+                return
+            sweep_begin = config_json["sweep_begin"]
+            if sweep_begin < 0:
+                print_status("Error: key 'sweep_begin' cannot be negative")
+                return
+
+            if "sweep_end" not in config_json or not isinstance(
+                config_json["sweep_end"], int
+            ):
+                print_status("Error: config.json does not contain key 'sweep_end'")
+                return
+            sweep_end = config_json["sweep_end"]
+            if sweep_end <= 0:
+                print_status("Error: key 'sweep_end' must be greater than 0")
+                return
 
             if "dry_signal" not in config_json or not isinstance(
                 config_json["dry_signal"], str
@@ -187,6 +206,10 @@ def run_zip_loader(context: ZipLoaderContext, input_file: str | io.BytesIO):
 
                 test_dry = None
                 test_wet = None
+
+            sweep_begin_real = sweep_begin - dry_sample_rate
+            sweep_end_real = sweep_end - dry_sample_rate
+            context.signal_wet_sweep = dry_signal[sweep_begin_real:sweep_end_real]
 
             # Trim the end so we have a 1:1 mapping between the two
             train_trimmed_size = min(len(train_dry), len(train_wet))

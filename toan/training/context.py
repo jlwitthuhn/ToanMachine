@@ -23,6 +23,8 @@ class TrainingProgressContext:
     signal_dry_train: np.ndarray | None = None
     signal_wet_train: np.ndarray | None = None
 
+    signal_wet_sweep: np.ndarray | None = None
+
     lock: threading.Lock = threading.Lock()
     iters_done: int = 0
     iters_total: int = 1
