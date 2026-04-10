@@ -24,6 +24,8 @@ def create_training_zip(
     dev_make: str,
     dev_model: str,
     test_offset: int,
+    sweep_begin: int,
+    sweep_end: int,
 ) -> io.BytesIO:
     wav_dry = io.BytesIO()
     scipy.io.wavfile.write(
@@ -47,6 +49,8 @@ def create_training_zip(
         "device_model": dev_model,
         "sample_rate": sample_rate,
         "test_offset": test_offset,
+        "sweep_begin": sweep_begin,
+        "sweep_end": sweep_end,
         "dry_signal": "dry.wav",
         "wet_signal": "wet.wav",
     }

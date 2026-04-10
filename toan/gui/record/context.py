@@ -17,4 +17,7 @@ class RecordingContext:
     extra_signal_dry_train: np.ndarray | None = None
     signal_dry: np.ndarray | None = None
     signal_recorded: np.ndarray | None = None
+    # Extra details for json file, to be consumed during training
     test_signal_offset: int = 0
+    dry_sweep_begin: int = 0
+    dry_sweep_end: int = 0

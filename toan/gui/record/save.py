@@ -39,6 +39,8 @@ class RecordSavePage(QtWidgets.QWizardPage):
             self.context.device_make,
             self.context.device_model,
             self.context.test_signal_offset,
+            self.context.dry_sweep_begin,
+            self.context.dry_sweep_end,
         )
 
         with open(file_path, "wb") as f:
