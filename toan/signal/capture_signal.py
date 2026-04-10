@@ -77,30 +77,6 @@ def _generate_calibration_block(sample_rate: int) -> np.ndarray:
     )
 
 
-def _generate_impulse_block(sample_rate: int) -> np.ndarray:
-    impulse0 = np.ones(1)
-    impulse1 = generate_gaussian_pulse(sample_rate // 4000)
-    impulse2 = generate_gaussian_pulse(sample_rate // 3000)
-    impulse3 = generate_gaussian_pulse(sample_rate // 2500)
-    impulse4 = generate_gaussian_pulse(sample_rate // 2100)
-    impulse5 = generate_gaussian_pulse(sample_rate // 1800)
-    impulse6 = generate_gaussian_pulse(sample_rate // 1500)
-    impulse7 = generate_gaussian_pulse(sample_rate // 1350)
-    return concat_signals(
-        [
-            impulse0,
-            impulse1,
-            impulse2,
-            impulse3,
-            impulse4,
-            impulse5,
-            impulse6,
-            impulse7,
-        ],
-        sample_rate // 4,
-    )
-
-
 def _generate_sweep_block(sample_rate: int, duration: float) -> np.ndarray:
     sweep_up = generate_chirp(sample_rate, 18.0, 22000.0, duration)
     sweep_down = generate_chirp(sample_rate, 22000.0, 18.0, duration / 2)
@@ -200,7 +176,6 @@ def generate_capture_signal(
     rng_state = np.random.get_state()
     np.random.seed(config.rand_seed)
 
-    block_impulse = _generate_impulse_block(sample_rate)
     block_sweep = _generate_sweep_block(sample_rate, config.sweep_duration)
     block_warble = _generate_warble_block(
         sample_rate, config.warble_chords, config.warble_duration
@@ -217,7 +192,6 @@ def generate_capture_signal(
 
     signal_train = concat_signals(
         [
-            block_impulse,
             block_sweep,
             block_warble,
             block_plucked,
