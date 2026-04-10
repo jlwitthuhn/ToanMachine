@@ -21,6 +21,7 @@ class ZipLoaderContext:
     signal_dry: np.ndarray | None = None
     signal_wet: np.ndarray | None = None
     signal_dry_test: np.ndarray | None = None
+    signal_dry_sweep: np.ndarray | None = None
     signal_wet_test: np.ndarray | None = None
     signal_wet_sweep: np.ndarray | None = None
     metadata: ModelMetadata | None = None
@@ -231,6 +232,7 @@ def run_zip_loader(context: ZipLoaderContext, input_file: str | io.BytesIO):
             context.signal_dry = train_dry
             context.signal_wet = train_wet
             context.signal_dry_test = test_dry
+            context.signal_dry_sweep = dry_signal[sweep_begin:sweep_end]
             context.signal_wet_test = test_wet
             context.signal_wet_sweep = wet_signal[
                 sweep_begin + latency_samples : sweep_end + latency_samples

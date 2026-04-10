@@ -44,7 +44,7 @@ class TrainGraphPage(QtWidgets.QWizardPage):
         spec_nam_layout = QtWidgets.QVBoxLayout(spec_nam_widget)
         self.graph_spec_nam = FigureCanvasQTAgg()
         spec_nam_layout.addWidget(self.graph_spec_nam)
-        tab_root.addTab(self.graph_spec_nam, "Spectrogram (NAM)")
+        tab_root.addTab(spec_nam_widget, "Spectrogram (NAM)")
 
         layout.addWidget(tab_root)
 
@@ -72,3 +72,10 @@ class TrainGraphPage(QtWidgets.QWizardPage):
             self.graph_spec_real.draw_idle()
             self.graph_spec_real.flush_events()
             self.graph_spec_real_loaded = True
+        elif index == 2 and not self.graph_spec_nam_loaded:
+            self.graph_spec_nam.figure = generate_spectrogram(
+                self.context.sample_rate, self.context.signal_dry_sweep
+            )
+            self.graph_spec_nam.draw_idle()
+            self.graph_spec_nam.flush_events()
+            self.graph_spec_nam_loaded = True
