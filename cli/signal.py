@@ -89,7 +89,7 @@ def do_iteration(
     extra_signal_test: np.ndarray | None,
 ) -> float:
     print("Generating signal...")
-    signal_dry = generate_capture_signal(sample_rate, signal_config)
+    signal_dry = generate_capture_signal(sample_rate, signal_config).signal
     if extra_signal_train is not None:
         print(f"Adding extra training signal of {len(extra_signal_train)} samples...")
         assert extra_signal_train.ndim == 1

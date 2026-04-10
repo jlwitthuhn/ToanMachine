@@ -15,7 +15,7 @@ from toan.signal.capture_signal import generate_capture_signal
 
 def _clicked_play_training_signal():
     playback_sample_rate = 48000
-    signal = generate_capture_signal(playback_sample_rate)
+    signal = generate_capture_signal(playback_sample_rate).signal
     sd.play(signal, playback_sample_rate)
 
 
@@ -23,7 +23,7 @@ def _clicked_save_training_signal():
     file_path, _ = QtWidgets.QFileDialog.getSaveFileName(filter="Wav Files (*.wav)")
     if file_path == "":
         return
-    signal = generate_capture_signal(48000)
+    signal = generate_capture_signal(48000).signal
     scipy.io.wavfile.write(file_path, 48000, signal)
 
 

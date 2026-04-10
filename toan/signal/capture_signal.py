@@ -62,6 +62,14 @@ class CaptureSignalConfig:
     rand_seed: int = 0x35
 
 
+@dataclass
+class CaptureSignalWithDetails:
+    signal: np.ndarray
+    sample_rate: int
+    sweep_begin: int
+    sweep_end: int
+
+
 def _generate_calibration_block(sample_rate: int) -> np.ndarray:
     silence_quarter = np.zeros(sample_rate // 4)
     impulse = np.ones(1) * 0.5
@@ -77,9 +85,11 @@ def _generate_calibration_block(sample_rate: int) -> np.ndarray:
     )
 
 
-def _generate_sweep_block(sample_rate: int, duration: float) -> np.ndarray:
+def _generate_sweep_block(sample_rate: int, duration: float) -> (np.ndarray, int):
     sweep_up = generate_chirp(sample_rate, 18.0, 22000.0, duration)
     sweep_down = generate_chirp(sample_rate, 22000.0, 18.0, duration / 2)
+
+    sweep_up_end = len(sweep_up)
 
     cosine_multiplier = generate_cosine_wave(
         len(sweep_down), sample_rate // 5, 0.08, 1.0
@@ -89,13 +99,16 @@ def _generate_sweep_block(sample_rate: int, duration: float) -> np.ndarray:
     sweep_down_cos = sweep_down * cosine_multiplier
     sweep_down_sin = sweep_down * sine_multiplier
 
-    return concat_signals(
-        [
-            sweep_up,
-            sweep_down_cos,
-            sweep_down_sin,
-        ],
-        sample_rate // 4,
+    return (
+        concat_signals(
+            [
+                sweep_up,
+                sweep_down_cos,
+                sweep_down_sin,
+            ],
+            sample_rate // 4,
+        ),
+        sweep_up_end,
     )
 
 
@@ -172,11 +185,14 @@ def _generate_builtin_wav_block(sample_rate: int, wavs: list[BuiltinWav]) -> np.
 
 def generate_capture_signal(
     sample_rate: int, config: CaptureSignalConfig = CaptureSignalConfig()
-) -> np.ndarray:
+) -> CaptureSignalWithDetails:
     rng_state = np.random.get_state()
     np.random.seed(config.rand_seed)
 
-    block_sweep = _generate_sweep_block(sample_rate, config.sweep_duration)
+    main_sweep_begin = 0
+    block_sweep, main_sweep_end = _generate_sweep_block(
+        sample_rate, config.sweep_duration
+    )
     block_warble = _generate_warble_block(
         sample_rate, config.warble_chords, config.warble_duration
     )
@@ -190,6 +206,8 @@ def generate_capture_signal(
     block_white_noise = _generate_white_noise_block(sample_rate, config.noise_duration)
     block_builtin_wavs = _generate_builtin_wav_block(sample_rate, config.builtin_wavs)
 
+    main_sweep_begin += 0
+    main_sweep_end += 0
     signal_train = concat_signals(
         [
             block_sweep,
@@ -207,7 +225,9 @@ def generate_capture_signal(
 
     silence_half_second = np.zeros(sample_rate // 2)
 
-    return concat_signals(
+    main_sweep_begin += len(block_calibration) + len(silence_half_second)
+    main_sweep_end += len(block_calibration) + len(silence_half_second)
+    raw_signal = concat_signals(
         [
             block_calibration,
             silence_half_second,
@@ -216,4 +236,10 @@ def generate_capture_signal(
             silence_half_second,
         ],
         0,
+    )
+    return CaptureSignalWithDetails(
+        raw_signal,
+        sample_rate,
+        main_sweep_begin,
+        main_sweep_end,
     )
