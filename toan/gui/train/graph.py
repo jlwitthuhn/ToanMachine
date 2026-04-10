@@ -15,6 +15,8 @@ class TrainGraphPage(QtWidgets.QWizardPage):
     graph_loss: FigureCanvasQTAgg
     graph_spec_real: FigureCanvasQTAgg
     graph_spec_real_loaded: bool = False
+    graph_spec_nam: FigureCanvasQTAgg
+    graph_spec_nam_loaded: bool = False
 
     def __init__(self, parent, context: TrainingGuiContext):
         super().__init__(parent)
@@ -37,6 +39,12 @@ class TrainGraphPage(QtWidgets.QWizardPage):
         self.graph_spec_real = FigureCanvasQTAgg()
         spec_real_layout.addWidget(self.graph_spec_real)
         tab_root.addTab(spec_real_widget, "Spectrogram (Real)")
+
+        spec_nam_widget = QtWidgets.QWidget()
+        spec_nam_layout = QtWidgets.QVBoxLayout(spec_nam_widget)
+        self.graph_spec_nam = FigureCanvasQTAgg()
+        spec_nam_layout.addWidget(self.graph_spec_nam)
+        tab_root.addTab(self.graph_spec_nam, "Spectrogram (NAM)")
 
         layout.addWidget(tab_root)
 
