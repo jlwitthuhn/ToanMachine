@@ -64,7 +64,7 @@ class CaptureSignalConfig:
 
 def _generate_calibration_block(sample_rate: int) -> np.ndarray:
     silence_quarter = np.zeros(sample_rate // 4)
-    impulse = np.ones(1)
+    impulse = np.ones(1) * 0.5
 
     return concat_signals(
         [
