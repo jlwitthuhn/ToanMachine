@@ -2,6 +2,8 @@
 # https://www.gnu.org/licenses/gpl-3.0.en.html
 # SPDX-License-Identifier: GPL-3.0-only
 
+import mlx.core as mx
+import numpy as np
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg
 from PySide6 import QtWidgets
 
@@ -73,8 +75,14 @@ class TrainGraphPage(QtWidgets.QWizardPage):
             self.graph_spec_real.flush_events()
             self.graph_spec_real_loaded = True
         elif index == 2 and not self.graph_spec_nam_loaded:
+            the_model = self.context.progress_context.model
+            assert the_model is not None
+            input = np.concat(
+                [np.zeros(the_model.receptive_field - 1), self.context.signal_dry_sweep]
+            )
+            output = the_model(mx.array(input).reshape(1, -1)).squeeze()
             self.graph_spec_nam.figure = generate_spectrogram(
-                self.context.sample_rate, self.context.signal_dry_sweep
+                self.context.sample_rate, output
             )
             self.graph_spec_nam.draw_idle()
             self.graph_spec_nam.flush_events()
