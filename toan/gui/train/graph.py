@@ -12,21 +12,24 @@ class TrainGraphPage(QtWidgets.QWizardPage):
     context: TrainingGuiContext
 
     graph: FigureCanvasQTAgg
-    save_button: QtWidgets.QPushButton
 
     def __init__(self, parent, context: TrainingGuiContext):
         super().__init__(parent)
         self.context = context
 
-        self.setTitle("Training Graphs")
+        self.setTitle("Training Data")
         layout = QtWidgets.QVBoxLayout(self)
 
-        self.graph = FigureCanvasQTAgg()
-        layout.addWidget(self.graph)
+        tab_root = QtWidgets.QTabWidget()
 
-        self.save_button = QtWidgets.QPushButton("Save Graph...")
-        self.save_button.clicked.connect(self._pressed_save)
-        layout.addWidget(self.save_button)
+        loss_widget = QtWidgets.QWidget()
+        loss_layout = QtWidgets.QVBoxLayout(loss_widget)
+        self.graph = FigureCanvasQTAgg()
+        loss_layout.addWidget(self.graph)
+
+        tab_root.addTab(loss_widget, "Loss")
+
+        layout.addWidget(tab_root)
 
     def initializePage(self):
         figure = self.context.progress_context.summary.generate_loss_graph(5)
@@ -42,9 +45,3 @@ class TrainGraphPage(QtWidgets.QWizardPage):
             file.write(self.context.progress_context.model.export_nam_json_str())
 
         return True
-
-    def _pressed_save(self) -> None:
-        file_path, _ = QtWidgets.QFileDialog.getSaveFileName(filter="PNG Files (*.png)")
-        if file_path == "":
-            return
-        self.graph.figure.savefig(file_path, dpi=300)
