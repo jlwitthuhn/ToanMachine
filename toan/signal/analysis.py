@@ -113,18 +113,17 @@ def generate_spectrogram(sample_rate: int, signal: np.ndarray) -> plt.Figure:
         signal,
         sample_rate,
         window="hann",
-        nperseg=1024,
-        noverlap=256,
+        nperseg=2048,
+        noverlap=512,
     )
-
-    print(len(freq))
-    print(len(t))
 
     fig, ax = plt.subplots()
     ax.set_title("Spectrogram")
 
-    mesh = ax.pcolormesh(t, freq, np.log10(Sxx), shading="gouraud")
+    mesh = ax.pcolormesh(t, freq, np.log10(Sxx + 1e-10), shading="gouraud")
     ax.set_xlabel("Seconds")
     ax.set_ylabel("Frequency")
+    ax.set_yscale("log")
+    ax.set_ylim(20, sample_rate // 2)
     fig.colorbar(mesh, ax=ax)
     return fig
