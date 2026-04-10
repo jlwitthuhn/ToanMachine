@@ -27,7 +27,6 @@ class TrainingStageSummary:
 
     def generate_loss_graph(self, smooth_factor: int) -> Figure:
         fig, ax = plt.subplots()
-        ax.set_title("Training Loss")
 
         def clip_warmup(
             losses: np.ndarray, points: np.ndarray
