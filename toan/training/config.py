@@ -4,6 +4,7 @@
 
 from dataclasses import dataclass, field
 
+from toan.model.presets import ModelConfigPreset
 from toan.training import LossFunction
 
 
@@ -42,7 +43,11 @@ class TrainingConfig:
         return total
 
 
-def get_a2_training_config() -> TrainingConfig:
+def _get_a1_training_config() -> TrainingConfig:
+    return TrainingConfig()
+
+
+def _get_a2_training_config() -> TrainingConfig:
     config = TrainingConfig()
     the_stage = config.stages[0]
     the_stage.batch_size_list = [(0.0, 24), (0.60, 40), (0.70, 56), (0.80, 72)]
@@ -52,3 +57,18 @@ def get_a2_training_config() -> TrainingConfig:
     the_stage.learn_rate_hi = 6.0e-3
     the_stage.learn_rate_lo = 1.0e-3
     return config
+
+
+def get_training_config_from_preset(selected_preset: ModelConfigPreset):
+    match selected_preset:
+        case (
+            ModelConfigPreset.NAM_A1_STANDARD
+            | ModelConfigPreset.NAM_A1_LITE
+            | ModelConfigPreset.NAM_A1_FEATHER
+            | ModelConfigPreset.NAM_A1_NANO
+        ):
+            return _get_a1_training_config()
+        case ModelConfigPreset.TOAN_A2_TEST:
+            return _get_a2_training_config()
+        case _:
+            assert False

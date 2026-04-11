@@ -5,6 +5,7 @@
 from PySide6 import QtCore, QtWidgets
 
 from toan.gui.train.context import TrainingGuiContext
+from toan.training.config import TrainingConfig
 
 
 class TrainTrainConfigPage(QtWidgets.QWizardPage):

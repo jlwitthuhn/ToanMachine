@@ -8,7 +8,7 @@ from toan.gui.train.context import TrainingGuiContext
 from toan.model.nam_a1_wavenet_presets import get_a1_wavenet_config
 from toan.model.nam_a2_wavenet_presets import get_a2_wavenet_config
 from toan.model.presets import ModelConfigPreset
-from toan.training.config import TrainingConfig, get_a2_training_config
+from toan.training.config import get_training_config_from_preset
 
 
 class TrainModelConfigPage(QtWidgets.QWizardPage):
@@ -74,18 +74,13 @@ class TrainModelConfigPage(QtWidgets.QWizardPage):
         selected_preset = ModelConfigPreset(self.combo_size.currentData())
 
         maybe_config = get_a1_wavenet_config(selected_preset)
-        is_a2 = False
         if maybe_config is None:
             maybe_config = get_a2_wavenet_config(selected_preset)
-            is_a2 = True
         if maybe_config is None:
             return False
         self.context.model_config = maybe_config
 
-        if is_a2:
-            self.context.train_config = get_a2_training_config()
-        else:
-            self.context.train_config = TrainingConfig()
-
+        self.context.train_config = get_training_config_from_preset(selected_preset)
         self.context.loaded_metadata.comment = self.edit_comment.text()
+
         return True
