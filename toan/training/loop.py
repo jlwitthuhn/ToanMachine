@@ -9,6 +9,7 @@ import numpy as np
 from mlx import core as mx
 from mlx import nn as nn
 from mlx import optimizers as optimizers
+from mlx.utils import tree_map
 
 from toan.model.nam_a1_wavenet import NamA1WaveNet
 from toan.model.nam_a1_wavenet_config import NamA1WaveNetConfig
@@ -127,6 +128,10 @@ def run_training_loop(context: TrainingProgressContext, config: TrainingConfig):
             this_batch_size = get_batch_size(stage_config, i)
             batch_in, batch_out = data_loader.make_batch(this_batch_size)
             loss, grads = loss_and_grad_fn(model, batch_in, batch_out)
+
+            if stage_config.loss_fn == LossFunction.ESR:
+                grads = tree_map(lambda g: mx.clip(g, -0.4, 0.4), grads)
+
             optimizer.update(model, grads)
             train_loss_buffer[i % train_loss_buffer_sz] = loss
             mx.eval(model.parameters())
@@ -150,6 +155,15 @@ def run_training_loop(context: TrainingProgressContext, config: TrainingConfig):
         context.metadata.loss_test_mse = measure_test_loss(LossFunction.MSE)
         context.metadata.loss_test_rmse = math.sqrt(context.metadata.loss_test_mse)
         context.metadata.loss_test_esr = measure_test_loss(LossFunction.ESR)
+        # Overall loss will use the last stage loss fn
+        loss_fn = config.stages[-1].loss_fn
+        match loss_fn:
+            case LossFunction.MSE:
+                context.loss_test = context.metadata.loss_test_mse
+            case LossFunction.RMSE:
+                context.loss_test = context.metadata.loss_test_rmse
+            case LossFunction.ESR:
+                context.loss_test = context.metadata.loss_test_esr
 
     context.model = model
 
