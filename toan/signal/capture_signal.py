@@ -26,7 +26,6 @@ class ChordWithEffects:
 
 @dataclass
 class CaptureSignalConfig:
-    TMP_extra_sweeps: bool = False
     sweep_duration: float = 10.0
     warble_duration: float = 6.5
     noise_duration: float = 8.0
@@ -86,9 +85,7 @@ def _generate_calibration_block(sample_rate: int) -> np.ndarray:
     )
 
 
-def _generate_sweep_block(
-    sample_rate: int, duration: float, extra: bool
-) -> tuple[np.ndarray, int]:
+def _generate_sweep_block(sample_rate: int, duration: float) -> tuple[np.ndarray, int]:
     sweep_up = generate_chirp(sample_rate, 18.0, 22000.0, duration)
     sweep_down = generate_chirp(sample_rate, 22000.0, 18.0, duration / 2)
 
@@ -102,31 +99,23 @@ def _generate_sweep_block(
     sweep_down_cos = sweep_down * cosine_multiplier
     sweep_down_sin = sweep_down * sine_multiplier
 
-    if not extra:
-        return (
-            concat_signals(
-                [
-                    sweep_up,
-                    sweep_down_cos,
-                    sweep_down_sin,
-                ],
-                sample_rate // 4,
-            ),
-            sweep_up_end,
-        )
-
+    sweep_max = min(24000, sample_rate // 2)
     sweep_pairs = [
-        (500, 22050),
-        (1000, 22050),
-        (2000, 22050),
-        (4000, 22050),
-        (6000, 22050),
-        (8000, 22050),
+        (500, sweep_max),
+        (750, sweep_max),
+        (1000, sweep_max),
+        (1500, sweep_max),
+        (2000, sweep_max),
+        (3000, sweep_max),
+        (4000, sweep_max),
+        (6000, sweep_max),
+        (8000, sweep_max),
+        (12000, sweep_max),
     ]
     extra_sweeps = []
     for f_start, f_end in sweep_pairs:
-        extra_sweeps.append(generate_chirp(sample_rate, f_start, f_end, 0.35))
-        extra_sweeps.append(generate_chirp(sample_rate, f_end, f_start, 0.35))
+        extra_sweeps.append(generate_chirp(sample_rate, f_start, f_end, 0.36))
+        extra_sweeps.append(generate_chirp(sample_rate, f_end, f_start, 0.36))
     extra_block = concat_signals(extra_sweeps, sample_rate // 24)
 
     return (
@@ -222,7 +211,7 @@ def generate_capture_signal(
 
     main_sweep_begin = 0
     block_sweep, main_sweep_end = _generate_sweep_block(
-        sample_rate, config.sweep_duration, config.TMP_extra_sweeps
+        sample_rate, config.sweep_duration
     )
     block_warble = _generate_warble_block(
         sample_rate, config.warble_chords, config.warble_duration
