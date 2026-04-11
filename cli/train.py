@@ -13,12 +13,15 @@ import numpy as np
 from matplotlib.figure import Figure
 from tqdm import tqdm
 
+from toan.model.nam_a1_wavenet_presets import get_a1_wavenet_config
 from toan.model.nam_a2_wavenet_presets import get_a2_wavenet_config
 from toan.model.presets import ModelConfigPreset
 from toan.training.config import TrainingConfig, get_training_config_from_preset
 from toan.training.context import TrainingProgressContext
 from toan.training.loop import run_training_loop
 from toan.training.zip_loader import ZipLoaderContext, run_zip_loader
+
+THE_PRESET: ModelConfigPreset = ModelConfigPreset.NAM_A1_STANDARD
 
 
 @dataclass
@@ -59,8 +62,10 @@ def main():
 
         train_context = TrainingProgressContext()
 
-        model_preset = ModelConfigPreset.TOAN_A2_TEST
-        model_config = get_a2_wavenet_config(model_preset)
+        model_config = get_a1_wavenet_config(THE_PRESET)
+        if model_config is None:
+            model_config = get_a2_wavenet_config(THE_PRESET)
+
         train_context.model_config = model_config
         train_context.metadata = zip_context.metadata
         train_context.sample_rate = zip_context.sample_rate
@@ -134,7 +139,7 @@ def main():
 
     # Copy paste the below bit to do multiple training runs with different configs
 
-    train_config = get_training_config_from_preset(ModelConfigPreset.TOAN_A2_TEST)
+    train_config = get_training_config_from_preset(THE_PRESET)
     iter_count = 5
     do_iteration_and_log("default", train_config, False, iter_count)
 
