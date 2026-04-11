@@ -86,8 +86,9 @@ def _generate_calibration_block(sample_rate: int) -> np.ndarray:
 
 
 def _generate_sweep_block(sample_rate: int, duration: float) -> tuple[np.ndarray, int]:
-    sweep_up = generate_chirp(sample_rate, 18.0, 22000.0, duration)
-    sweep_down = generate_chirp(sample_rate, 22000.0, 18.0, duration / 2)
+    sweep_max = min(24000, sample_rate // 2)
+    sweep_up = generate_chirp(sample_rate, 18.0, sweep_max, duration)
+    sweep_down = generate_chirp(sample_rate, sweep_max, 18.0, duration / 2)
 
     sweep_up_end = len(sweep_up)
 
@@ -99,7 +100,6 @@ def _generate_sweep_block(sample_rate: int, duration: float) -> tuple[np.ndarray
     sweep_down_cos = sweep_down * cosine_multiplier
     sweep_down_sin = sweep_down * sine_multiplier
 
-    sweep_max = min(24000, sample_rate // 2)
     sweep_pairs = [
         (500, sweep_max),
         (750, sweep_max),
