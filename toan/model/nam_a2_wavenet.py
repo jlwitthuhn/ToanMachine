@@ -317,7 +317,7 @@ class NamA2WaveNet(nn.Module):
                 assert False
 
     def loss_esr(
-        self, inputs: mx.array, targets: mx.array, eps: float = 1e-6
+        self, inputs: mx.array, targets: mx.array, eps: float = 1e-4
     ) -> mx.array:
         outputs = self(inputs)
         delta2 = (targets - outputs) ** 2
