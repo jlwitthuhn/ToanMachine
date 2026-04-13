@@ -11,17 +11,17 @@ from toan.training import LossFunction
 @dataclass
 class TrainingStageConfig:
     steps_warmup: int = 100
-    steps_main: int = 1100
+    steps_main: int = 1300
     test_interval: int = 50
     # If batch_size is 0, batch_size_list will be used
     batch_size: int = 0
     batch_size_list: list[tuple[float, int]] = field(
-        default_factory=lambda: [(0.0, 24), (0.4, 40), (0.8, 56)]
+        default_factory=lambda: [(0.0, 24), (0.3, 40), (0.75, 56)]
     )
     input_sample_width: int = 8192 + 4096
-    learn_rate_hi: float = 3.0e-3
-    learn_rate_lo: float = 5.0e-3
-    weight_decay: float = 1.1e-2
+    learn_rate_hi: float = 3.5e-3
+    learn_rate_lo: float = 3.0e-3
+    weight_decay: float = 1.0e-2
     loss_fn: LossFunction = LossFunction.MSE
     adam_betas: list[float] = field(default_factory=lambda: [0.89, 0.98])
 
