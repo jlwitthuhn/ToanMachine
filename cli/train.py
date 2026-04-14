@@ -19,6 +19,7 @@ from toan.model.presets import ModelConfigPreset
 from toan.training.config import TrainingConfig, get_training_config_from_preset
 from toan.training.context import TrainingProgressContext
 from toan.training.loop import run_training_loop
+from toan.training.loss import LossFunction
 from toan.training.zip_loader import ZipLoaderContext, run_zip_loader
 
 THE_PRESET: ModelConfigPreset = ModelConfigPreset.NAM_A1_STANDARD
@@ -88,7 +89,7 @@ def main():
                     if train_context.loss_test != last_loss:
                         last_loss = train_context.loss_test
                         progress_bar.set_description(
-                            f"Test: {train_context.loss_test:0.5f}"
+                            f"Test: {train_context.loss_test:0.8f}"
                         )
                     if train_context.model is not None:
                         break
@@ -106,8 +107,8 @@ def main():
             with open(model_path, "w") as file:
                 file.write(train_context.model.export_nam_json_str())
 
-        if train_context.metadata.loss_test_mse is not None:
-            return train_context.metadata.loss_test_mse
+        if train_context.loss_test is not None:
+            return train_context.loss_test
         else:
             return train_context.loss_train
 
