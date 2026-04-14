@@ -5,7 +5,7 @@
 from dataclasses import dataclass, field
 
 from toan.model.presets import ModelConfigPreset
-from toan.training import LossFunction
+from toan.training.loss import LossFunction
 
 
 @dataclass

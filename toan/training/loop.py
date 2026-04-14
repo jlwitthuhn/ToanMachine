@@ -15,10 +15,11 @@ from toan.model.nam_a1_wavenet import NamA1WaveNet
 from toan.model.nam_a1_wavenet_config import NamA1WaveNetConfig
 from toan.model.nam_a2_wavenet import NamA2WaveNet
 from toan.model.nam_a2_wavenet_config import NamA2WaveNetConfig
-from toan.training import LossFunction, TrainingStageSummary
+from toan.training import TrainingStageSummary
 from toan.training.config import TrainingConfig, TrainingStageConfig
 from toan.training.context import TrainingProgressContext
 from toan.training.data_loader import TrainingDataLoader
+from toan.training.loss import LossFunction, calculate_loss
 
 
 def run_training_loop(context: TrainingProgressContext, config: TrainingConfig):
@@ -85,7 +86,7 @@ def run_training_loop(context: TrainingProgressContext, config: TrainingConfig):
     def measure_test_loss(func: LossFunction) -> float:
         model.train(False)
         test_in, test_out = get_test_data()
-        return model.loss(test_in, test_out, func).item()
+        return calculate_loss(model, func, test_in, test_out).item()
 
     with context.lock:
         context.iters_done = 0
@@ -108,8 +109,8 @@ def run_training_loop(context: TrainingProgressContext, config: TrainingConfig):
         )
 
         # Make a loss function in the shape that MLX expects
-        def loss_fn(model_in, inputs: mx.array, outputs: mx.array):
-            return model_in.loss(inputs, outputs, stage_config.loss_fn)
+        def loss_fn(model_in, inputs: mx.array, targets: mx.array):
+            return calculate_loss(model_in, stage_config.loss_fn, inputs, targets)
 
         loss_and_grad_fn = nn.value_and_grad(model, loss_fn)
         optimizer = optimizers.AdamW(

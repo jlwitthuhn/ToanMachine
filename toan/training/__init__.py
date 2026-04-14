@@ -4,18 +4,10 @@
 
 import enum
 from dataclasses import dataclass, field
-from enum import Enum
 
 import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib.figure import Figure
-
-
-class LossFunction(Enum):
-    MSE = enum.auto()
-    RMSE = enum.auto()
-    ESR = enum.auto()
-    SoftESR_04 = enum.auto()
 
 
 @dataclass

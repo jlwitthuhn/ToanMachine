@@ -14,7 +14,6 @@ from toan.model.nam_a1_wavenet_config import (
     NamA1WaveNetConfig,
     NamA1WaveNetLayerGroupConfig,
 )
-from toan.training import LossFunction
 
 # Based on code from Neural Amp Modeler
 # https://github.com/sdatkinson/neural-amp-modeler/blob/e054002e48cd102b0993811d69e8172db4a91597/nam/models/wavenet.py
@@ -194,36 +193,6 @@ class NamA1WaveNet(nn.Module):
     config: NamA1WaveNetConfig
     metadata: ModelMetadata
     sample_rate: int = 0
-
-    def loss(self, inputs: mx.array, targets: mx.array, func: LossFunction) -> mx.array:
-        match func:
-            case LossFunction.MSE:
-                return self.loss_mse(inputs, targets)
-            case LossFunction.RMSE:
-                return self.loss_rmse(inputs, targets)
-            case LossFunction.ESR:
-                return self.loss_esr(inputs, targets)
-            case _:
-                assert False
-
-    def loss_esr(self, inputs: mx.array, targets: mx.array) -> mx.array:
-        outputs = self(inputs)
-        eps = 1e-6
-        delta2 = (targets - outputs) ** 2
-        target2 = targets**2
-        delta2_mean = delta2.mean(axis=-1)
-        target2_mean = target2.mean(axis=-1)
-        loss_per_batch_item = delta2_mean / (target2_mean + eps)
-        return loss_per_batch_item.mean()
-
-    def loss_mse(self, inputs: mx.array, targets: mx.array) -> mx.array:
-        outputs = self(inputs)
-        delta = targets - outputs
-        delta2 = delta**2
-        return delta2.mean()
-
-    def loss_rmse(self, inputs: mx.array, targets: mx.array) -> mx.array:
-        return mx.sqrt(self.loss_mse(inputs, targets))
 
     def __init__(
         self,
