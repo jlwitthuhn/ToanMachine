@@ -6,6 +6,8 @@ import dataclasses
 import datetime
 from dataclasses import dataclass
 
+from toan.training.loss import LossFunction
+
 
 @dataclass
 class ModelMetadata:
@@ -13,9 +15,7 @@ class ModelMetadata:
     gear_make: str
     gear_model: str
     comment: str | None = None
-    loss_test_mse: float | None = None
-    loss_test_rmse: float | None = None
-    loss_test_esr: float | None = None
+    loss_test: dict[str, float] = dataclasses.field(default_factory=dict)
 
     def export_dict(self) -> dict:
         result = dataclasses.asdict(self)
