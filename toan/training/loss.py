@@ -12,6 +12,7 @@ class LossFunction(enum.Enum):
     ESR = enum.auto()
     MSE = enum.auto()
     RMSE = enum.auto()
+    FFT_MSE = enum.auto()
 
 
 def _loss_esr(output: mx.array, target: mx.array) -> mx.array:
@@ -34,6 +35,14 @@ def _loss_rmse(output: mx.array, target: mx.array) -> mx.array:
     return mx.sqrt(_loss_mse(output, target))
 
 
+def _loss_fft_mse(output: mx.array, target: mx.array) -> mx.array:
+    output_fft = mx.fft.fft(output)
+    target_fft = mx.fft.fft(target)
+    delta = target_fft - output_fft
+    delta2 = (delta.abs()) ** 2
+    return delta2.mean()
+
+
 def calculate_loss(
     model: nn.Module, loss_fn: LossFunction, input: mx.array, target: mx.array
 ) -> mx.array:
@@ -45,5 +54,7 @@ def calculate_loss(
             return _loss_mse(output, target)
         case LossFunction.RMSE:
             return _loss_rmse(output, target)
+        case LossFunction.FFT_MSE:
+            return _loss_fft_mse(output, target)
         case _:
             assert False
