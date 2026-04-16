@@ -35,6 +35,7 @@ class TrainingConfig:
         default_factory=lambda: [TrainingStageConfig()]
     )
     rng_seed: int = 0x35
+    compile_model: bool = False
 
     def steps_total(self) -> int:
         total = 0

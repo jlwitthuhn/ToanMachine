@@ -13,6 +13,7 @@ from mlx.utils import tree_map
 
 from toan.model.nam_a1_wavenet import NamA1WaveNet
 from toan.model.nam_a1_wavenet_config import NamA1WaveNetConfig
+from toan.model.nam_a1_wavenet_functional import NamA1WavenetFunctional
 from toan.model.nam_a2_wavenet import NamA2WaveNet
 from toan.model.nam_a2_wavenet_config import NamA2WaveNetConfig
 from toan.training import TrainingStageSummary
@@ -111,15 +112,34 @@ def run_training_loop(context: TrainingProgressContext, config: TrainingConfig):
 
         # Make a loss function in the shape that MLX expects
         def loss_fn(model_in, inputs: mx.array, targets: mx.array):
-            outputs = model_in(inputs)
+            if isinstance(model_in, nn.Module):
+                outputs = model_in(inputs)
+            elif isinstance(model_in, dict):
+                if isinstance(context.model_config, NamA1WaveNetConfig):
+                    outputs = NamA1WavenetFunctional.forward_model(
+                        context.model_config, model_in, inputs
+                    )
+                else:
+                    raise NotImplementedError
+            else:
+                raise ValueError("`model_in` must be a `nn.Module` or `dict`")
             return calculate_loss(stage_config.loss_fn, outputs, targets)
 
-        loss_and_grad_fn = nn.value_and_grad(model, loss_fn)
         optimizer = optimizers.AdamW(
             learning_rate=learn_rate,
             betas=stage_config.adam_betas,
             weight_decay=stage_config.weight_decay,
         )
+        loss_and_grad_fn = nn.value_and_grad(model, loss_fn)
+
+        def do_step(batch_in_step: mx.array, batch_out_step: mx.array) -> mx.array:
+            loss, grads = loss_and_grad_fn(model, batch_in_step, batch_out_step)
+            optimizer.update(model, grads)
+            return loss
+
+        if config.compile_model:
+            state = [model.state, optimizer.state]
+            do_step = mx.compile(do_step, inputs=state, outputs=state)
 
         train_loss_buffer = mx.ones(12)
         train_loss_buffer_sz = len(train_loss_buffer)
@@ -130,12 +150,9 @@ def run_training_loop(context: TrainingProgressContext, config: TrainingConfig):
             model.train(True)
             this_batch_size = get_batch_size(stage_config, i)
             batch_in, batch_out = data_loader.make_batch(this_batch_size)
-            loss, grads = loss_and_grad_fn(model, batch_in, batch_out)
 
-            if stage_config.loss_fn == LossFunction.ESR:
-                grads = tree_map(lambda g: mx.clip(g, -0.4, 0.4), grads)
+            loss = do_step(batch_in, batch_out)
 
-            optimizer.update(model, grads)
             train_loss_buffer[i % train_loss_buffer_sz] = loss
             mx.eval(model.parameters())
 
