@@ -86,7 +86,8 @@ def run_training_loop(context: TrainingProgressContext, config: TrainingConfig):
     def measure_test_loss(func: LossFunction) -> float:
         model.train(False)
         test_in, test_out = get_test_data()
-        return calculate_loss(model, func, test_in, test_out).item()
+        model_out = model(test_in)
+        return calculate_loss(func, model_out, test_out).item()
 
     with context.lock:
         context.iters_done = 0
@@ -110,7 +111,8 @@ def run_training_loop(context: TrainingProgressContext, config: TrainingConfig):
 
         # Make a loss function in the shape that MLX expects
         def loss_fn(model_in, inputs: mx.array, targets: mx.array):
-            return calculate_loss(model_in, stage_config.loss_fn, inputs, targets)
+            outputs = model_in(inputs)
+            return calculate_loss(stage_config.loss_fn, outputs, targets)
 
         loss_and_grad_fn = nn.value_and_grad(model, loss_fn)
         optimizer = optimizers.AdamW(

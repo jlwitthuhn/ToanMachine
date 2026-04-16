@@ -44,17 +44,16 @@ def _loss_fft_mse(output: mx.array, target: mx.array) -> mx.array:
 
 
 def calculate_loss(
-    model: nn.Module, loss_fn: LossFunction, input: mx.array, target: mx.array
+    loss_fn: LossFunction, model_output: mx.array, target: mx.array
 ) -> mx.array:
-    output = model(input)
     match loss_fn:
         case LossFunction.ESR:
-            return _loss_esr(output, target)
+            return _loss_esr(model_output, target)
         case LossFunction.MSE:
-            return _loss_mse(output, target)
+            return _loss_mse(model_output, target)
         case LossFunction.RMSE:
-            return _loss_rmse(output, target)
+            return _loss_rmse(model_output, target)
         case LossFunction.FFT_MSE:
-            return _loss_fft_mse(output, target)
+            return _loss_fft_mse(model_output, target)
         case _:
             assert False
