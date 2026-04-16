@@ -22,6 +22,9 @@ class NamA1WaveNetLayerGroupConfig:
         result = dataclasses.asdict(self)
         return result
 
+    def receptive_field(self) -> int:
+        return 1 + (self.kernel_size - 1) * sum(self.dilations)
+
 
 @dataclass
 class NamA1WaveNetConfig:

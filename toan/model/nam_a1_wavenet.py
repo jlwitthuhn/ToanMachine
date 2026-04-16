@@ -183,7 +183,7 @@ class _NamA1WaveNetLayerGroup(nn.Module):
 
     @property
     def receptive_field(self) -> int:
-        return 1 + (self.config.kernel_size - 1) * sum(self.config.dilations)
+        return self.config.receptive_field()
 
 
 class NamA1WaveNet(nn.Module):
