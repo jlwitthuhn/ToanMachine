@@ -103,15 +103,11 @@ class TrainTrainPage(QtWidgets.QWizardPage):
             self.progress_bar.repaint()
             if self.context.progress_context.loss_train is not None:
                 self.progress_desc_train.setText(
-                    f"Training loss: {self.context.progress_context.loss_train:.5f}"
+                    f"Training loss: {self.context.progress_context.loss_train:.6f}"
                 )
-            if (
-                self.context.progress_context.summary is not None
-                and self.context.progress_context.summary.losses_test is not None
-                and len(self.context.progress_context.summary.losses_test) > 0
-            ):
+            if self.context.progress_context.loss_test is not None:
                 self.progress_desc_test.setText(
-                    f"Test loss: {self.context.progress_context.summary.losses_test[-1]:.5f}"
+                    f"Test loss: {self.context.progress_context.loss_test:.6f}"
                 )
             if self.context.progress_context.model is not None:
                 self.refresh_timer.stop()
