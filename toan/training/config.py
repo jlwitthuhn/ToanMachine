@@ -72,4 +72,4 @@ def get_training_config_from_preset(selected_preset: ModelConfigPreset):
         case ModelConfigPreset.TOAN_A2_TEST:
             return _get_a2_training_config()
         case _:
-            assert False
+            raise NotImplementedError
