@@ -34,6 +34,10 @@ class TrainingDataLoader:
         self.dry_begin_points = []
         self.remaining_begin_points = []
 
+        print(
+            f"Dry: {self.dry_width}, Wet: {self.wet_width}, Rf: {self.receptive_field}"
+        )
+
         def dry_begin_from_wet_begin(wet_begin: int) -> int:
             delta = self.dry_width - self.wet_width
             result = wet_begin - delta

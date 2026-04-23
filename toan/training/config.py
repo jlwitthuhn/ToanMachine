@@ -48,6 +48,14 @@ def _get_a1_training_config() -> TrainingConfig:
     return TrainingConfig()
 
 
+def _get_a1_xstd_training_config() -> TrainingConfig:
+    config = TrainingConfig()
+    the_stage = config.stages[0]
+    the_stage.input_sample_width = 1024 * 24
+    the_stage.steps_main = 800
+    return config
+
+
 def _get_a2_training_config() -> TrainingConfig:
     config = TrainingConfig()
     the_stage = config.stages[0]
@@ -69,6 +77,8 @@ def get_training_config_from_preset(selected_preset: ModelConfigPreset):
             | ModelConfigPreset.NAM_A1_NANO
         ):
             return _get_a1_training_config()
+        case ModelConfigPreset.CUSTOM_A1_XSTD:
+            return _get_a1_xstd_training_config()
         case ModelConfigPreset.TOAN_A2_TEST:
             return _get_a2_training_config()
         case _:

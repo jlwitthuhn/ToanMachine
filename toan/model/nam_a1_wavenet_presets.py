@@ -158,5 +158,54 @@ def get_a1_wavenet_config(size_preset: ModelConfigPreset) -> NamA1WaveNetConfig 
                     ),
                 ]
             )
+        case ModelConfigPreset.CUSTOM_A1_XSTD:
+            return NamA1WaveNetConfig(
+                layers=[
+                    NamA1WaveNetLayerGroupConfig(
+                        input_size=1,
+                        condition_size=1,
+                        head_size=8,
+                        channels=8,
+                        kernel_size=6,
+                        dilations=[1, 3, 9, 27, 81, 243, 729],
+                        activation="Tanh",
+                        gated=False,
+                        head_bias=False,
+                    ),
+                    NamA1WaveNetLayerGroupConfig(
+                        input_size=8,
+                        condition_size=1,
+                        head_size=8,
+                        channels=8,
+                        kernel_size=6,
+                        dilations=[1, 3, 9, 27, 81, 243, 729],
+                        activation="Tanh",
+                        gated=False,
+                        head_bias=False,
+                    ),
+                    NamA1WaveNetLayerGroupConfig(
+                        input_size=8,
+                        condition_size=1,
+                        head_size=8,
+                        channels=8,
+                        kernel_size=15,
+                        dilations=[1, 16],
+                        activation="Tanh",
+                        gated=False,
+                        head_bias=False,
+                    ),
+                    NamA1WaveNetLayerGroupConfig(
+                        input_size=8,
+                        condition_size=1,
+                        head_size=1,
+                        channels=8,
+                        kernel_size=6,
+                        dilations=[1, 3, 9, 27, 81, 243, 729],
+                        activation="Tanh",
+                        gated=False,
+                        head_bias=True,
+                    ),
+                ]
+            )
         case _:
             return None

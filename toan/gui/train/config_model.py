@@ -50,6 +50,7 @@ class TrainModelConfigPage(QtWidgets.QWizardPage):
             ModelConfigPreset.NAM_A1_STANDARD,
             ModelConfigPreset.NAM_A1_LITE,
             ModelConfigPreset.NAM_A1_FEATHER,
+            ModelConfigPreset.CUSTOM_A1_XSTD,
             ModelConfigPreset.TOAN_A2_TEST,
         ]:
             label = allowed_model.get_label()
