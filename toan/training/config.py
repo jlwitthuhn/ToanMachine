@@ -53,6 +53,8 @@ def _get_a1_xstd_training_config() -> TrainingConfig:
     the_stage = config.stages[0]
     the_stage.input_sample_width = 1024 * 24
     the_stage.steps_main = 800
+    the_stage.learn_rate_hi = 7.5e-3
+    the_stage.learn_rate_lo = 3.0e-3
     return config
 
 
