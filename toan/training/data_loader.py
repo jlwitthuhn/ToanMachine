@@ -2,7 +2,6 @@
 # https://www.gnu.org/licenses/gpl-3.0.en.html
 # SPDX-License-Identifier: GPL-3.0-only
 
-import mlx.core as mx
 import numpy as np
 
 
@@ -65,10 +64,8 @@ class TrainingDataLoaderMlx:
             index_begin = np.random.randint(len(self.remaining_begin_points))
             sample_begin = self.remaining_begin_points.pop(index_begin)
             sample_end = sample_begin + self.dry_width
-            this_input = mx.array(self.signal_dry[sample_begin:sample_end])
-            this_output = mx.array(
-                self.signal_wet[sample_end - self.wet_width : sample_end]
-            )
+            this_input = self.signal_dry[sample_begin:sample_end]
+            this_output = self.signal_wet[sample_end - self.wet_width : sample_end]
             input_list.append(this_input)
             output_list.append(this_output)
         return np.array(input_list), np.array(output_list)

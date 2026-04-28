@@ -2,14 +2,13 @@
 # https://www.gnu.org/licenses/gpl-3.0.en.html
 # SPDX-License-Identifier: GPL-3.0-only
 
-import mlx.core as mx
 import numpy as np
 import sounddevice as sd
+import torch
 from PySide6 import QtWidgets
 
 from toan.gui.playback import PlaybackContext
-from toan.model.nam_a1_wavenet_mlx import NamA1WaveNetMlx
-from toan.model.nam_a2_wavenet_mlx import NamA2WaveNetMlx
+from toan.model.nam_a1_wavenet_torch import NamA1WaveNetTorch
 from toan.soundio import SdChannel, generate_descriptions, get_input_devices
 
 LISTEN_TEXT = [
@@ -133,7 +132,7 @@ class PlaybackListenPage(QtWidgets.QWizardPage):
 
 
 def _convert_complete_signal(
-    raw_signal: np.ndarray, model: NamA1WaveNetMlx | NamA2WaveNetMlx
+    raw_signal: np.ndarray, model: NamA1WaveNetTorch
 ) -> np.ndarray:
-    output = model(mx.array(raw_signal).reshape(1, -1))
+    output = model(torch.tensor(raw_signal).reshape(1, -1))
     return np.array(output.squeeze())

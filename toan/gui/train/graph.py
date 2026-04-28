@@ -2,8 +2,8 @@
 # https://www.gnu.org/licenses/gpl-3.0.en.html
 # SPDX-License-Identifier: GPL-3.0-only
 
-import mlx.core as mx
 import numpy as np
+import torch
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg
 from PySide6 import QtWidgets
 
@@ -80,7 +80,10 @@ class TrainGraphPage(QtWidgets.QWizardPage):
             input = np.concat(
                 [np.zeros(the_model.receptive_field - 1), self.context.signal_dry_sweep]
             )
-            output = the_model(mx.array(input).reshape(1, -1)).squeeze()
+            input = torch.tensor(input.astype(np.float32)).to(torch.device("mps"))
+
+            output = the_model(input.reshape(1, -1)).squeeze()
+            output = output.cpu().detach().numpy()
             self.graph_spec_nam.figure = generate_spectrogram(
                 self.context.sample_rate, output
             )
