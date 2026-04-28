@@ -7,7 +7,7 @@ from mlx import nn, utils
 
 from toan.model.activation import get_activation_module
 from toan.model.metadata import ModelMetadata
-from toan.model.nam_a1_wavenet import _NamA1Conv1dLayer
+from toan.model.nam_a1_wavenet_mlx import _NamA1Conv1dLayerMlx
 from toan.model.nam_a2_wavenet_config import (
     NamA2ActivationDetails,
     NamA2WaveNetConfig,
@@ -20,11 +20,11 @@ from toan.model.nam_a2_wavenet_config import (
 # https://github.com/sdatkinson/neural-amp-modeler/tree/main/nam/models/wavenet
 
 
-class _NamA2Conv1dLayer(_NamA1Conv1dLayer):
+class _NamA2Conv1dLayerMlx(_NamA1Conv1dLayerMlx):
     pass
 
 
-class _NamA2WrappedActivation(nn.Module):
+class _NamA2WrappedActivationMlx(nn.Module):
     gate_type: str
     primary: nn.Module
     secondary: nn.Module | None = None
@@ -55,12 +55,12 @@ class _NamA2WrappedActivation(nn.Module):
             return self.primary(x1) * self.secondary(x2)
 
 
-class _NamA2WaveNetLayer(nn.Module):
+class _NamA2WaveNetLayerMlx(nn.Module):
     bottleneck: int
 
-    conv: _NamA2Conv1dLayer
-    input_mixer: _NamA2Conv1dLayer
-    activation: _NamA2WrappedActivation
+    conv: _NamA2Conv1dLayerMlx
+    input_mixer: _NamA2Conv1dLayerMlx
+    activation: _NamA2WrappedActivationMlx
     layer1x1: nn.Module | None = None
     head1x1: nn.Module | None = None
 
@@ -93,25 +93,25 @@ class _NamA2WaveNetLayer(nn.Module):
         else:
             raise ValueError(f"Unknown gating mode: {gating_mode}")
 
-        self.conv = _NamA2Conv1dLayer(
+        self.conv = _NamA2Conv1dLayerMlx(
             channels, mid_channels, kernel_size, dilation=dilation, groups=groups_input
         )
-        self.input_mixer = _NamA2Conv1dLayer(
+        self.input_mixer = _NamA2Conv1dLayerMlx(
             condition_size, mid_channels, 1, bias=False, groups=groups_input_mixin
         )
-        self.activation = _NamA2WrappedActivation(
+        self.activation = _NamA2WrappedActivationMlx(
             activation, secondary_activation, gating_mode
         )
 
         if layer_1x1_config.active:
-            self.layer1x1 = _NamA2Conv1dLayer(
+            self.layer1x1 = _NamA2Conv1dLayerMlx(
                 bottleneck, channels, 1, groups=layer_1x1_config.groups
             )
         else:
             assert bottleneck == channels
 
         if head_1x1_config.active:
-            self.head1x1 = _NamA2Conv1dLayer(
+            self.head1x1 = _NamA2Conv1dLayerMlx(
                 bottleneck,
                 head_1x1_config.out_channels,
                 1,
@@ -166,19 +166,19 @@ class _NamA2WaveNetLayer(nn.Module):
             print(f">>>> head1x1: 0")
 
 
-class _NamA2WaveNetLayerGroup(nn.Module):
+class _NamA2WaveNetLayerGroupMlx(nn.Module):
     config: NamA2WaveNetLayerGroupConfig
 
-    rechannel: _NamA2Conv1dLayer
-    layers: list[_NamA2WaveNetLayer]
-    head_rechannel: _NamA2Conv1dLayer
+    rechannel: _NamA2Conv1dLayerMlx
+    layers: list[_NamA2WaveNetLayerMlx]
+    head_rechannel: _NamA2Conv1dLayerMlx
 
     def __init__(self, config: NamA2WaveNetLayerGroupConfig):
         super().__init__()
 
         self.config = config
 
-        self.rechannel = _NamA2Conv1dLayer(
+        self.rechannel = _NamA2Conv1dLayerMlx(
             config.input_size, config.channels, 1, bias=False
         )
 
@@ -187,7 +187,7 @@ class _NamA2WaveNetLayerGroup(nn.Module):
         )
 
         self.layers = [
-            _NamA2WaveNetLayer(
+            _NamA2WaveNetLayerMlx(
                 config.condition_size,
                 config.channels,
                 config.kernel_size,
@@ -207,7 +207,7 @@ class _NamA2WaveNetLayerGroup(nn.Module):
         head_rechannel_in = (
             config.head1x1.out_channels if config.head1x1.active else real_bottleneck
         )
-        self.head_rechannel = _NamA2Conv1dLayer(
+        self.head_rechannel = _NamA2Conv1dLayerMlx(
             head_rechannel_in,
             config.head_size,
             1,
@@ -244,11 +244,11 @@ class _NamA2WaveNetLayerGroup(nn.Module):
             layer.debug_print_size()
 
 
-class NamA2WaveNet(nn.Module):
+class NamA2WaveNetMlx(nn.Module):
     config: NamA2WaveNetConfig
     metadata: ModelMetadata
 
-    layer_groups: list[_NamA2WaveNetLayerGroup]
+    layer_groups: list[_NamA2WaveNetLayerGroupMlx]
     head: None = None
     head_scale: float = 0.02
 
@@ -268,7 +268,7 @@ class NamA2WaveNet(nn.Module):
         self.metadata = metadata
         self.sample_rate = sample_rate
         self.layer_groups = [
-            _NamA2WaveNetLayerGroup(layer_config) for layer_config in config.layers
+            _NamA2WaveNetLayerGroupMlx(layer_config) for layer_config in config.layers
         ]
         self.head_scale = config.head_scale
 

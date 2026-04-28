@@ -11,11 +11,11 @@ from mlx import nn as nn
 from mlx import optimizers as optimizers
 from mlx.utils import tree_map
 
-from toan.model.nam_a1_wavenet import NamA1WaveNet
 from toan.model.nam_a1_wavenet_config import NamA1WaveNetConfig
-from toan.model.nam_a1_wavenet_functional import NamA1WavenetFunctional
-from toan.model.nam_a2_wavenet import NamA2WaveNet
+from toan.model.nam_a1_wavenet_mlx import NamA1WaveNetMlx
+from toan.model.nam_a1_wavenet_mlx_functional import NamA1WavenetMlxFunctional
 from toan.model.nam_a2_wavenet_config import NamA2WaveNetConfig
+from toan.model.nam_a2_wavenet_mlx import NamA2WaveNetMlx
 from toan.training import TrainingStageSummary
 from toan.training.config import TrainingConfig, TrainingStageConfig
 from toan.training.context import TrainingProgressContext
@@ -26,14 +26,14 @@ from toan.training.loss import LossFunction, calculate_loss
 def run_training_loop(context: TrainingProgressContext, config: TrainingConfig):
     assert len(config.stages) > 0
     if isinstance(context.model_config, NamA1WaveNetConfig):
-        model = NamA1WaveNet(
+        model = NamA1WaveNetMlx(
             context.model_config,
             context.metadata,
             context.sample_rate,
             rng_seed=config.rng_seed,
         )
     elif isinstance(context.model_config, NamA2WaveNetConfig):
-        model = NamA2WaveNet(
+        model = NamA2WaveNetMlx(
             context.model_config,
             context.metadata,
             context.sample_rate,
@@ -117,7 +117,7 @@ def run_training_loop(context: TrainingProgressContext, config: TrainingConfig):
                 outputs = model_in(inputs)
             elif isinstance(model_in, dict):
                 if isinstance(context.model_config, NamA1WaveNetConfig):
-                    outputs = NamA1WavenetFunctional.forward_model(
+                    outputs = NamA1WavenetMlxFunctional.forward_model(
                         context.model_config, model_in, inputs
                     )
                 else:

@@ -3,12 +3,11 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
 import json
-import warnings
 
 import mlx.core as mx
 from mlx import nn, utils
 
-from toan.model.activation import FastTanh, LeakyHardTanh, get_activation_module
+from toan.model.activation import get_activation_module
 from toan.model.metadata import ModelMetadata
 from toan.model.nam_a1_wavenet_config import (
     NamA1WaveNetConfig,
@@ -22,7 +21,7 @@ from toan.model.nam_a1_wavenet_config import (
 # Specialization to support exporting/importing to a single huge array
 # And also to transpose inputs to play nice with MLX dimension ordering
 # Functionally the same as normal conv1d
-class _NamA1Conv1dLayer(nn.Conv1d):
+class _NamA1Conv1dLayerMlx(nn.Conv1d):
     def export_nam_linear_weights(self) -> list[float]:
         result = []
         if self.weight is not None:
@@ -62,10 +61,10 @@ class _NamA1Conv1dLayer(nn.Conv1d):
         return i
 
 
-class _NamA1WaveNetLayer(nn.Module):
+class _NamA1WaveNetLayerMlx(nn.Module):
     channels: int
-    conv: _NamA1Conv1dLayer
-    input_mixer: _NamA1Conv1dLayer
+    conv: _NamA1Conv1dLayerMlx
+    input_mixer: _NamA1Conv1dLayerMlx
     activation: nn.Module
     activation_name: str
     gated: bool
@@ -82,15 +81,15 @@ class _NamA1WaveNetLayer(nn.Module):
         super().__init__()
         mid_channels = 2 * channels if gated else channels
         self.channels = channels
-        self.conv = _NamA1Conv1dLayer(
+        self.conv = _NamA1Conv1dLayerMlx(
             channels, mid_channels, kernel_size, dilation=dilation
         )
-        self.input_mixer = _NamA1Conv1dLayer(
+        self.input_mixer = _NamA1Conv1dLayerMlx(
             condition_size, mid_channels, 1, bias=False
         )
         self.activation = get_activation_module(activation)
         self.activation_name = activation
-        self.conv1x1 = _NamA1Conv1dLayer(channels, channels, 1)
+        self.conv1x1 = _NamA1Conv1dLayerMlx(channels, channels, 1)
         self.gated = gated
 
     def __call__(
@@ -125,20 +124,20 @@ class _NamA1WaveNetLayer(nn.Module):
         return i
 
 
-class _NamA1WaveNetLayerGroup(nn.Module):
+class _NamA1WaveNetLayerGroupMlx(nn.Module):
     config: NamA1WaveNetLayerGroupConfig
-    rechannel: _NamA1Conv1dLayer
-    layers: list[_NamA1WaveNetLayer]
-    head_rechannel: _NamA1Conv1dLayer
+    rechannel: _NamA1Conv1dLayerMlx
+    layers: list[_NamA1WaveNetLayerMlx]
+    head_rechannel: _NamA1Conv1dLayerMlx
 
     def __init__(self, config: NamA1WaveNetLayerGroupConfig):
         super().__init__()
         self.config = config
-        self.rechannel = _NamA1Conv1dLayer(
+        self.rechannel = _NamA1Conv1dLayerMlx(
             config.input_size, config.channels, 1, bias=False
         )
         self.layers = [
-            _NamA1WaveNetLayer(
+            _NamA1WaveNetLayerMlx(
                 config.condition_size,
                 config.channels,
                 config.kernel_size,
@@ -148,7 +147,7 @@ class _NamA1WaveNetLayerGroup(nn.Module):
             )
             for dilation in config.dilations
         ]
-        self.head_rechannel = _NamA1Conv1dLayer(
+        self.head_rechannel = _NamA1Conv1dLayerMlx(
             config.channels, config.head_size, 1, bias=config.head_bias
         )
 
@@ -186,8 +185,8 @@ class _NamA1WaveNetLayerGroup(nn.Module):
         return self.config.receptive_field()
 
 
-class NamA1WaveNet(nn.Module):
-    layer_groups: list[_NamA1WaveNetLayerGroup]
+class NamA1WaveNetMlx(nn.Module):
+    layer_groups: list[_NamA1WaveNetLayerGroupMlx]
     head: None = None
 
     config: NamA1WaveNetConfig
@@ -210,7 +209,7 @@ class NamA1WaveNet(nn.Module):
         self.metadata = metadata
         self.sample_rate = sample_rate
         self.layer_groups = [
-            _NamA1WaveNetLayerGroup(layer_config) for layer_config in config.layers
+            _NamA1WaveNetLayerGroupMlx(layer_config) for layer_config in config.layers
         ]
         assert config.head_config is None
 

@@ -10,7 +10,7 @@ from toan.model.nam_a1_wavenet_config import (
 )
 
 
-class NamA1WavenetFunctional:
+class NamA1WavenetMlxFunctional:
 
     @staticmethod
     def forward_activation(type: str, weights: dict, x: mx.array) -> mx.array:
@@ -44,11 +44,11 @@ class NamA1WavenetFunctional:
 
         assert "activation" in weights
         if gated:
-            post_activation = NamA1WavenetFunctional.forward_activation(
+            post_activation = NamA1WavenetMlxFunctional.forward_activation(
                 activation, weights["activation"], z1[:, :, :channels]
             ) * mx.sigmoid(z1[:, :, channels:])
         else:
-            post_activation = NamA1WavenetFunctional.forward_activation(
+            post_activation = NamA1WavenetMlxFunctional.forward_activation(
                 activation, weights["activation"], z1
             )
 
@@ -80,7 +80,7 @@ class NamA1WavenetFunctional:
         for i in range(len(config.dilations)):
             this_dilation = config.dilations[i]
             this_layer_weight = weights["layers"][i]
-            x, head_term = NamA1WavenetFunctional.forward_layer(
+            x, head_term = NamA1WavenetMlxFunctional.forward_layer(
                 config.activation,
                 config.channels,
                 this_dilation,
@@ -118,7 +118,7 @@ class NamA1WavenetFunctional:
         for i in range(len(config.layers)):
             this_config = config.layers[i]
             this_weights = weights["layer_groups"][i]
-            head_in, y = NamA1WavenetFunctional.forward_layer_group(
+            head_in, y = NamA1WavenetMlxFunctional.forward_layer_group(
                 this_config, this_weights, y, x, head_in
             )
         assert head_in is not None

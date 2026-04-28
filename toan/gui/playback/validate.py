@@ -8,10 +8,10 @@ from PySide6 import QtGui, QtWidgets
 
 from toan.gui.playback import PlaybackContext
 from toan.model.metadata import ModelMetadata
-from toan.model.nam_a1_wavenet import NamA1WaveNet
 from toan.model.nam_a1_wavenet_config import json_a1_wavenet_config
-from toan.model.nam_a2_wavenet import NamA2WaveNet
+from toan.model.nam_a1_wavenet_mlx import NamA1WaveNetMlx
 from toan.model.nam_a2_wavenet_config import json_a2_wavenet_config
+from toan.model.nam_a2_wavenet_mlx import NamA2WaveNetMlx
 
 
 class PlaybackValidatePage(QtWidgets.QWizardPage):
@@ -104,7 +104,7 @@ class PlaybackValidatePage(QtWidgets.QWizardPage):
 
         metadata = ModelMetadata("Playback A1 NAM model", "Toan Machine", "Test model")
 
-        model = NamA1WaveNet(model_config, metadata, self.context.sample_rate)
+        model = NamA1WaveNetMlx(model_config, metadata, self.context.sample_rate)
         self.text_edit.append(f"Model parameters: {model.parameter_count}")
 
         if "weights" not in nam_json or not isinstance(nam_json["weights"], list):
@@ -179,7 +179,7 @@ class PlaybackValidatePage(QtWidgets.QWizardPage):
         self.text_edit.append("Creating model...")
 
         metadata = ModelMetadata("Playback A2 NAM model", "Toan Machine", "Test model")
-        model = NamA2WaveNet(model_config, metadata, self.context.sample_rate)
+        model = NamA2WaveNetMlx(model_config, metadata, self.context.sample_rate)
         self.text_edit.append(f"Model parameters: {model.parameter_count}")
 
         if model.parameter_count != len(nam_json["weights"]):
