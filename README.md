@@ -8,7 +8,7 @@ The main design philosophy behind this project is to create an interface that di
 * Recording wet/dry pair and metadata are bundled together as a single zip file. It is impossible to mix up your tracks or load incorrect metadata.
 * Users can inject their own guitar DI into the training signal as validation data to answer the question "How accurate is this capture for my guitar specifically?".
 
-Toan Machine is currently built on MLX and will only work on Apple-Silicon-based Macs.
+Toan Machine is currently only compatible with Apple Silicon Macs. Support for nVidia cards on Windows is planned for the future.
 
 # Installation
 
