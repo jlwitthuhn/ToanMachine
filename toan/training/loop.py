@@ -19,7 +19,7 @@ from toan.model.nam_a2_wavenet_mlx import NamA2WaveNetMlx
 from toan.training import TrainingStageSummary
 from toan.training.config import TrainingConfig, TrainingStageConfig
 from toan.training.context import TrainingProgressContext
-from toan.training.data_loader import TrainingDataLoader
+from toan.training.data_loader_mlx import TrainingDataLoaderMlx
 from toan.training.loss_mlx import LossFunction, calculate_loss_mlx
 
 
@@ -104,7 +104,7 @@ def run_training_loop(context: TrainingProgressContext, config: TrainingConfig):
 
         learn_rate = get_learn_rate(stage_config)
 
-        data_loader = TrainingDataLoader(
+        data_loader = TrainingDataLoaderMlx(
             context.signal_dry_train,
             context.signal_wet_train,
             stage_config.input_sample_width,

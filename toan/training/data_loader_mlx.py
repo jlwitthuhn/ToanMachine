@@ -6,7 +6,7 @@ import mlx.core as mx
 import numpy as np
 
 
-class TrainingDataLoader:
+class TrainingDataLoaderMlx:
     signal_dry: np.ndarray
     signal_wet: np.ndarray
 
