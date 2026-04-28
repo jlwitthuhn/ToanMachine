@@ -22,7 +22,7 @@ from toan.training.loop import run_training_loop
 from toan.training.loss import LossFunction
 from toan.training.zip_loader import ZipLoaderContext, run_zip_loader
 
-THE_PRESET: ModelConfigPreset = ModelConfigPreset.A1_NAM_STANDARD
+THE_PRESET: ModelConfigPreset = ModelConfigPreset.A1_CUSTOM_XSTD
 
 
 @dataclass

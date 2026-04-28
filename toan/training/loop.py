@@ -41,6 +41,7 @@ def run_training_loop(context: TrainingProgressContext, config: TrainingConfig):
         )
     else:
         assert False
+    print(model.parameter_count)
     mx.eval(model.parameters())
 
     np_rng_state = np.random.get_state()

@@ -76,7 +76,6 @@ def get_training_config_from_preset(selected_preset: ModelConfigPreset):
             ModelConfigPreset.A1_NAM_STANDARD
             | ModelConfigPreset.A1_NAM_LITE
             | ModelConfigPreset.A1_NAM_FEATHER
-            | ModelConfigPreset.A1_NAM_NANO
         ):
             return _get_a1_training_config()
         case ModelConfigPreset.A1_CUSTOM_XSTD:

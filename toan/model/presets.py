@@ -10,7 +10,6 @@ class ModelConfigPreset(Enum):
     A1_NAM_STANDARD = enum.auto()
     A1_NAM_LITE = enum.auto()
     A1_NAM_FEATHER = enum.auto()
-    A1_NAM_NANO = enum.auto()
     A1_CUSTOM_XSTD = enum.auto()
     A2_TOAN_TEST = enum.auto()
 
@@ -22,10 +21,8 @@ class ModelConfigPreset(Enum):
                 return "A1 NAM Lite - 6553p"
             case ModelConfigPreset.A1_NAM_FEATHER:
                 return "A1 NAM Feather - 3025p"
-            case ModelConfigPreset.A1_NAM_NANO:
-                return "A1 NAM Nano"
             case ModelConfigPreset.A1_CUSTOM_XSTD:
-                return "A1 Custom xSTD"
+                return "A1 Custom xSTD - 12409p"
             case ModelConfigPreset.A2_TOAN_TEST:
                 return "A2 Toan Test (broken)"
             case _:
