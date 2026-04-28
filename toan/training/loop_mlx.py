@@ -23,6 +23,8 @@ from toan.training.loss_mlx import LossFunction, calculate_loss_mlx
 
 def run_training_loop_mlx(context: TrainingProgressContext, config: TrainingConfig):
     assert len(config.stages) > 0
+    assert context.metadata is not None
+    assert context.sample_rate is not None
     if isinstance(context.model_config, NamA1WaveNetConfig):
         model = NamA1WaveNetMlx(
             context.model_config,
