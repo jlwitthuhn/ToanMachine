@@ -11,7 +11,7 @@ from toan.formatting import format_seconds_as_mmss
 from toan.gui.train import TrainingGuiContext
 from toan.model.nam_a2_wavenet_config import NamA2WaveNetConfig
 from toan.training.context import TrainingProgressContext
-from toan.training.loop import run_training_loop
+from toan.training.loop_mlx import run_training_loop_mlx
 
 TRAIN_TEXT = [
     "Your model is now training. After training has finished you will be asked to choose a location for the NAM file."
@@ -80,7 +80,9 @@ class TrainTrainPage(QtWidgets.QWizardPage):
         self.context.progress_context.signal_wet_train = self.context.signal_wet
 
         def thread_func():
-            run_training_loop(self.context.progress_context, self.context.train_config)
+            run_training_loop_mlx(
+                self.context.progress_context, self.context.train_config
+            )
 
         self.context.quit_training = False
         self.timestamp_begin = datetime.datetime.now()

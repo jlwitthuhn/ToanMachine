@@ -28,7 +28,7 @@ from toan.soundio import SdChannel, get_input_devices, get_output_devices
 from toan.soundio.record_wet import RecordWetController
 from toan.training.config import TrainingConfig, get_a2_training_config
 from toan.training.context import TrainingProgressContext
-from toan.training.loop import run_training_loop
+from toan.training.loop_mlx import run_training_loop_mlx
 from toan.training.zip_loader import ZipLoaderContext, run_zip_loader
 from toan.zip import create_training_zip
 
@@ -158,7 +158,7 @@ def do_iteration(
     progress_context.signal_wet_train = zip_context.signal_wet
     progress_context.signal_dry_test = zip_context.signal_dry_test
     progress_context.signal_wet_test = zip_context.signal_wet_test
-    run_training_loop(progress_context, training_config)
+    run_training_loop_mlx(progress_context, training_config)
     print("Training complete")
     print(f"train loss: {progress_context.loss_train}")
     print(f"mse test loss: {progress_context.metadata.loss_test_mse}")

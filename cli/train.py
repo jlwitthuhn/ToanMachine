@@ -18,7 +18,7 @@ from toan.model.nam_a2_wavenet_presets import get_a2_wavenet_config
 from toan.model.presets import ModelConfigPreset
 from toan.training.config import TrainingConfig, get_training_config_from_preset
 from toan.training.context import TrainingProgressContext
-from toan.training.loop import run_training_loop
+from toan.training.loop_mlx import run_training_loop_mlx
 from toan.training.loss_mlx import LossFunction
 from toan.training.zip_loader import ZipLoaderContext, run_zip_loader
 
@@ -77,7 +77,7 @@ def main():
         train_context.signal_wet_train = zip_context.signal_wet[:]
 
         def thread_func():
-            run_training_loop(train_context, train_config)
+            run_training_loop_mlx(train_context, train_config)
 
         print("Data loaded, beginning training...")
         threading.Thread(target=thread_func).start()

@@ -2,14 +2,12 @@
 # https://www.gnu.org/licenses/gpl-3.0.en.html
 # SPDX-License-Identifier: GPL-3.0-only
 
-import math
 from typing import Any
 
 import numpy as np
 from mlx import core as mx
 from mlx import nn as nn
 from mlx import optimizers as optimizers
-from mlx.utils import tree_map
 
 from toan.model.nam_a1_wavenet_config import NamA1WaveNetConfig
 from toan.model.nam_a1_wavenet_mlx import NamA1WaveNetMlx
@@ -23,7 +21,7 @@ from toan.training.data_loader_mlx import TrainingDataLoaderMlx
 from toan.training.loss_mlx import LossFunction, calculate_loss_mlx
 
 
-def run_training_loop(context: TrainingProgressContext, config: TrainingConfig):
+def run_training_loop_mlx(context: TrainingProgressContext, config: TrainingConfig):
     assert len(config.stages) > 0
     if isinstance(context.model_config, NamA1WaveNetConfig):
         model = NamA1WaveNetMlx(
