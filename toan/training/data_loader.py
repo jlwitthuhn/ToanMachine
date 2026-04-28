@@ -48,14 +48,14 @@ class TrainingDataLoaderMlx:
                 assert dry_begin >= 0
                 assert dry_begin + self.dry_width <= len(signal_dry)
                 this_segment = signal_dry[dry_begin : dry_begin + self.dry_width]
-                if np.max(np.abs(this_segment)) > 1e-4:
+                if np.max(np.abs(this_segment)).item() > 1e-4:
                     self.dry_begin_points.append(dry_begin)
                 this_wet_begin += self.wet_width
 
         append_to_dry_point_list(0)
         append_to_dry_point_list(self.wet_width // 2)
 
-    def make_batch(self, batch_size: int) -> tuple[mx.array, mx.array]:
+    def make_batch(self, batch_size: int) -> tuple[np.ndarray, np.ndarray]:
         input_list: list[mx.array] = []
         output_list: list[mx.array] = []
         for i in range(batch_size):
@@ -71,4 +71,4 @@ class TrainingDataLoaderMlx:
             )
             input_list.append(this_input)
             output_list.append(this_output)
-        return mx.array(input_list), mx.array(output_list)
+        return np.array(input_list), np.array(output_list)

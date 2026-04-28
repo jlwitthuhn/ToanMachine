@@ -17,7 +17,7 @@ from toan.model.nam_a2_wavenet_mlx import NamA2WaveNetMlx
 from toan.training import TrainingStageSummary
 from toan.training.config import TrainingConfig, TrainingStageConfig
 from toan.training.context import TrainingProgressContext
-from toan.training.data_loader_mlx import TrainingDataLoaderMlx
+from toan.training.data_loader import TrainingDataLoaderMlx
 from toan.training.loss_mlx import LossFunction, calculate_loss_mlx
 
 
@@ -149,6 +149,7 @@ def run_training_loop_mlx(context: TrainingProgressContext, config: TrainingConf
             model.train(True)
             this_batch_size = get_batch_size(stage_config, i)
             batch_in, batch_out = data_loader.make_batch(this_batch_size)
+            batch_in, batch_out = mx.array(batch_in), mx.array(batch_out)
 
             loss = do_step(batch_in, batch_out)
 
