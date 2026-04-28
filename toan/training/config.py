@@ -73,15 +73,15 @@ def _get_a2_training_config() -> TrainingConfig:
 def get_training_config_from_preset(selected_preset: ModelConfigPreset):
     match selected_preset:
         case (
-            ModelConfigPreset.NAM_A1_STANDARD
-            | ModelConfigPreset.NAM_A1_LITE
-            | ModelConfigPreset.NAM_A1_FEATHER
-            | ModelConfigPreset.NAM_A1_NANO
+            ModelConfigPreset.A1_NAM_STANDARD
+            | ModelConfigPreset.A1_NAM_LITE
+            | ModelConfigPreset.A1_NAM_FEATHER
+            | ModelConfigPreset.A1_NAM_NANO
         ):
             return _get_a1_training_config()
-        case ModelConfigPreset.CUSTOM_A1_XSTD:
+        case ModelConfigPreset.A1_CUSTOM_XSTD:
             return _get_a1_xstd_training_config()
-        case ModelConfigPreset.TOAN_A2_TEST:
+        case ModelConfigPreset.A2_TOAN_TEST:
             return _get_a2_training_config()
         case _:
             raise NotImplementedError

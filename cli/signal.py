@@ -150,7 +150,7 @@ def do_iteration(
     print("Beginning training...")
     progress_context = TrainingProgressContext()
     progress_context.model_config = get_a2_wavenet_config(
-        ModelConfigPreset.TOAN_A2_TEST
+        ModelConfigPreset.A2_TOAN_TEST
     )
     progress_context.metadata = zip_context.metadata
     progress_context.sample_rate = sample_rate

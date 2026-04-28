@@ -7,26 +7,26 @@ from enum import Enum
 
 
 class ModelConfigPreset(Enum):
-    NAM_A1_STANDARD = enum.auto()
-    NAM_A1_LITE = enum.auto()
-    NAM_A1_FEATHER = enum.auto()
-    NAM_A1_NANO = enum.auto()
-    CUSTOM_A1_XSTD = enum.auto()
-    TOAN_A2_TEST = enum.auto()
+    A1_NAM_STANDARD = enum.auto()
+    A1_NAM_LITE = enum.auto()
+    A1_NAM_FEATHER = enum.auto()
+    A1_NAM_NANO = enum.auto()
+    A1_CUSTOM_XSTD = enum.auto()
+    A2_TOAN_TEST = enum.auto()
 
     def get_label(self) -> str:
         match self:
-            case ModelConfigPreset.NAM_A1_STANDARD:
-                return "NAM A1 Standard - 13801p"
-            case ModelConfigPreset.NAM_A1_LITE:
-                return "NAM A1 Lite - 6553p"
-            case ModelConfigPreset.NAM_A1_FEATHER:
-                return "NAM A1 Feather - 3025p"
-            case ModelConfigPreset.NAM_A1_NANO:
-                return "NAM A1 Nano"
-            case ModelConfigPreset.CUSTOM_A1_XSTD:
-                return "Custom A1 xSTD"
-            case ModelConfigPreset.TOAN_A2_TEST:
-                return "Toan A2 Test"
+            case ModelConfigPreset.A1_NAM_STANDARD:
+                return "A1 NAM Standard - 13801p"
+            case ModelConfigPreset.A1_NAM_LITE:
+                return "A1 NAM Lite - 6553p"
+            case ModelConfigPreset.A1_NAM_FEATHER:
+                return "A1 NAM Feather - 3025p"
+            case ModelConfigPreset.A1_NAM_NANO:
+                return "A1 NAM Nano"
+            case ModelConfigPreset.A1_CUSTOM_XSTD:
+                return "A1 Custom xSTD"
+            case ModelConfigPreset.A2_TOAN_TEST:
+                return "A2 Toan Test (broken)"
             case _:
                 raise NotImplementedError

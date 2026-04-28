@@ -14,7 +14,7 @@ from toan.model.presets import ModelConfigPreset
 
 
 def get_a2_wavenet_config(size_preset: ModelConfigPreset) -> NamA2WaveNetConfig | None:
-    if size_preset == ModelConfigPreset.TOAN_A2_TEST:
+    if size_preset == ModelConfigPreset.A2_TOAN_TEST:
         return NamA2WaveNetConfig(
             layers=[
                 NamA2WaveNetLayerGroupConfig(
