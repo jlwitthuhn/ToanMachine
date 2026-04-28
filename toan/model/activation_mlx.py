@@ -10,7 +10,7 @@ import mlx.nn as nn
 
 # Based on `fast_tanh` from NeuralAmpModelerCore
 # https://github.com/sdatkinson/NeuralAmpModelerCore/blob/v0.4.0.rc2/NAM/activations.h#L89
-class FastTanh(nn.Module):
+class FastTanhMlx(nn.Module):
     def __init__(self):
         warnings.warn("Using unverified fast tanh implementation")
         super().__init__()
@@ -34,7 +34,7 @@ class FastTanh(nn.Module):
 
 # Based on `leaky_hardtanh` from NeuralAmpModelerCore
 # https://github.com/sdatkinson/NeuralAmpModelerCore/blob/v0.4.0.rc2/NAM/activations.h#L73
-class LeakyHardTanh(nn.Module):
+class LeakyHardTanhMlx(nn.Module):
     min_val: float
     max_val: float
     min_slope: float
@@ -63,16 +63,16 @@ class LeakyHardTanh(nn.Module):
             return x
 
 
-def get_activation_module(activation: str) -> nn.Module:
+def get_activation_module_mlx(activation: str) -> nn.Module:
     match activation:
         case "Fasttanh":
-            return FastTanh()
+            return FastTanhMlx()
         case "Hardswish":
             return nn.Hardswish()
         case "Hardtanh":
             return nn.HardTanh()
         case "LeakyHardtanh":
-            return LeakyHardTanh()
+            return LeakyHardTanhMlx()
         case "LeakyReLU":
             return nn.LeakyReLU()
         case "PReLU":

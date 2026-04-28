@@ -5,7 +5,7 @@
 import mlx.core as mx
 from mlx import nn, utils
 
-from toan.model.activation import get_activation_module
+from toan.model.activation_mlx import get_activation_module_mlx
 from toan.model.metadata import ModelMetadata
 from toan.model.nam_a1_wavenet_mlx import _NamA1Conv1dLayerMlx
 from toan.model.nam_a2_wavenet_config import (
@@ -38,11 +38,11 @@ class _NamA2WrappedActivationMlx(nn.Module):
         super().__init__()
         self.gate_type = gating_mode
 
-        self.primary = get_activation_module(primary_config.type)
+        self.primary = get_activation_module_mlx(primary_config.type)
         if gating_mode is None or gating_mode == "none":
             pass
         elif gating_mode == "gated":
-            self.secondary = get_activation_module(secondary_name)
+            self.secondary = get_activation_module_mlx(secondary_name)
         else:
             raise ValueError(f"Unknown gating mode: {gating_mode}")
 

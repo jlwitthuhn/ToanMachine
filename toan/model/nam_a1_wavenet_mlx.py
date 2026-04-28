@@ -7,7 +7,7 @@ import json
 import mlx.core as mx
 from mlx import nn, utils
 
-from toan.model.activation import get_activation_module
+from toan.model.activation_mlx import get_activation_module_mlx
 from toan.model.metadata import ModelMetadata
 from toan.model.nam_a1_wavenet_config import (
     NamA1WaveNetConfig,
@@ -87,7 +87,7 @@ class _NamA1WaveNetLayerMlx(nn.Module):
         self.input_mixer = _NamA1Conv1dLayerMlx(
             condition_size, mid_channels, 1, bias=False
         )
-        self.activation = get_activation_module(activation)
+        self.activation = get_activation_module_mlx(activation)
         self.activation_name = activation
         self.conv1x1 = _NamA1Conv1dLayerMlx(channels, channels, 1)
         self.gated = gated
