@@ -20,7 +20,7 @@ from toan.training import TrainingStageSummary
 from toan.training.config import TrainingConfig, TrainingStageConfig
 from toan.training.context import TrainingProgressContext
 from toan.training.data_loader import TrainingDataLoader
-from toan.training.loss import LossFunction, calculate_loss
+from toan.training.loss_mlx import LossFunction, calculate_loss_mlx
 
 
 def run_training_loop(context: TrainingProgressContext, config: TrainingConfig):
@@ -89,7 +89,7 @@ def run_training_loop(context: TrainingProgressContext, config: TrainingConfig):
         model.train(False)
         test_in, test_out = get_test_data()
         model_out = model(test_in)
-        return calculate_loss(func, model_out, test_out).item()
+        return calculate_loss_mlx(func, model_out, test_out).item()
 
     with context.lock:
         context.iters_done = 0
@@ -124,7 +124,7 @@ def run_training_loop(context: TrainingProgressContext, config: TrainingConfig):
                     raise NotImplementedError
             else:
                 raise ValueError("`model_in` must be a `nn.Module` or `dict`")
-            return calculate_loss(stage_config.loss_fn, outputs, targets)
+            return calculate_loss_mlx(stage_config.loss_fn, outputs, targets)
 
         optimizer = optimizers.AdamW(
             learning_rate=learn_rate,

@@ -15,7 +15,7 @@ class LossFunction(enum.Enum):
     FFT_MSE = enum.auto()
 
 
-def _loss_esr(output: mx.array, target: mx.array) -> mx.array:
+def _loss_esr_mlx(output: mx.array, target: mx.array) -> mx.array:
     eps = 1e-6
     delta2 = (target - output) ** 2
     target2 = target**2
@@ -25,17 +25,17 @@ def _loss_esr(output: mx.array, target: mx.array) -> mx.array:
     return loss_per_batch_item.mean()
 
 
-def _loss_mse(output: mx.array, target: mx.array) -> mx.array:
+def _loss_mse_mlx(output: mx.array, target: mx.array) -> mx.array:
     delta = target - output
     delta2 = delta**2
     return delta2.mean()
 
 
-def _loss_rmse(output: mx.array, target: mx.array) -> mx.array:
-    return mx.sqrt(_loss_mse(output, target))
+def _loss_rmse_mlx(output: mx.array, target: mx.array) -> mx.array:
+    return mx.sqrt(_loss_mse_mlx(output, target))
 
 
-def _loss_fft_mse(output: mx.array, target: mx.array) -> mx.array:
+def _loss_fft_mse_mlx(output: mx.array, target: mx.array) -> mx.array:
     output_fft = mx.fft.fft(output)
     target_fft = mx.fft.fft(target)
     delta = target_fft - output_fft
@@ -43,17 +43,17 @@ def _loss_fft_mse(output: mx.array, target: mx.array) -> mx.array:
     return delta2.mean()
 
 
-def calculate_loss(
+def calculate_loss_mlx(
     loss_fn: LossFunction, model_output: mx.array, target: mx.array
 ) -> mx.array:
     match loss_fn:
         case LossFunction.ESR:
-            return _loss_esr(model_output, target)
+            return _loss_esr_mlx(model_output, target)
         case LossFunction.MSE:
-            return _loss_mse(model_output, target)
+            return _loss_mse_mlx(model_output, target)
         case LossFunction.RMSE:
-            return _loss_rmse(model_output, target)
+            return _loss_rmse_mlx(model_output, target)
         case LossFunction.FFT_MSE:
-            return _loss_fft_mse(model_output, target)
+            return _loss_fft_mse_mlx(model_output, target)
         case _:
             assert False

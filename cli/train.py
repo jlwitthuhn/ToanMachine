@@ -19,7 +19,7 @@ from toan.model.presets import ModelConfigPreset
 from toan.training.config import TrainingConfig, get_training_config_from_preset
 from toan.training.context import TrainingProgressContext
 from toan.training.loop import run_training_loop
-from toan.training.loss import LossFunction
+from toan.training.loss_mlx import LossFunction
 from toan.training.zip_loader import ZipLoaderContext, run_zip_loader
 
 THE_PRESET: ModelConfigPreset = ModelConfigPreset.A1_CUSTOM_XSTD
