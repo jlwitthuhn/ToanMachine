@@ -6,7 +6,7 @@ import dataclasses
 import datetime
 from dataclasses import dataclass
 
-from toan.training.loss_mlx import LossFunction
+from toan.training.loss import LossFunction
 
 
 @dataclass

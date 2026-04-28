@@ -2,17 +2,9 @@
 # https://www.gnu.org/licenses/gpl-3.0.en.html
 # SPDX-License-Identifier: GPL-3.0-only
 
-import enum
-
 import mlx.core as mx
-from mlx import nn
 
-
-class LossFunction(enum.Enum):
-    ESR = enum.auto()
-    MSE = enum.auto()
-    RMSE = enum.auto()
-    FFT_MSE = enum.auto()
+from toan.training.loss import LossFunction
 
 
 def _loss_esr_mlx(output: mx.array, target: mx.array) -> mx.array:

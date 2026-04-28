@@ -18,7 +18,8 @@ from toan.training import TrainingStageSummary
 from toan.training.config import TrainingConfig, TrainingStageConfig
 from toan.training.context import TrainingProgressContext
 from toan.training.data_loader import TrainingDataLoaderMlx
-from toan.training.loss_mlx import LossFunction, calculate_loss_mlx
+from toan.training.loss import LossFunction
+from toan.training.loss_mlx import calculate_loss_mlx
 
 
 def run_training_loop_mlx(context: TrainingProgressContext, config: TrainingConfig):
