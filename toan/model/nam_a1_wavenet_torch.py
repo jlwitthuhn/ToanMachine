@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
 import json
+import math
 
 import torch
 from torch import nn
@@ -16,6 +17,14 @@ from toan.model.nam_a1_wavenet_config import (
 
 # Based on code from Neural Amp Modeler
 # https://github.com/sdatkinson/neural-amp-modeler/blob/e054002e48cd102b0993811d69e8172db4a91597/nam/models/wavenet.py
+
+
+def _reset_conv_from_generator(conv: nn.Conv1d, generator: torch.Generator) -> None:
+    nn.init.kaiming_uniform_(conv.weight, a=math.sqrt(5), generator=generator)
+    if conv.bias is not None:
+        fan_in, _ = nn.init._calculate_fan_in_and_fan_out(conv.weight)
+        bound = 1 / math.sqrt(fan_in) if fan_in > 0 else 0
+        nn.init.uniform_(conv.bias, -bound, bound, generator=generator)
 
 
 class _NamA1Conv1dLayerTorch(nn.Conv1d):
@@ -174,9 +183,6 @@ class NamA1WaveNetTorch(nn.Module):
     ):
         super().__init__()
 
-        rng_state = torch.get_rng_state()
-        torch.manual_seed(rng_seed)
-
         self.config = config
         self.metadata = metadata
         self.sample_rate = sample_rate
@@ -188,7 +194,10 @@ class NamA1WaveNetTorch(nn.Module):
         )
         assert config.head_config is None
 
-        torch.set_rng_state(rng_state)
+        generator = torch.Generator(device="cpu").manual_seed(rng_seed)
+        for module in self.modules():
+            if isinstance(module, _NamA1Conv1dLayerTorch):
+                _reset_conv_from_generator(module, generator)
 
     @property
     def parameter_count(self) -> int:
