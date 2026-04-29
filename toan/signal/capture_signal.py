@@ -5,8 +5,8 @@
 from dataclasses import dataclass, field
 
 import numpy as np
-
 from toan.mix import concat_signals
+
 from toan.music.chord import ChordType
 from toan.persistence.builtin_wav import BuiltinWav, get_builtin_wav_signal
 from toan.signal.effect import EffectType, apply_effect

@@ -10,8 +10,8 @@ from pathlib import Path
 import numpy as np
 import platformdirs
 from scipy.io import wavfile
-
 from toan.mix import concat_signals
+
 from toan.wav import load_and_resample_wav
 
 

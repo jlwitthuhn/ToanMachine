@@ -12,8 +12,8 @@ from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser
 from dataclasses import dataclass
 
 import numpy as np
-
 from toan.mix import concat_signals
+
 from toan.model.nam_a1_wavenet_presets import get_a1_wavenet_config
 from toan.model.nam_a2_wavenet_presets import get_a2_wavenet_config
 from toan.model.presets import ModelConfigPreset

@@ -7,8 +7,8 @@ from dataclasses import dataclass
 
 import numpy as np
 import sounddevice as sd
-
 from toan.mix import concat_signals
+
 from toan.soundio import SdChannel, SdIoController
 
 
