@@ -16,9 +16,9 @@ class TrainingStageConfig:
     # If batch_size is 0, batch_size_list will be used
     batch_size: int = 0
     batch_size_list: list[tuple[float, int]] = field(
-        default_factory=lambda: [(0.0, 24), (0.3, 40), (0.75, 56)]
+        default_factory=lambda: [(0.0, 32), (0.5, 48), (0.9, 64)]
     )
-    input_sample_width: int = 8192 + 4096
+    input_sample_width: int = 1024 * 16
     learn_rate_hi: float = 3.5e-3
     learn_rate_lo: float = 3.0e-3
     weight_decay: float = 1.0e-2
@@ -52,9 +52,9 @@ def _get_a1_xstd_training_config() -> TrainingConfig:
     config = TrainingConfig()
     the_stage = config.stages[0]
     the_stage.input_sample_width = 1024 * 24
-    the_stage.steps_main = 800
-    the_stage.learn_rate_hi = 7.5e-3
-    the_stage.learn_rate_lo = 3.0e-3
+    the_stage.steps_main = 1000
+    the_stage.learn_rate_hi = 5.0e-3
+    the_stage.learn_rate_lo = 2.0e-3
     return config
 
 
