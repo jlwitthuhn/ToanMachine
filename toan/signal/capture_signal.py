@@ -5,7 +5,6 @@
 from dataclasses import dataclass, field
 
 import numpy as np
-from toan.mix import concat_signals
 
 from toan.music.chord import ChordType
 from toan.persistence.builtin_wav import BuiltinWav, get_builtin_wav_signal
@@ -16,6 +15,7 @@ from toan.signal.generator.noise import generate_white_noise
 from toan.signal.generator.pluck_scale import generate_named_chord_pluck_scale
 from toan.signal.generator.trig import generate_cosine_wave, generate_sine_wave
 from toan.signal.generator.warble import generate_warble_chord
+from toan.signal.mix import concat_signals
 
 
 @dataclass

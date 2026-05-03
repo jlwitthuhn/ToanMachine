@@ -3,10 +3,10 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
 from PySide6 import QtCore, QtWidgets
-from toan.mix import concat_signals
 
 from toan.gui.record import RecordingContext
 from toan.signal.capture_signal import generate_capture_signal
+from toan.signal.mix import concat_signals
 from toan.soundio.record_wet import RecordWetController, RecordWetProgress
 
 RECORD_TEXT = [

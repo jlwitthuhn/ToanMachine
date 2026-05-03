@@ -7,10 +7,10 @@ import math
 import numpy as np
 import sounddevice as sd
 from PySide6 import QtCore, QtWidgets
-from toan.mix import concat_signals
 
 from toan.gui.record import RecordingContext
 from toan.signal.generator.chirp import generate_chirp
+from toan.signal.mix import concat_signals
 from toan.soundio import SdIoController
 
 VOLUME_TEXT = [
