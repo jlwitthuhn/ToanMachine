@@ -4,11 +4,11 @@
 
 import numpy as np
 from PySide6 import QtWidgets
-from toan.mix import concat_signals
 
 from toan.gui.record import RecordingContext
 from toan.persistence.user_wav import UserWavDesc, get_user_wav_list
 from toan.qt import WavFileModel
+from toan.signal.mix import concat_signals
 from toan.wav import load_and_resample_wav
 
 EXTRA_AUDIO_TEXT = [
