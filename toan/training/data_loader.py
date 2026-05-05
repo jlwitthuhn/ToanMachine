@@ -25,6 +25,7 @@ class TrainingDataLoaderMlx:
         receptive_field: int,
     ):
         assert len(signal_dry) == len(signal_wet)
+        assert dry_width > receptive_field
         self.signal_dry = signal_dry
         self.signal_wet = signal_wet
         self.dry_width = dry_width
