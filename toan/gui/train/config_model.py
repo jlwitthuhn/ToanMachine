@@ -51,7 +51,7 @@ class TrainModelConfigPage(QtWidgets.QWizardPage):
             ModelConfigPreset.A1_NAM_LITE,
             ModelConfigPreset.A1_NAM_FEATHER,
             ModelConfigPreset.A1_CUSTOM_XSTD,
-            ModelConfigPreset.A2_TOAN_TEST,
+            ModelConfigPreset.A1_CUSTOM_REVYSTD,
         ]:
             label = allowed_model.get_label()
             self.combo_size.addItem(label, allowed_model.value)

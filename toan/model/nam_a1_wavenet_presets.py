@@ -207,5 +207,65 @@ def get_a1_wavenet_config(size_preset: ModelConfigPreset) -> NamA1WaveNetConfig 
                     ),
                 ]
             )
+        case ModelConfigPreset.A1_CUSTOM_REVYSTD:
+            return NamA1WaveNetConfig(
+                layers=[
+                    NamA1WaveNetLayerGroupConfig(
+                        input_size=1,
+                        condition_size=1,
+                        head_size=8,
+                        channels=8,
+                        kernel_size=5,
+                        dilations=[1024, 256, 64, 16, 4, 1],
+                        activation="Tanh",
+                        gated=False,
+                        head_bias=False,
+                    ),
+                    NamA1WaveNetLayerGroupConfig(
+                        input_size=8,
+                        condition_size=1,
+                        head_size=8,
+                        channels=8,
+                        kernel_size=5,
+                        dilations=[1024, 256, 64, 16, 4, 1],
+                        activation="Tanh",
+                        gated=False,
+                        head_bias=False,
+                    ),
+                    NamA1WaveNetLayerGroupConfig(
+                        input_size=8,
+                        condition_size=1,
+                        head_size=8,
+                        channels=8,
+                        kernel_size=5,
+                        dilations=[1024, 256, 64, 16, 4, 1],
+                        activation="Tanh",
+                        gated=False,
+                        head_bias=False,
+                    ),
+                    NamA1WaveNetLayerGroupConfig(
+                        input_size=8,
+                        condition_size=1,
+                        head_size=8,
+                        channels=8,
+                        kernel_size=5,
+                        dilations=[1024, 256, 64, 16, 4, 1],
+                        activation="Tanh",
+                        gated=False,
+                        head_bias=False,
+                    ),
+                    NamA1WaveNetLayerGroupConfig(
+                        input_size=8,
+                        condition_size=1,
+                        head_size=1,
+                        channels=8,
+                        kernel_size=5,
+                        dilations=[1024, 256, 64, 16, 4, 1],
+                        activation="Tanh",
+                        gated=False,
+                        head_bias=False,
+                    ),
+                ]
+            )
         case _:
             return None

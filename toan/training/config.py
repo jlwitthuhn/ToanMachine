@@ -58,6 +58,14 @@ def _get_a1_xstd_training_config() -> TrainingConfig:
     return config
 
 
+def _get_a1_rev_ystd_training_config() -> TrainingConfig:
+    config = _get_a1_xstd_training_config()
+    the_stage = config.stages[0]
+    the_stage.input_sample_width = 1024 * 36
+    the_stage.steps_main = 800
+    return config
+
+
 def _get_a2_training_config() -> TrainingConfig:
     config = TrainingConfig()
     the_stage = config.stages[0]
@@ -80,6 +88,8 @@ def get_training_config_from_preset(selected_preset: ModelConfigPreset):
             return _get_a1_training_config()
         case ModelConfigPreset.A1_CUSTOM_XSTD:
             return _get_a1_xstd_training_config()
+        case ModelConfigPreset.A1_CUSTOM_REVYSTD:
+            return _get_a1_rev_ystd_training_config()
         case ModelConfigPreset.A2_TOAN_TEST:
             return _get_a2_training_config()
         case _:
