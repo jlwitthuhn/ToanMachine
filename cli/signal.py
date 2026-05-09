@@ -12,10 +12,8 @@ from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser
 from dataclasses import dataclass
 
 import numpy as np
-from toan.mix import concat_signals
 
 from toan.model.nam_a1_wavenet_presets import get_a1_wavenet_config
-from toan.model.nam_a2_wavenet_presets import get_a2_wavenet_config
 from toan.model.presets import ModelConfigPreset
 from toan.music.chord import ChordType
 from toan.persistence.user_wav import load_user_wav_list
@@ -25,6 +23,7 @@ from toan.signal.capture_signal import (
     generate_capture_signal,
 )
 from toan.signal.effect import EffectType
+from toan.signal.mix import concat_signals
 from toan.soundio import SdChannel, get_input_devices, get_output_devices
 from toan.soundio.record_wet import RecordWetController
 from toan.training.config import TrainingConfig, get_training_config_from_preset
@@ -150,8 +149,8 @@ def do_iteration(
 
     print("Beginning training...")
     progress_context = TrainingProgressContext()
-    progress_context.model_config = get_a2_wavenet_config(
-        ModelConfigPreset.A2_TOAN_TEST
+    progress_context.model_config = get_a1_wavenet_config(
+        ModelConfigPreset.A1_CUSTOM_REVYSTD
     )
     progress_context.metadata = zip_context.metadata
     progress_context.sample_rate = sample_rate
