@@ -8,6 +8,7 @@ from enum import Enum
 import numpy as np
 
 from toan.signal.effect.delay import effect_delay
+from toan.signal.effect.ring_mod import effect_ring_mod
 from toan.signal.effect.vibrato import effect_vibrato
 
 
@@ -23,6 +24,9 @@ class EffectType(Enum):
     Vibrato7Hz = enum.auto()
     Flanger4Hz = enum.auto()
     Flanger7Hz = enum.auto()
+    RingMod0200Hz = enum.auto()
+    RingMod0500Hz = enum.auto()
+    RingMod1100Hz = enum.auto()
 
 
 def apply_effect(
@@ -51,6 +55,12 @@ def apply_effect(
             result = effect_vibrato(signal, sample_rate, 4.0, 0.001, 0.5)
         case EffectType.Flanger7Hz:
             result = effect_vibrato(signal, sample_rate, 7.0, 0.001, 0.5)
+        case EffectType.RingMod0200Hz:
+            result = effect_ring_mod(signal, sample_rate, 200.0)
+        case EffectType.RingMod0500Hz:
+            result = effect_ring_mod(signal, sample_rate, 500.0)
+        case EffectType.RingMod1100Hz:
+            result = effect_ring_mod(signal, sample_rate, 1100.0)
     if normalize:
         result /= np.max(np.abs(result))
     return result
