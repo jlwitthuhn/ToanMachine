@@ -164,9 +164,9 @@ def do_iteration(
     run_training_loop_torch(progress_context, training_config)
     print("Training complete")
     print(f"train loss: {progress_context.loss_train}")
-    print(f"mse test loss: {progress_context.metadata.loss_test_mse}")
-    if progress_context.metadata.loss_test_mse is not None:
-        return progress_context.metadata.loss_test_mse
+    print(f"test loss: {progress_context.loss_test}")
+    if progress_context.loss_test is not None:
+        return progress_context.loss_test
     else:
         return progress_context.loss_train
 
