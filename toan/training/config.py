@@ -62,7 +62,9 @@ def _get_a1_rev_ystd_training_config() -> TrainingConfig:
     config = _get_a1_xstd_training_config()
     the_stage = config.stages[0]
     the_stage.input_sample_width = 1024 * 36
-    the_stage.steps_main = 800
+    the_stage.steps_main = 700
+    the_stage.learn_rate_hi = 6.0e-3
+    the_stage.learn_rate_lo = 1.0e-3
     return config
 
 
