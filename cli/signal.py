@@ -6,6 +6,7 @@
 # It can record and then train on that recording in a loop to measure test loss
 
 import copy
+import io
 import math
 import time
 from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser
@@ -33,6 +34,7 @@ from toan.training.zip_loader import ZipLoaderContext, run_zip_loader
 from toan.zip import create_training_zip
 
 THE_PRESET: ModelConfigPreset = ModelConfigPreset.A1_CUSTOM_REVYSTD
+ITER_PER_RECORDING: int = 4
 
 
 @dataclass
@@ -81,15 +83,14 @@ def _validate_sdchannel(channel: SdChannel, is_input: bool) -> str | None:
     return f"Index {channel.device_index} is not a valid device"
 
 
-def do_iteration(
+def _synthezise_and_record(
     sample_rate: int,
     channel_in: SdChannel,
     channel_out: SdChannel,
     signal_config: CaptureSignalConfig,
-    training_config: TrainingConfig,
     extra_signal_train: np.ndarray | None,
     extra_signal_test: np.ndarray | None,
-) -> float:
+) -> io.BytesIO | None:
     print("Generating signal...")
     capture_signal_details = generate_capture_signal(sample_rate, signal_config)
     signal_dry = capture_signal_details.signal
@@ -105,8 +106,7 @@ def do_iteration(
         test_offset = len(signal_dry)
         signal_dry = concat_signals([signal_dry, extra_signal_test], sample_rate // 2)
 
-    record_attempts = 5
-    zip_context: ZipLoaderContext | None = None
+    record_attempts = 3
     for i in range(record_attempts):
         print(f"Beginning recording attempt {i}...")
         record_controller = RecordWetController(
@@ -132,24 +132,33 @@ def do_iteration(
             capture_signal_details.sweep_end,
         )
 
-        print("Loading zip file...")
+        print("Validating zip file...")
         zip_context = ZipLoaderContext()
+        zip_buffer.seek(0)
         run_zip_loader(zip_context, zip_buffer)
-        zip_buffer.close()
 
         if not zip_context.errored:
-            # Stop looping on success
-            break
+            zip_buffer.seek(0)
+            return zip_buffer
 
+        zip_buffer.close()
         print("Failed to load zip file, replaying log...")
         for line in zip_context.messages_queue:
             print(f">> {line}")
 
-    if zip_context is None or zip_context.errored:
-        print(
-            f"Failed to load zip file after {record_attempts} attempts, reporting 100 loss"
-        )
-        return 100
+    print(f"Failed to load zip file after {record_attempts} attempts")
+    return None
+
+
+def _train_model(
+    sample_rate: int,
+    training_config: TrainingConfig,
+    zip_buffer: io.BytesIO,
+) -> float:
+    print("Loading zip file...")
+    zip_context = ZipLoaderContext()
+    zip_buffer.seek(0)
+    run_zip_loader(zip_context, zip_buffer)
     assert zip_context.complete
 
     print("Beginning training...")
@@ -191,7 +200,7 @@ def main() -> None:
     arg_parser.add_argument(
         "--repeat",
         type=int,
-        default=3,
+        default=1,
         help="Number of times to repeat each stage of recording and training",
     )
     arg_parser.add_argument(
@@ -259,17 +268,24 @@ def main() -> None:
             stage.test_interval = 0
         losses: list[float] = []
         for i in range(count):
-            train_config.rng_seed = 0x35 + i
-            loss = do_iteration(
+            zip_buffer = _synthezise_and_record(
                 args.samplerate,
                 input_channel,
                 output_channel,
                 capture_config,
-                train_config,
                 train_extra_in,
                 test_wav_extra,
             )
-            losses.append(loss)
+            if zip_buffer is None:
+                print("Reporting 100 loss for this recording")
+                for _ in range(ITER_PER_RECORDING):
+                    losses.append(100)
+                continue
+            for j in range(ITER_PER_RECORDING):
+                train_config.rng_seed = 0x35 + i * ITER_PER_RECORDING + j
+                loss = _train_model(args.samplerate, train_config, zip_buffer)
+                losses.append(loss)
+            zip_buffer.close()
         loss_min: float = np.min(losses)
         loss_max: float = np.max(losses)
         loss_mean: float = float(np.mean(losses))
