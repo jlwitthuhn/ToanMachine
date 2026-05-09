@@ -27,29 +27,30 @@ class EffectType(Enum):
 
 def apply_effect(
     signal: np.ndarray, sample_rate: int, effect: EffectType, normalize: bool = True
-) -> None:
+) -> np.ndarray:
     match effect:
         case EffectType.Nothing:
-            pass
+            result = signal.copy()
         case EffectType.Delay0100:
-            effect_delay(signal, int(sample_rate * 0.1), 0.5, False)
+            result = effect_delay(signal, int(sample_rate * 0.1), 0.5, False)
         case EffectType.Delay0200:
-            effect_delay(signal, int(sample_rate * 0.2), 0.5, False)
+            result = effect_delay(signal, int(sample_rate * 0.2), 0.5, False)
         case EffectType.Delay0400:
-            effect_delay(signal, int(sample_rate * 0.4), 0.5, False)
+            result = effect_delay(signal, int(sample_rate * 0.4), 0.5, False)
         case EffectType.FeedbackDelay0100:
-            effect_delay(signal, int(sample_rate * 0.1), 0.4, True)
+            result = effect_delay(signal, int(sample_rate * 0.1), 0.4, True)
         case EffectType.FeedbackDelay0200:
-            effect_delay(signal, int(sample_rate * 0.2), 0.4, True)
+            result = effect_delay(signal, int(sample_rate * 0.2), 0.4, True)
         case EffectType.FeedbackDelay0400:
-            effect_delay(signal, int(sample_rate * 0.4), 0.4, True)
+            result = effect_delay(signal, int(sample_rate * 0.4), 0.4, True)
         case EffectType.Vibrato4Hz:
-            effect_vibrato(signal, sample_rate, 4.0, 0.002)
+            result = effect_vibrato(signal, sample_rate, 4.0, 0.002)
         case EffectType.Vibrato7Hz:
-            effect_vibrato(signal, sample_rate, 7.0, 0.002)
+            result = effect_vibrato(signal, sample_rate, 7.0, 0.002)
         case EffectType.Flanger4Hz:
-            effect_vibrato(signal, sample_rate, 4.0, 0.001, 0.5)
+            result = effect_vibrato(signal, sample_rate, 4.0, 0.001, 0.5)
         case EffectType.Flanger7Hz:
-            effect_vibrato(signal, sample_rate, 7.0, 0.001, 0.5)
+            result = effect_vibrato(signal, sample_rate, 7.0, 0.001, 0.5)
     if normalize:
-        signal /= np.max(np.abs(signal))
+        result /= np.max(np.abs(result))
+    return result
