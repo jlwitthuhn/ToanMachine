@@ -89,7 +89,8 @@ def do_iteration(
     extra_signal_test: np.ndarray | None,
 ) -> float:
     print("Generating signal...")
-    signal_dry = generate_capture_signal(sample_rate, signal_config).signal
+    capture_signal_details = generate_capture_signal(sample_rate, signal_config)
+    signal_dry = capture_signal_details.signal
     if extra_signal_train is not None:
         print(f"Adding extra training signal of {len(extra_signal_train)} samples...")
         assert extra_signal_train.ndim == 1
@@ -125,6 +126,8 @@ def do_iteration(
             "Test Make",
             "Test Model",
             test_offset,
+            capture_signal_details.sweep_begin,
+            capture_signal_details.sweep_end,
         )
 
         print("Loading zip file...")
