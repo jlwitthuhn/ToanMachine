@@ -32,6 +32,8 @@ from toan.training.loop_torch import run_training_loop_torch
 from toan.training.zip_loader import ZipLoaderContext, run_zip_loader
 from toan.zip import create_training_zip
 
+THE_PRESET: ModelConfigPreset = ModelConfigPreset.A1_CUSTOM_REVYSTD
+
 
 @dataclass
 class _LossStats:
@@ -152,9 +154,7 @@ def do_iteration(
 
     print("Beginning training...")
     progress_context = TrainingProgressContext()
-    progress_context.model_config = get_a1_wavenet_config(
-        ModelConfigPreset.A1_CUSTOM_REVYSTD
-    )
+    progress_context.model_config = get_a1_wavenet_config(THE_PRESET)
     progress_context.metadata = zip_context.metadata
     progress_context.sample_rate = sample_rate
     progress_context.signal_dry_train = zip_context.signal_dry
@@ -254,7 +254,7 @@ def main() -> None:
     ) -> None:
         if train_extra_in is None:
             train_extra_in = train_wav_extra
-        train_config = get_training_config_from_preset(ModelConfigPreset.A1_CUSTOM_XSTD)
+        train_config = get_training_config_from_preset(THE_PRESET)
         for stage in train_config.stages:
             stage.test_interval = 0
         losses: list[float] = []
