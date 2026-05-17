@@ -50,7 +50,7 @@ class CaptureSignalConfig:
             ChordWithEffects(ChordType.MajorSixth, EffectType.Nothing),
             ChordWithEffects(ChordType.MinorThird, EffectType.Nothing),
             ChordWithEffects(ChordType.MajorTriad, EffectType.Nothing),
-            ChordWithEffects(ChordType.DominantSeventhTetrad, EffectType.Nothing),
+            ChordWithEffects(ChordType.DominantSeventhTetrad, EffectType.Delay0400),
         ]
     )
     builtin_wavs: list[BuiltinWav] = field(
