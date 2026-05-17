@@ -19,5 +19,4 @@ class RecordingContext:
     signal_recorded: np.ndarray | None = None
     # Extra details for json file, to be consumed during training
     test_signal_offset: int = 0
-    dry_sweep_begin: int = 0
-    dry_sweep_end: int = 0
+    segment_dry_sweep: tuple[int, int] = (0, 0)

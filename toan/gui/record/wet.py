@@ -71,8 +71,7 @@ class RecordWetSignalPage(QtWidgets.QWizardPage):
         self.button_record.setEnabled(False)
 
         capture_signal_details = generate_capture_signal(self.context.sample_rate)
-        self.context.dry_sweep_begin = capture_signal_details.sweep_begin
-        self.context.dry_sweep_end = capture_signal_details.sweep_end
+        self.context.segment_dry_sweep = capture_signal_details.segment_sweep
 
         capture_signal_train = concat_signals(
             [capture_signal_details.signal, self.context.extra_signal_dry_train],

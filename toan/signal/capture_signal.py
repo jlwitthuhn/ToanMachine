@@ -66,8 +66,7 @@ class CaptureSignalConfig:
 class CaptureSignalWithDetails:
     signal: np.ndarray
     sample_rate: int
-    sweep_begin: int
-    sweep_end: int
+    segment_sweep: tuple[int, int]
 
 
 def _generate_calibration_block(sample_rate: int) -> np.ndarray:
@@ -260,6 +259,5 @@ def generate_capture_signal(
     return CaptureSignalWithDetails(
         raw_signal,
         sample_rate,
-        main_sweep_begin,
-        main_sweep_end,
+        (main_sweep_begin, main_sweep_end),
     )

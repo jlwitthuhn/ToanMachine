@@ -128,8 +128,7 @@ def _synthezise_and_record(
             "Test Make",
             "Test Model",
             test_offset,
-            capture_signal_details.sweep_begin,
-            capture_signal_details.sweep_end,
+            capture_signal_details.segment_sweep,
         )
 
         print("Validating zip file...")
