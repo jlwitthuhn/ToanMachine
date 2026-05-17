@@ -29,7 +29,7 @@ class CaptureSignalConfig:
     sweep_duration: float = 10.0
     warble_duration: float = 6.5
     noise_duration: float = 8.0
-    pluck_note_duration: float = 0.65
+    pluck_note_duration: float = 0.62
     pluck_decay: float = 0.982
     pluck_pre_smooth: int = 1
     warble_chords: list[ChordWithEffects] = field(
