@@ -99,12 +99,14 @@ def _synthezise_and_record(
         assert extra_signal_train.ndim == 1
         signal_dry = concat_signals([signal_dry, extra_signal_train], sample_rate // 4)
 
-    test_offset = 0
+    segment_train: tuple[int, int] = (0, len(signal_dry))
+    segment_test: tuple[int, int] = (0, 0)
     if extra_signal_test is not None:
         print(f"Adding extra test signal of {len(extra_signal_test)} samples...")
         assert extra_signal_test.ndim == 1
         test_offset = len(signal_dry)
         signal_dry = concat_signals([signal_dry, extra_signal_test], sample_rate // 2)
+        segment_test = (test_offset, len(signal_dry))
 
     record_attempts = 3
     for i in range(record_attempts):
@@ -127,7 +129,8 @@ def _synthezise_and_record(
             signal_wet,
             "Test Make",
             "Test Model",
-            test_offset,
+            segment_train,
+            segment_test,
             capture_signal_details.segment_sweep,
         )
 

@@ -38,7 +38,8 @@ class RecordSavePage(QtWidgets.QWizardPage):
             self.context.signal_recorded,
             self.context.device_make,
             self.context.device_model,
-            self.context.test_signal_offset,
+            self.context.segment_dry_train,
+            self.context.segment_dry_test,
             self.context.segment_dry_sweep,
         )
 

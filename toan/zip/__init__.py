@@ -23,7 +23,8 @@ def create_training_zip(
     signal_wet: np.ndarray,
     dev_make: str,
     dev_model: str,
-    test_offset: int,
+    segment_train: tuple[int, int],
+    segment_test: tuple[int, int],
     segment_sweep: tuple[int, int],
 ) -> io.BytesIO:
     wav_dry = io.BytesIO()
@@ -47,7 +48,11 @@ def create_training_zip(
         "device_make": dev_make,
         "device_model": dev_model,
         "sample_rate": sample_rate,
-        "test_offset": test_offset,
+        "test_offset": segment_test[0],
+        "train_begin": segment_train[0],
+        "train_end": segment_train[1],
+        "test_begin": segment_test[0],
+        "test_end": segment_test[1],
         "sweep_begin": segment_sweep[0],
         "sweep_end": segment_sweep[1],
         "dry_signal": "dry.wav",
