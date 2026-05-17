@@ -49,7 +49,6 @@ def create_training_zip(
         "device_make": dev_make,
         "device_model": dev_model,
         "sample_rate": sample_rate,
-        "test_offset": segment_test[0],
         "clicks_begin": segment_clicks[0],
         "clicks_end": segment_clicks[1],
         "train_begin": segment_train[0],

@@ -88,13 +88,72 @@ def run_zip_loader(context: ZipLoaderContext, input_file: str | io.BytesIO):
 
             print_status(f"Sample rate: {config_json["sample_rate"]}")
 
-            if "test_offset" not in config_json or not isinstance(
-                config_json["sample_rate"], int
+            if "clicks_begin" not in config_json or not isinstance(
+                config_json["clicks_begin"], int
             ):
-                print_status("Error: config.json does not contain key 'test_offset'")
+                print_status("Error: config.json does not contain key 'clicks_begin'")
                 return
-            test_data_offset = config_json["test_offset"]
-            if test_data_offset > 0:
+            clicks_begin = config_json["clicks_begin"]
+            if clicks_begin < 0:
+                print_status("Error: key 'clicks_begin' cannot be negative")
+                return
+
+            if "clicks_end" not in config_json or not isinstance(
+                config_json["clicks_end"], int
+            ):
+                print_status("Error: config.json does not contain key 'clicks_end'")
+                return
+            clicks_end = config_json["clicks_end"]
+            if clicks_end <= clicks_begin:
+                print_status(
+                    "Error: key 'clicks_end' must be greater than 'clicks_begin'"
+                )
+                return
+
+            if "train_begin" not in config_json or not isinstance(
+                config_json["train_begin"], int
+            ):
+                print_status("Error: config.json does not contain key 'train_begin'")
+                return
+            train_begin = config_json["train_begin"]
+            if train_begin < 0:
+                print_status("Error: key 'train_begin' cannot be negative")
+                return
+
+            if "train_end" not in config_json or not isinstance(
+                config_json["train_end"], int
+            ):
+                print_status("Error: config.json does not contain key 'train_end'")
+                return
+            train_end = config_json["train_end"]
+            if train_end <= train_begin:
+                print_status(
+                    "Error: key 'train_end' must be greater than 'train_begin'"
+                )
+                return
+
+            if "test_begin" not in config_json or not isinstance(
+                config_json["test_begin"], int
+            ):
+                print_status("Error: config.json does not contain key 'test_begin'")
+                return
+            test_begin = config_json["test_begin"]
+            if test_begin < 0:
+                print_status("Error: key 'test_begin' cannot be negative")
+                return
+
+            if "test_end" not in config_json or not isinstance(
+                config_json["test_end"], int
+            ):
+                print_status("Error: config.json does not contain key 'test_end'")
+                return
+            test_end = config_json["test_end"]
+            if test_end < test_begin:
+                print_status("Error: key 'test_end' cannot be less than 'test_begin'")
+                return
+
+            has_test_data = test_end > test_begin
+            if has_test_data:
                 print_status("Recording contains test data")
 
             if "sweep_begin" not in config_json or not isinstance(
@@ -156,10 +215,8 @@ def run_zip_loader(context: ZipLoaderContext, input_file: str | io.BytesIO):
                 )
                 return
 
-            # Input file is half a second of silence, a click, quarter second silence, click, half second silence
-            # Use the first 1 1/4 seconds to sync wet/dry tracks
-            dry_clicks_signal = dry_signal[: 5 * dry_sample_rate // 4]
-            wet_clicks_signal = wet_signal[: 5 * wet_sample_rate // 4]
+            dry_clicks_signal = dry_signal[clicks_begin:clicks_end]
+            wet_clicks_signal = wet_signal[clicks_begin:clicks_end]
             wet_quiet_samples = 3 * wet_sample_rate // 8
 
             dry_clicks = find_dry_clicks(dry_clicks_signal)
@@ -190,22 +247,17 @@ def run_zip_loader(context: ZipLoaderContext, input_file: str | io.BytesIO):
             latency_samples = min(latency_samples_a, latency_samples_b)
             print_status(f"Recording latency: {latency_samples} samples")
 
-            # Cut the first second of timing calibration data off of the start
-            # Also cut the test data off of the end if it exists
-            if test_data_offset > 0:
-                train_dry = dry_signal[dry_sample_rate:test_data_offset]
-                train_wet = wet_signal[
-                    wet_sample_rate
-                    + latency_samples : test_data_offset
-                    + latency_samples
+            train_dry = dry_signal[train_begin:train_end]
+            train_wet = wet_signal[
+                train_begin + latency_samples : train_end + latency_samples
+            ]
+
+            if has_test_data:
+                test_dry = dry_signal[test_begin:test_end]
+                test_wet = wet_signal[
+                    test_begin + latency_samples : test_end + latency_samples
                 ]
-
-                test_dry = dry_signal[test_data_offset:]
-                test_wet = wet_signal[test_data_offset + latency_samples :]
             else:
-                train_dry = dry_signal[dry_sample_rate:]
-                train_wet = wet_signal[wet_sample_rate + latency_samples :]
-
                 test_dry = None
                 test_wet = None
 
