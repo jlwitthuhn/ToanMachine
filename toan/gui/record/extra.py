@@ -8,8 +8,13 @@ from PySide6 import QtWidgets
 from toan.gui.record import RecordingContext
 from toan.persistence.user_wav import UserWavDesc, get_user_wav_list
 from toan.qt import WavFileModel
+from toan.signal.generator.chirp import generate_chirp
 from toan.signal.mix import concat_signals
 from toan.wav import load_and_resample_wav
+
+TEST_SWEEP_DURATION_SEC = 5.0
+TEST_SWEEP_BEGIN_HZ = 20.0
+TEST_SWEEP_END_HZ = 20000.0
 
 EXTRA_AUDIO_TEXT = [
     "Select any extra audio you would like to include in the recorded signal.",
@@ -92,18 +97,23 @@ class RecordExtraPage(QtWidgets.QWizardPage):
         else:
             self.context.extra_signal_dry_train = np.zeros(1)
 
+        sweep = generate_chirp(
+            self.context.sample_rate,
+            TEST_SWEEP_BEGIN_HZ,
+            TEST_SWEEP_END_HZ,
+            TEST_SWEEP_DURATION_SEC,
+        ).astype(np.float32)
+
         test_wavs: list[UserWavDesc] = self.table.model().get_selected_test_wavs()
-        test_ready_to_concat: list[np.ndarray] = []
+        test_ready_to_concat: list[np.ndarray] = [sweep]
         for this_wav in test_wavs:
             this_signal = load_and_resample_wav(self.context.sample_rate, this_wav.path)
+            # TODO: This scales the signal too loud in many cases, it should not do that
+            this_signal = this_signal.astype(np.float32) / np.abs(this_signal).max()
             test_ready_to_concat.append(this_signal)
 
-        if len(test_ready_to_concat) > 0:
-            test_signal = concat_signals(
-                test_ready_to_concat, self.context.sample_rate // 4
-            )
-            # TODO: This scales the signal too loud in many cases, it should not do that
-            test_signal = test_signal.astype(np.float32) / np.abs(test_signal).max()
-            self.context.extra_signal_dry_test = test_signal
+        self.context.extra_signal_dry_test = concat_signals(
+            test_ready_to_concat, self.context.sample_rate // 4
+        )
 
         return True
