@@ -124,13 +124,23 @@ def _generate_sweep_block(
     sweep_down_sin = sweep_down * sine_multiplier
 
     small_sweeps = []
-    for multiplier in small_sweep_magnitudes:
+    duration_multiplier = 0.99
+    for magnitude in small_sweep_magnitudes:
+        # Use a few more samples each on each distinct multiplier
+        # This way we don't just get scaled versions of exactly the same waveform
+        duration_multiplier += 0.01
         for f_start in small_sweep_begins:
             small_sweeps.append(
-                generate_chirp(sample_rate, f_start, sweep_max, 0.36) * multiplier
+                generate_chirp(
+                    sample_rate, f_start, sweep_max, 0.36 * duration_multiplier
+                )
+                * magnitude
             )
             small_sweeps.append(
-                generate_chirp(sample_rate, sweep_max, f_start, 0.36) * multiplier
+                generate_chirp(
+                    sample_rate, sweep_max, f_start, 0.36 * duration_multiplier
+                )
+                * magnitude
             )
     if small_sweep_shuffle:
         np.random.shuffle(small_sweeps)
