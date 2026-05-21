@@ -302,7 +302,6 @@ def main() -> None:
         loss_dict[label] = loss_stats
 
     signal_config = CaptureSignalConfig()
-    do_iteration_and_log("default", signal_config, args.repeat)
 
     def iterate_with_added_warble():
         original_warbles = signal_config.warble_chords.copy()
@@ -377,6 +376,7 @@ def main() -> None:
             do_iteration_and_log(file_name, signal_config, args.repeat, train_extra)
 
     try:
+        do_iteration_and_log("default", signal_config, args.repeat)
         iterate_with_applied_effect()
     except KeyboardInterrupt:
         print("Interrupted, aborting...")
