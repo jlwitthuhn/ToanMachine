@@ -26,12 +26,28 @@ class ChordWithEffects:
 
 @dataclass
 class CaptureSignalConfig:
+    TMP_extra_sweeps: bool = False
     sweep_duration: float = 10.0
     warble_duration: float = 6.5
     noise_duration: float = 8.0
     pluck_note_duration: float = 0.62
     pluck_decay: float = 0.982
     pluck_pre_smooth: int = 1
+    small_sweep_begins: list[int] = field(
+        default_factory=lambda: [
+            500,
+            750,
+            1000,
+            1500,
+            2000,
+            3000,
+            4000,
+            6000,
+            8000,
+            12000,
+        ]
+    )
+    small_sweep_magnitudes: list[int] = field(default_factory=lambda: [1.0])
     warble_chords: list[ChordWithEffects] = field(
         default_factory=lambda: [
             ChordWithEffects(ChordType.Tritone, EffectType.Flanger4Hz),
@@ -86,7 +102,12 @@ def _generate_calibration_block(sample_rate: int) -> np.ndarray:
     )
 
 
-def _generate_sweep_block(sample_rate: int, duration: float) -> tuple[np.ndarray, int]:
+def _generate_sweep_block(
+    sample_rate: int,
+    duration: float,
+    small_sweep_begins: list[int],
+    small_sweep_magnitudes: list[int],
+) -> tuple[np.ndarray, int]:
     sweep_max = min(24000, sample_rate // 2)
     sweep_up = generate_chirp(sample_rate, 18.0, sweep_max, duration)
     sweep_down = generate_chirp(sample_rate, sweep_max, 18.0, duration / 2)
@@ -101,23 +122,16 @@ def _generate_sweep_block(sample_rate: int, duration: float) -> tuple[np.ndarray
     sweep_down_cos = sweep_down * cosine_multiplier
     sweep_down_sin = sweep_down * sine_multiplier
 
-    sweep_pairs = [
-        (500, sweep_max),
-        (750, sweep_max),
-        (1000, sweep_max),
-        (1500, sweep_max),
-        (2000, sweep_max),
-        (3000, sweep_max),
-        (4000, sweep_max),
-        (6000, sweep_max),
-        (8000, sweep_max),
-        (12000, sweep_max),
-    ]
-    extra_sweeps = []
-    for f_start, f_end in sweep_pairs:
-        extra_sweeps.append(generate_chirp(sample_rate, f_start, f_end, 0.36))
-        extra_sweeps.append(generate_chirp(sample_rate, f_end, f_start, 0.36))
-    extra_block = concat_signals(extra_sweeps, sample_rate // 24)
+    small_sweeps = []
+    for multiplier in small_sweep_magnitudes:
+        for f_start in small_sweep_begins:
+            small_sweeps.append(
+                generate_chirp(sample_rate, f_start, sweep_max, 0.36) * multiplier
+            )
+            small_sweeps.append(
+                generate_chirp(sample_rate, sweep_max, f_start, 0.36) * multiplier
+            )
+    small_block = concat_signals(small_sweeps, sample_rate // 24)
 
     return (
         concat_signals(
@@ -125,7 +139,7 @@ def _generate_sweep_block(sample_rate: int, duration: float) -> tuple[np.ndarray
                 sweep_up,
                 sweep_down_cos,
                 sweep_down_sin,
-                extra_block,
+                small_block,
             ],
             sample_rate // 4,
         ),
@@ -212,7 +226,10 @@ def generate_capture_signal(
 
     main_sweep_begin = 0
     block_sweep, main_sweep_end = _generate_sweep_block(
-        sample_rate, config.sweep_duration
+        sample_rate,
+        config.sweep_duration,
+        config.small_sweep_begins,
+        config.small_sweep_magnitudes,
     )
     block_warble = _generate_warble_block(
         sample_rate, config.warble_chords, config.warble_duration
