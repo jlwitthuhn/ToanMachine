@@ -27,7 +27,6 @@ class ChordWithEffects:
 @dataclass
 class CaptureSignalConfig:
     sweep_duration: float = 10.0
-    small_sweep_shuffle: bool = False
     warble_duration: float = 6.5
     noise_duration: float = 8.0
     pluck_note_duration: float = 0.62
@@ -36,7 +35,6 @@ class CaptureSignalConfig:
     small_sweep_begins: list[int] = field(
         default_factory=lambda: [
             500,
-            750,
             1000,
             1500,
             2000,
@@ -44,10 +42,9 @@ class CaptureSignalConfig:
             4000,
             6000,
             8000,
-            12000,
         ]
     )
-    small_sweep_magnitudes: list[int] = field(default_factory=lambda: [1.0])
+    small_sweep_magnitudes: list[int] = field(default_factory=lambda: [1.0, 0.66, 0.33])
     warble_chords: list[ChordWithEffects] = field(
         default_factory=lambda: [
             ChordWithEffects(ChordType.Tritone, EffectType.Flanger4Hz),
@@ -107,7 +104,6 @@ def _generate_sweep_block(
     duration: float,
     small_sweep_begins: list[int],
     small_sweep_magnitudes: list[int],
-    small_sweep_shuffle: bool,
 ) -> tuple[np.ndarray, int]:
     sweep_max = min(24000, sample_rate // 2)
     sweep_up = generate_chirp(sample_rate, 18.0, sweep_max, duration)
@@ -142,8 +138,7 @@ def _generate_sweep_block(
                 )
                 * magnitude
             )
-    if small_sweep_shuffle:
-        np.random.shuffle(small_sweeps)
+    np.random.shuffle(small_sweeps)
     small_block = concat_signals(small_sweeps, sample_rate // 24)
 
     return (
@@ -243,7 +238,6 @@ def generate_capture_signal(
         config.sweep_duration,
         config.small_sweep_begins,
         config.small_sweep_magnitudes,
-        config.small_sweep_shuffle,
     )
     block_warble = _generate_warble_block(
         sample_rate, config.warble_chords, config.warble_duration
