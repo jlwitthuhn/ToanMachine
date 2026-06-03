@@ -10,7 +10,6 @@ from torch import optim
 
 from toan.model.nam_a1_wavenet_config import NamA1WaveNetConfig
 from toan.model.nam_a1_wavenet_torch import NamA1WaveNetTorch
-from toan.model.nam_a2_wavenet_config import NamA2WaveNetConfig
 from toan.training import TrainingStageSummary
 from toan.training.config import TrainingConfig, TrainingStageConfig
 from toan.training.context import TrainingProgressContext
@@ -30,10 +29,8 @@ def run_training_loop_torch(context: TrainingProgressContext, config: TrainingCo
             context.sample_rate,
             rng_seed=config.rng_seed,
         )
-    elif isinstance(context.model_config, NamA2WaveNetConfig):
-        raise NotImplementedError("A2 models are not yet supported in the torch loop")
     else:
-        assert False
+        raise NotImplementedError("Only NAM A1 is supported.")
     device = torch.device("mps")
     model.to(device)
 
