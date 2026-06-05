@@ -12,7 +12,7 @@ class ModelConfigPreset(Enum):
     A1_NAM_FEATHER = enum.auto()
     A1_CUSTOM_XSTD = enum.auto()
     A1_CUSTOM_REVYSTD = enum.auto()
-    A2_TOAN_TEST = enum.auto()
+    A2_NAM = enum.auto()
 
     def get_label(self) -> str:
         match self:
@@ -26,7 +26,7 @@ class ModelConfigPreset(Enum):
                 return "A1 Custom xSTD - 12409p"
             case ModelConfigPreset.A1_CUSTOM_REVYSTD:
                 return "A1 Custom REVySTD - 12768p"
-            case ModelConfigPreset.A2_TOAN_TEST:
-                return "A2 Toan Test (broken)"
+            case ModelConfigPreset.A2_NAM:
+                return "A2 NAM Slimmable"
             case _:
                 raise NotImplementedError
