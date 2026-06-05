@@ -8,7 +8,7 @@ from scipy.signal import resample
 
 
 def load_and_resample_wav(sample_rate: int, path: str) -> np.ndarray:
-    this_signal, this_sample_rate = sf.read(path)
+    this_signal, this_sample_rate = sf.read(path, dtype="float32")
     if len(this_signal.shape) == 2:
         this_signal = this_signal[:, 0]
     if this_sample_rate != sample_rate:
@@ -16,4 +16,4 @@ def load_and_resample_wav(sample_rate: int, path: str) -> np.ndarray:
         desired_sample_count = int(this_sample_count * (sample_rate / this_sample_rate))
         this_signal = resample(this_signal, desired_sample_count)
     assert type(this_signal) == np.ndarray
-    return this_signal
+    return this_signal.astype(np.float32)

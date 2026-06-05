@@ -34,5 +34,4 @@ def _get_builtin_wav_filename(type: BuiltinWav) -> str:
 def get_builtin_wav_signal(sample_rate: int, type: BuiltinWav) -> np.ndarray:
     file_name = _get_builtin_wav_filename(type)
     file_path = _get_builtin_wav_dir().joinpath(file_name).resolve()
-    signal = load_and_resample_wav(sample_rate, str(file_path))
-    return signal / np.max(np.abs(signal))
+    return load_and_resample_wav(sample_rate, str(file_path))

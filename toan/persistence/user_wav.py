@@ -58,6 +58,5 @@ def load_user_wav_list(sample_rate: int, file_names: list[str]) -> np.ndarray:
     for file_name in file_names:
         file_path = os.path.join(wav_dir, file_name)
         file_signal = load_and_resample_wav(sample_rate, file_path)
-        file_signal = file_signal.astype(np.float32) / np.abs(file_signal).max()
         signal_list.append(file_signal)
     return concat_signals(signal_list, sample_rate // 4)

@@ -92,7 +92,6 @@ class RecordExtraPage(QtWidgets.QWizardPage):
             train_signal = concat_signals(
                 train_ready_to_concat, self.context.sample_rate // 4
             )
-            train_signal = train_signal.astype(np.float32) / np.abs(train_signal).max()
             self.context.extra_signal_dry_train = train_signal
         else:
             self.context.extra_signal_dry_train = np.zeros(1)
@@ -108,8 +107,6 @@ class RecordExtraPage(QtWidgets.QWizardPage):
         test_ready_to_concat: list[np.ndarray] = [sweep]
         for this_wav in test_wavs:
             this_signal = load_and_resample_wav(self.context.sample_rate, this_wav.path)
-            # TODO: This scales the signal too loud in many cases, it should not do that
-            this_signal = this_signal.astype(np.float32) / np.abs(this_signal).max()
             test_ready_to_concat.append(this_signal)
 
         self.context.extra_signal_dry_test = concat_signals(
