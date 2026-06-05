@@ -256,10 +256,10 @@ def generate_capture_signal(
     main_sweep_end += 0
     signal_train = concat_signals(
         [
+            block_white_noise,
             block_sweep,
             block_warble,
             block_plucked,
-            block_white_noise,
             block_builtin_wavs,
         ],
         sample_rate // 4,
