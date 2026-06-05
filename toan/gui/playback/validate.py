@@ -9,6 +9,9 @@ from PySide6 import QtGui, QtWidgets
 from toan.gui.playback import PlaybackContext
 from toan.model.metadata import ModelMetadata
 from toan.model.nam_a1_wavenet_config import json_a1_wavenet_config
+from toan.model.nam_a1_wavenet_torch import NamA1WaveNetTorch
+from toan.model.nam_a2_wavenet_config import json_a2_wavenet_container_config
+from toan.model.nam_a2_wavenet_torch import NamA2WaveNetTorch
 
 
 class PlaybackValidatePage(QtWidgets.QWizardPage):
@@ -55,15 +58,18 @@ class PlaybackValidatePage(QtWidgets.QWizardPage):
             return
 
         if "sample_rate" not in nam_json or not isinstance(
-            nam_json["sample_rate"], int
+            nam_json["sample_rate"], (int, float)
         ):
-            self.text_edit.append("Error: Root key 'sample_rate' must be int")
+            self.text_edit.append("Error: Root key 'sample_rate' must be a number")
             return
-        self.context.sample_rate = nam_json["sample_rate"]
+        # Always store the sample rate as an int internally, truncate float on load
+        self.context.sample_rate = int(nam_json["sample_rate"])
 
         json_version = nam_json["version"]
         if json_version == "0.5.4":
             self._init_a1(nam_json)
+        elif json_version == "0.7.0":
+            self._init_a2(nam_json)
         else:
             self.text_edit.append(f"Error: Unsupported version: {json_version}")
 
@@ -99,7 +105,7 @@ class PlaybackValidatePage(QtWidgets.QWizardPage):
 
         metadata = ModelMetadata("Playback A1 NAM model", "Toan Machine", "Test model")
 
-        model = NamA1WaveNetMlx(model_config, metadata, self.context.sample_rate)
+        model = NamA1WaveNetTorch(model_config, metadata, self.context.sample_rate)
         self.text_edit.append(f"Model parameters: {model.parameter_count}")
 
         if "weights" not in nam_json or not isinstance(nam_json["weights"], list):
@@ -112,6 +118,61 @@ class PlaybackValidatePage(QtWidgets.QWizardPage):
 
         model.import_nam_linear_weights(weights)
         self.text_edit.append("A1 model successfully loaded")
+
+        self.context.nam_model = model
+        self.completeChanged.emit()
+
+    def _init_a2(self, nam_json: dict):
+        if "architecture" not in nam_json:
+            self.text_edit.append("Error: Architecture is not specified")
+            return
+
+        arch = nam_json["architecture"]
+        if not isinstance(arch, str):
+            self.text_edit.append("Error: Architecture is not a string")
+            return
+        if arch != "SlimmableContainer":
+            self.text_edit.append(f"Error: Unsupported architecture: {arch}")
+            return
+
+        if "config" not in nam_json:
+            self.text_edit.append("Error: Model config is not specified")
+            return
+
+        self.text_edit.append("Loading config...")
+
+        try:
+            model_config = json_a2_wavenet_container_config(nam_json["config"])
+        except:
+            self.text_edit.append("Error: a2 wavenet config is not valid")
+            return
+
+        self.text_edit.append("Creating model...")
+
+        metadata = ModelMetadata("Playback A2 NAM model", "Toan Machine", "Test model")
+
+        model = NamA2WaveNetTorch(model_config, metadata, self.context.sample_rate)
+        self.text_edit.append(f"Model parameters: {model.parameter_count}")
+        self.text_edit.append(f"Submodels: {len(model.submodels)}")
+
+        submodel_weights: list[list[float]] = []
+        for submodel in nam_json["config"]["submodels"]:
+            if (
+                not isinstance(submodel, dict)
+                or "model" not in submodel
+                or not isinstance(submodel["model"], dict)
+                or "weights" not in submodel["model"]
+                or not isinstance(submodel["model"]["weights"], list)
+            ):
+                self.text_edit.append("Error: Submodel weights are not specified")
+                return
+            submodel_weights.append(submodel["model"]["weights"])
+
+        weight_count = sum(len(weights) for weights in submodel_weights)
+        self.text_edit.append(f"Profile parameters: {weight_count}")
+
+        model.import_nam_linear_weights(submodel_weights)
+        self.text_edit.append("A2 model successfully loaded")
 
         self.context.nam_model = model
         self.completeChanged.emit()
