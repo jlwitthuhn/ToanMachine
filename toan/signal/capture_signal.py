@@ -165,7 +165,7 @@ def _generate_warble_block(
         return generate_warble_chord(sample_rate, duration, 55.0, shape, 10, 0.68)
 
     buffer_size = int(sample_rate * duration)
-    modulation = generate_gaussian_pulse(buffer_size, buffer_size // 8)
+    modulation = generate_gaussian_pulse(buffer_size, 2)
     chord_buffers = []
     for chord in chords:
         this_chord_buffer = generate_warble_signal(chord.chord)
@@ -210,9 +210,8 @@ def _generate_plucked_block(
 
 def _generate_white_noise_block(sample_rate: int, duration: float) -> np.ndarray:
     samples = int(sample_rate * duration)
-    plateau_width = samples // 8
     white_noise = generate_white_noise(samples)
-    pulse = generate_gaussian_pulse(samples, plateau_width)
+    pulse = generate_gaussian_pulse(samples, 2)
     return white_noise * pulse
 
 
@@ -258,8 +257,8 @@ def generate_capture_signal(
         [
             block_white_noise,
             block_sweep,
-            block_warble,
-            block_plucked,
+            block_warble * 0.9,
+            block_plucked * 0.9,
             block_builtin_wavs,
         ],
         sample_rate // 4,
