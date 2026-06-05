@@ -14,13 +14,23 @@ from matplotlib.figure import Figure
 from tqdm import tqdm
 
 from toan.model.nam_a1_wavenet_presets import get_a1_wavenet_config
+from toan.model.nam_a2_wavenet_presets import get_a2_wavenet_config
 from toan.model.presets import ModelConfigPreset
 from toan.training.config import TrainingConfig, get_training_config_from_preset
 from toan.training.context import TrainingProgressContext
 from toan.training.loop_torch import run_training_loop_torch
 from toan.training.zip_loader import ZipLoaderContext, run_zip_loader
 
-THE_PRESET: ModelConfigPreset = ModelConfigPreset.A1_CUSTOM_REVYSTD
+THE_PRESET: ModelConfigPreset = ModelConfigPreset.A2_NAM
+
+
+def _get_model_config(preset: ModelConfigPreset):
+    config = get_a2_wavenet_config(preset)
+    if config is None:
+        config = get_a1_wavenet_config(preset)
+    if config is None:
+        raise NotImplementedError(f"No model config for preset {preset}")
+    return config
 
 
 @dataclass
@@ -61,7 +71,7 @@ def main():
 
         train_context = TrainingProgressContext()
 
-        model_config = get_a1_wavenet_config(THE_PRESET)
+        model_config = _get_model_config(THE_PRESET)
 
         train_context.model_config = model_config
         train_context.metadata = zip_context.metadata

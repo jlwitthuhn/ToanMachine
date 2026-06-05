@@ -10,12 +10,30 @@ from torch import optim
 
 from toan.model.nam_a1_wavenet_config import NamA1WaveNetConfig
 from toan.model.nam_a1_wavenet_torch import NamA1WaveNetTorch
+from toan.model.nam_a2_wavenet_config import NamA2WaveNetContainerConfig
+from toan.model.nam_a2_wavenet_torch import NamA2WaveNetTorch
 from toan.training import TrainingStageSummary
 from toan.training.config import TrainingConfig, TrainingStageConfig
 from toan.training.context import TrainingProgressContext
 from toan.training.data_loader import TrainingDataLoaderMlx
 from toan.training.loss import LossFunction
 from toan.training.loss_torch import calculate_loss_torch
+
+
+def _calculate_model_loss(
+    loss_fn: LossFunction,
+    model_output: torch.Tensor,
+    target: torch.Tensor,
+) -> torch.Tensor:
+    # A2 models stack one prediction per submodel as (num_submodels, batch, length)
+    # Train every submodel jointly by summing each submodel's own loss
+    if model_output.ndim == 3:
+        total = calculate_loss_torch(loss_fn, model_output[0], target)
+        for i in range(1, model_output.shape[0]):
+            total = total + calculate_loss_torch(loss_fn, model_output[i], target)
+        return total
+    # A1 models just produce one output
+    return calculate_loss_torch(loss_fn, model_output, target)
 
 
 def run_training_loop_torch(context: TrainingProgressContext, config: TrainingConfig):
@@ -29,8 +47,15 @@ def run_training_loop_torch(context: TrainingProgressContext, config: TrainingCo
             context.sample_rate,
             rng_seed=config.rng_seed,
         )
+    elif isinstance(context.model_config, NamA2WaveNetContainerConfig):
+        model = NamA2WaveNetTorch(
+            context.model_config,
+            context.metadata,
+            context.sample_rate,
+            rng_seed=config.rng_seed,
+        )
     else:
-        raise NotImplementedError("Only NAM A1 is supported.")
+        raise NotImplementedError("Only NAM A1 and A2 are supported.")
     device = torch.device("mps")
     model.to(device)
 
@@ -92,7 +117,7 @@ def run_training_loop_torch(context: TrainingProgressContext, config: TrainingCo
         test_in, test_out = get_test_data()
         with torch.no_grad():
             model_out = model(test_in)
-            return calculate_loss_torch(func, model_out, test_out).item()
+            return _calculate_model_loss(func, model_out, test_out).item()
 
     with context.lock:
         context.iters_done = 0
@@ -127,7 +152,7 @@ def run_training_loop_torch(context: TrainingProgressContext, config: TrainingCo
         ) -> torch.Tensor:
             optimizer.zero_grad()
             outputs = model(batch_in_step)
-            loss = calculate_loss_torch(stage_config.loss_fn, outputs, batch_out_step)
+            loss = _calculate_model_loss(stage_config.loss_fn, outputs, batch_out_step)
             loss.backward()
             optimizer.step()
             scheduler.step()

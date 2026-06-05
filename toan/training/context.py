@@ -9,11 +9,13 @@ import numpy as np
 from toan.model.metadata import ModelMetadata
 from toan.model.nam_a1_wavenet_config import NamA1WaveNetConfig
 from toan.model.nam_a1_wavenet_torch import NamA1WaveNetTorch
+from toan.model.nam_a2_wavenet_config import NamA2WaveNetContainerConfig
+from toan.model.nam_a2_wavenet_torch import NamA2WaveNetTorch
 from toan.training import TrainingStageSummary
 
 
 class TrainingProgressContext:
-    model_config: NamA1WaveNetConfig | None = None
+    model_config: NamA1WaveNetConfig | NamA2WaveNetContainerConfig | None = None
     metadata: ModelMetadata | None = None
     sample_rate: int | None = None
 
@@ -30,7 +32,7 @@ class TrainingProgressContext:
     loss_train: float | None = None
     loss_test: float | None = None
 
-    model: NamA1WaveNetTorch | None = None
+    model: NamA1WaveNetTorch | NamA2WaveNetTorch | None = None
     summary: TrainingStageSummary | None = None
 
     quit: bool = False

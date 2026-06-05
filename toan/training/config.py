@@ -92,7 +92,7 @@ def get_training_config_from_preset(selected_preset: ModelConfigPreset):
             return _get_a1_xstd_training_config()
         case ModelConfigPreset.A1_CUSTOM_REVYSTD:
             return _get_a1_rev_ystd_training_config()
-        case ModelConfigPreset.A2_TOAN_TEST:
+        case ModelConfigPreset.A2_NAM:
             return _get_a2_training_config()
         case _:
             raise NotImplementedError
