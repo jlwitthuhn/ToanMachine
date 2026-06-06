@@ -27,6 +27,7 @@ def create_training_zip(
     segment_train: tuple[int, int],
     segment_test: tuple[int, int],
     segment_sweep: tuple[int, int],
+    dbu: float | None = None,
 ) -> io.BytesIO:
     wav_dry = io.BytesIO()
     scipy.io.wavfile.write(
@@ -57,6 +58,7 @@ def create_training_zip(
         "test_end": segment_test[1],
         "sweep_begin": segment_sweep[0],
         "sweep_end": segment_sweep[1],
+        "input_level_dbu": dbu,
         "dry_signal": "dry.wav",
         "wet_signal": "wet.wav",
     }

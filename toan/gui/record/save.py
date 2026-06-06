@@ -42,6 +42,7 @@ class RecordSavePage(QtWidgets.QWizardPage):
             self.context.segment_dry_train,
             self.context.segment_dry_test,
             self.context.segment_dry_sweep,
+            self.context.dbu,
         )
 
         with open(file_path, "wb") as f:

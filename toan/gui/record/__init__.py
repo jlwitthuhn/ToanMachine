@@ -11,6 +11,7 @@ from toan.gui.record.extra import RecordExtraPage
 from toan.gui.record.input_gain import RecordInputGainPage
 from toan.gui.record.intro import RecordIntroPage
 from toan.gui.record.output_level import RecordOutputLevelPage
+from toan.gui.record.output_voltage import RecordOutputVoltagePage
 from toan.gui.record.save import RecordSavePage
 from toan.gui.record.wet import RecordWetSignalPage
 
@@ -28,6 +29,7 @@ class RecordWizard(QtWidgets.QWizard):
         self.addPage(RecordExtraPage(self, self.context))
         self.addPage(RecordDevicePage(self, self.context))
         self.addPage(RecordOutputLevelPage(self, self.context))
+        self.addPage(RecordOutputVoltagePage(self, self.context))
         self.addPage(RecordInputGainPage(self, self.context))
         self.addPage(RecordWetSignalPage(self, self.context))
         self.addPage(RecordSavePage(self, self.context))
