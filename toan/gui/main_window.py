@@ -2,6 +2,7 @@
 # https://www.gnu.org/licenses/gpl-3.0.en.html
 # SPDX-License-Identifier: GPL-3.0-only
 
+import numpy as np
 import scipy
 import sounddevice as sd
 from PySide6 import QtWidgets
@@ -24,7 +25,7 @@ def _clicked_save_training_signal():
     if file_path == "":
         return
     signal = generate_capture_signal(48000).signal
-    scipy.io.wavfile.write(file_path, 48000, signal)
+    scipy.io.wavfile.write(file_path, 48000, signal.astype(np.float32))
 
 
 class MainWindow(QtWidgets.QWidget):
