@@ -8,6 +8,7 @@ import numpy as np
 import torch
 from torch import optim
 
+from toan.model.metadata import ModelA1Metadata, ModelA2Metadata
 from toan.model.nam_a1_wavenet_config import NamA1WaveNetConfig
 from toan.model.nam_a1_wavenet_torch import NamA1WaveNetTorch
 from toan.model.nam_a2_wavenet_config import NamA2WaveNetContainerConfig
@@ -43,14 +44,14 @@ def run_training_loop_torch(context: TrainingProgressContext, config: TrainingCo
     if isinstance(context.model_config, NamA1WaveNetConfig):
         model = NamA1WaveNetTorch(
             context.model_config,
-            context.metadata,
+            ModelA1Metadata.from_generic(context.metadata),
             context.sample_rate,
             rng_seed=config.rng_seed,
         )
     elif isinstance(context.model_config, NamA2WaveNetContainerConfig):
         model = NamA2WaveNetTorch(
             context.model_config,
-            context.metadata,
+            ModelA2Metadata.from_generic(context.metadata),
             context.sample_rate,
             rng_seed=config.rng_seed,
         )
@@ -195,6 +196,12 @@ def run_training_loop_torch(context: TrainingProgressContext, config: TrainingCo
     if context.signal_dry_test is not None:
         for this_loss in LossFunction:
             context.metadata.loss_test[this_loss.name] = measure_test_loss(this_loss)
+
+        model.metadata.loss_test = dict(context.metadata.loss_test)
+        if isinstance(model, NamA2WaveNetTorch):
+            for submodel_metadata in model.submodel_metadata:
+                submodel_metadata.loss_test = dict(context.metadata.loss_test)
+
         # Overall loss will use the last stage loss fn
         loss_fn = config.stages[-1].loss_fn
         context.loss_test = context.metadata.loss_test[loss_fn.name]

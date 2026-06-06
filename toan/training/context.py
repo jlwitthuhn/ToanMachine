@@ -6,7 +6,7 @@ import threading
 
 import numpy as np
 
-from toan.model.metadata import ModelMetadata
+from toan.model.metadata import ModelGenericMetadata
 from toan.model.nam_a1_wavenet_config import NamA1WaveNetConfig
 from toan.model.nam_a1_wavenet_torch import NamA1WaveNetTorch
 from toan.model.nam_a2_wavenet_config import NamA2WaveNetContainerConfig
@@ -16,7 +16,7 @@ from toan.training import TrainingStageSummary
 
 class TrainingProgressContext:
     model_config: NamA1WaveNetConfig | NamA2WaveNetContainerConfig | None = None
-    metadata: ModelMetadata | None = None
+    metadata: ModelGenericMetadata | None = None
     sample_rate: int | None = None
 
     signal_dry_test: np.ndarray | None = None

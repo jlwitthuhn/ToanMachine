@@ -9,7 +9,7 @@ import torch
 from torch import nn
 
 from toan.model.activation_torch import get_activation_module_torch
-from toan.model.metadata import ModelMetadata
+from toan.model.metadata import ModelA1Metadata
 from toan.model.nam_a1_wavenet_config import (
     NamA1WaveNetConfig,
     NamA1WaveNetLayerGroupConfig,
@@ -177,7 +177,7 @@ class NamA1WaveNetTorch(nn.Module):
     def __init__(
         self,
         config: NamA1WaveNetConfig,
-        metadata: ModelMetadata,
+        metadata: ModelA1Metadata,
         sample_rate: int,
         rng_seed: int = 0x35,
     ):

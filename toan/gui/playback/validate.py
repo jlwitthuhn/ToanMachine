@@ -7,7 +7,7 @@ import json
 from PySide6 import QtGui, QtWidgets
 
 from toan.gui.playback import PlaybackContext
-from toan.model.metadata import ModelMetadata
+from toan.model.metadata import ModelA1Metadata, ModelA2Metadata
 from toan.model.nam_a1_wavenet_config import json_a1_wavenet_config
 from toan.model.nam_a1_wavenet_torch import NamA1WaveNetTorch
 from toan.model.nam_a2_wavenet_config import json_a2_wavenet_container_config
@@ -103,7 +103,9 @@ class PlaybackValidatePage(QtWidgets.QWizardPage):
 
         self.text_edit.append("Creating model...")
 
-        metadata = ModelMetadata("Playback A1 NAM model", "Toan Machine", "Test model")
+        metadata = ModelA1Metadata(
+            "Playback A1 NAM model", "Toan Machine", "Test model"
+        )
 
         model = NamA1WaveNetTorch(model_config, metadata, self.context.sample_rate)
         self.text_edit.append(f"Model parameters: {model.parameter_count}")
@@ -149,7 +151,9 @@ class PlaybackValidatePage(QtWidgets.QWizardPage):
 
         self.text_edit.append("Creating model...")
 
-        metadata = ModelMetadata("Playback A2 NAM model", "Toan Machine", "Test model")
+        metadata = ModelA2Metadata(
+            "Playback A2 NAM model", "Toan Machine", "Test model"
+        )
 
         model = NamA2WaveNetTorch(model_config, metadata, self.context.sample_rate)
         self.text_edit.append(f"Model parameters: {model.parameter_count}")

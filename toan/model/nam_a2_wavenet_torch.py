@@ -8,7 +8,7 @@ import math
 import torch
 from torch import nn
 
-from toan.model.metadata import ModelMetadata
+from toan.model.metadata import ModelA2Metadata, SubmodelA2Metadata
 from toan.model.nam_a2_wavenet_config import (
     NamA2WaveNetConfig,
     NamA2WaveNetContainerConfig,
@@ -231,7 +231,7 @@ class NamA2WaveNetTorch(nn.Module):
     def __init__(
         self,
         config: NamA2WaveNetContainerConfig,
-        metadata: ModelMetadata,
+        metadata: ModelA2Metadata,
         sample_rate: float,
         rng_seed: int = 0x35,
     ):
@@ -239,6 +239,9 @@ class NamA2WaveNetTorch(nn.Module):
 
         self.config = config
         self.metadata = metadata
+        self.submodel_metadata = [
+            SubmodelA2Metadata.from_a2(metadata) for _ in config.submodels
+        ]
         self.sample_rate = int(sample_rate)
         self.max_values = [submodel.max_value for submodel in config.submodels]
         self.submodels = nn.ModuleList(
@@ -280,11 +283,13 @@ class NamA2WaveNetTorch(nn.Module):
         return submodel(x)
 
     def _export_submodel_dict(
-        self, submodel: _NamA2WaveNetSubmodelTorch, metadata_dict: dict
+        self,
+        submodel: _NamA2WaveNetSubmodelTorch,
+        metadata: SubmodelA2Metadata,
     ) -> dict:
         return {
             "version": "0.7.0",
-            "metadata": metadata_dict,
+            "metadata": metadata.export_dict(),
             "architecture": "WaveNet",
             "config": submodel.config.export_dict(),
             "weights": submodel.export_nam_linear_weights(),
@@ -294,11 +299,13 @@ class NamA2WaveNetTorch(nn.Module):
     def export_nam_json_str(self) -> str:
         metadata_dict = self.metadata.export_dict()
         submodel_entries = []
-        for max_value, submodel in zip(self.max_values, self.submodels):
+        for max_value, submodel, submodel_metadata in zip(
+            self.max_values, self.submodels, self.submodel_metadata
+        ):
             submodel_entries.append(
                 {
                     "max_value": max_value,
-                    "model": self._export_submodel_dict(submodel, metadata_dict),
+                    "model": self._export_submodel_dict(submodel, submodel_metadata),
                 }
             )
         root = {

@@ -10,7 +10,7 @@ import zipfile
 import numpy as np
 from scipy.io import wavfile
 
-from toan.model.metadata import ModelMetadata
+from toan.model.metadata import ModelGenericMetadata
 from toan.signal.analysis import find_dry_clicks, find_wet_clicks
 
 
@@ -24,7 +24,7 @@ class ZipLoaderContext:
     signal_dry_sweep: np.ndarray | None = None
     signal_wet_test: np.ndarray | None = None
     signal_wet_sweep: np.ndarray | None = None
-    metadata: ModelMetadata | None = None
+    metadata: ModelGenericMetadata | None = None
     sample_rate: int = 0
 
     complete: bool = False
@@ -292,7 +292,7 @@ def run_zip_loader(context: ZipLoaderContext, input_file: str | io.BytesIO):
 
             gear_make = config_json["device_make"]
             gear_model = config_json["device_model"]
-            context.metadata = ModelMetadata(
+            context.metadata = ModelGenericMetadata(
                 name=f"{gear_make} -- {gear_model}",
                 gear_make=gear_make,
                 gear_model=gear_model,
