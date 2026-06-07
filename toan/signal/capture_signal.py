@@ -28,7 +28,7 @@ class ChordWithEffects:
 class CaptureSignalConfig:
     sweep_duration: float = 10.0
     warble_duration: float = 6.5
-    warble_octave_scale: float = 0.68
+    warble_octave_scale: float = 0.72
     noise_duration: float = 8.0
     pluck_note_duration: float = 0.62
     pluck_decay: float = 0.982
