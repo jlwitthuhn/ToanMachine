@@ -1,3 +1,5 @@
 The original NAM python code is the basis for the model architecture and some activation functions. This code originally targeted pytorch and has been ported to work with MLX.
 
+The calibration file `loudness_input.wav` from NAM is redistributed with this repo as `data/nam_loudness.flac`.
+
 https://github.com/sdatkinson/neural-amp-modeler/
