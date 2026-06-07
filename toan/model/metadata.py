@@ -82,29 +82,17 @@ class ModelA2Metadata:
 
 @dataclass
 class SubmodelA2Metadata:
-    name: str
-    gear_make: str
-    gear_model: str
-    comment: str | None = None
     loss_test: dict[str, float] = dataclasses.field(default_factory=dict)
 
     @classmethod
     def from_generic(cls, generic: ModelGenericMetadata) -> "SubmodelA2Metadata":
         return cls(
-            name=generic.name,
-            gear_make=generic.gear_make,
-            gear_model=generic.gear_model,
-            comment=generic.comment,
             loss_test=dict(generic.loss_test),
         )
 
     @classmethod
     def from_a2(cls, a2: ModelA2Metadata) -> "SubmodelA2Metadata":
         return cls(
-            name=a2.name,
-            gear_make=a2.gear_make,
-            gear_model=a2.gear_model,
-            comment=a2.comment,
             loss_test=dict(a2.loss_test),
         )
 
