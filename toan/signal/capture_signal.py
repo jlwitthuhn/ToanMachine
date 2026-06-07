@@ -28,6 +28,7 @@ class ChordWithEffects:
 class CaptureSignalConfig:
     sweep_duration: float = 10.0
     warble_duration: float = 6.5
+    warble_octave_scale: float = 0.68
     noise_duration: float = 8.0
     pluck_note_duration: float = 0.62
     pluck_decay: float = 0.982
@@ -156,13 +157,18 @@ def _generate_sweep_block(
 
 
 def _generate_warble_block(
-    sample_rate: int, chords: list[ChordWithEffects], duration: float
+    sample_rate: int,
+    chords: list[ChordWithEffects],
+    duration: float,
+    octave_scale: float,
 ) -> np.ndarray:
     if len(chords) == 0:
         return np.zeros(1)
 
     def generate_warble_signal(shape: ChordType):
-        return generate_warble_chord(sample_rate, duration, 55.0, shape, 10, 0.68)
+        return generate_warble_chord(
+            sample_rate, duration, 55.0, shape, 10, octave_scale
+        )
 
     buffer_size = int(sample_rate * duration)
     modulation = generate_gaussian_pulse(buffer_size, 2)
@@ -239,7 +245,10 @@ def generate_capture_signal(
         config.small_sweep_magnitudes,
     )
     block_warble = _generate_warble_block(
-        sample_rate, config.warble_chords, config.warble_duration
+        sample_rate,
+        config.warble_chords,
+        config.warble_duration,
+        config.warble_octave_scale,
     )
     block_plucked = _generate_plucked_block(
         sample_rate,
