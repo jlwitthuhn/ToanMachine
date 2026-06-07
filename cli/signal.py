@@ -14,7 +14,7 @@ from dataclasses import dataclass
 
 import numpy as np
 
-from toan.model.nam_a1_wavenet_presets import get_a1_wavenet_config
+from toan.model.nam_a2_wavenet_presets import get_a2_wavenet_config
 from toan.model.presets import ModelConfigPreset
 from toan.music.chord import ChordType
 from toan.persistence.user_wav import load_user_wav_list
@@ -33,7 +33,7 @@ from toan.training.loop_torch import run_training_loop_torch
 from toan.training.zip_loader import ZipLoaderContext, run_zip_loader
 from toan.zip import create_training_zip
 
-THE_PRESET: ModelConfigPreset = ModelConfigPreset.A1_CUSTOM_REVYSTD
+THE_PRESET: ModelConfigPreset = ModelConfigPreset.A2_NAM
 ITER_PER_RECORDING: int = 4
 
 
@@ -167,7 +167,7 @@ def _train_model(
 
     print("Beginning training...")
     progress_context = TrainingProgressContext()
-    progress_context.model_config = get_a1_wavenet_config(THE_PRESET)
+    progress_context.model_config = get_a2_wavenet_config(THE_PRESET)
     progress_context.metadata = zip_context.metadata
     progress_context.sample_rate = sample_rate
     progress_context.signal_dry_train = zip_context.signal_dry
