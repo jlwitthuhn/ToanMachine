@@ -290,6 +290,11 @@ def run_zip_loader(context: ZipLoaderContext, input_file: str | io.BytesIO):
                 sweep_begin + latency_samples : sweep_end + latency_samples
             ]
 
+            input_level_dbu = config_json.get("input_level_dbu")
+            if input_level_dbu is not None and not isinstance(input_level_dbu, float):
+                print_status("Error: key 'input_level_dbu' must be a float")
+                return
+
             gear_make = config_json["device_make"]
             gear_model = config_json["device_model"]
             context.metadata = ModelGenericMetadata(
@@ -297,6 +302,7 @@ def run_zip_loader(context: ZipLoaderContext, input_file: str | io.BytesIO):
                 gear_make=gear_make,
                 gear_model=gear_model,
                 comment="",
+                input_level_dbu=input_level_dbu,
             )
 
             context.sample_rate = config_json["sample_rate"]

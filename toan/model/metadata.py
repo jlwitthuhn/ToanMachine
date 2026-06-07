@@ -28,6 +28,7 @@ class ModelGenericMetadata:
     gear_model: str
     comment: str | None = None
     loss_test: dict[str, float] = dataclasses.field(default_factory=dict)
+    input_level_dbu: float | None = None
 
     def export_dict(self) -> dict:
         return _export_metadata_dict(self)
@@ -62,6 +63,7 @@ class ModelA2Metadata:
     gear_model: str
     comment: str | None = None
     loss_test: dict[str, float] = dataclasses.field(default_factory=dict)
+    input_level_dbu: float | None = None
 
     @classmethod
     def from_generic(cls, generic: ModelGenericMetadata) -> "ModelA2Metadata":
@@ -71,6 +73,7 @@ class ModelA2Metadata:
             gear_model=generic.gear_model,
             comment=generic.comment,
             loss_test=dict(generic.loss_test),
+            input_level_dbu=generic.input_level_dbu,
         )
 
     def export_dict(self) -> dict:
