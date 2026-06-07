@@ -9,3 +9,5 @@ class LossFunction(enum.Enum):
     MSE = enum.auto()
     RMSE = enum.auto()
     FFT_MSE = enum.auto()
+    # Loss used by original neural-amp-modeler repo
+    NamOriginal = enum.auto()
