@@ -4,7 +4,9 @@
 
 import json
 import math
+from pathlib import Path
 
+import numpy as np
 import torch
 from torch import nn
 
@@ -14,9 +16,17 @@ from toan.model.nam_a2_wavenet_config import (
     NamA2WaveNetContainerConfig,
     NamA2WaveNetLayerGroupConfig,
 )
+from toan.wav import load_and_resample_wav
 
 # Based on code from Neural Amp Modeler
 # https://github.com/sdatkinson/neural-amp-modeler/tree/2de335b3ee1138529286117978a54fc16aeb313c/nam/models/wavenet
+
+
+def _load_loudness_probe_signal(sample_rate: int) -> np.ndarray:
+    script_dir = Path(__file__).resolve().parent
+    root_dir = script_dir.parent.parent
+    probe_path = root_dir.joinpath("data").joinpath("nam_loudness.flac").resolve()
+    return load_and_resample_wav(sample_rate, str(probe_path))
 
 
 def _reset_conv_from_generator(conv: nn.Conv1d, generator: torch.Generator) -> None:
@@ -207,6 +217,26 @@ class _NamA2WaveNetSubmodelTorch(nn.Module):
         assert y.shape[1] == 1
         return y[:, 0, :]
 
+    def metadata_loudness(
+        self, probe: torch.Tensor, gain: float = 1.0, db: bool = True
+    ) -> float:
+        with torch.no_grad():
+            y = self(gain * probe)
+        loudness = torch.sqrt(torch.mean(torch.square(y)))
+        if db:
+            loudness = 20.0 * torch.log10(loudness)
+        return loudness.item()
+
+    def metadata_gain(self, probe: torch.Tensor) -> float:
+        x = np.linspace(0.0, 1.0, 11)
+        y = np.array([self.metadata_loudness(probe, gain=g, db=False) for g in x])
+        max_gain = y[-1] * len(x)  # "Square" (no compression)
+        min_gain = 0.5 * max_gain  # "Triangle" (full compression)
+        gain_range = max_gain - min_gain
+        this_gain = y.sum()
+        normalized_gain = (this_gain - min_gain) / gain_range
+        return float(np.clip(normalized_gain, 0.0, 1.0))
+
     def export_nam_linear_weights(self) -> list[float]:
         result = []
         for group in self.layer_groups:
@@ -281,6 +311,29 @@ class NamA2WaveNetTorch(nn.Module):
     def forward_best(self, x: torch.Tensor) -> torch.Tensor:
         submodel = self.submodels[self.best_submodel_index()]
         return submodel(x)
+
+    def populate_loudness_and_gain_metadata(self) -> None:
+        device = next(self.parameters()).device
+        probe_np = _load_loudness_probe_signal(self.sample_rate)
+        probe = torch.from_numpy(probe_np).float().reshape((1, -1)).to(device)
+
+        pad = torch.zeros((1, self.receptive_field - 1), device=device)
+        probe = torch.cat((pad, probe), dim=1)
+
+        was_training = self.training
+        self.eval()
+        try:
+            for submodel, submodel_metadata in zip(
+                self.submodels, self.submodel_metadata
+            ):
+                submodel_metadata.loudness = submodel.metadata_loudness(probe)
+                submodel_metadata.gain = submodel.metadata_gain(probe)
+        finally:
+            self.train(was_training)
+
+        best_metadata = self.submodel_metadata[self.best_submodel_index()]
+        self.metadata.loudness = best_metadata.loudness
+        self.metadata.gain = best_metadata.gain
 
     def _export_submodel_dict(
         self,

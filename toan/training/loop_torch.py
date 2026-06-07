@@ -236,6 +236,9 @@ def run_training_loop_torch(context: TrainingProgressContext, config: TrainingCo
         loss_fn = config.stages[-1].loss_fn
         context.loss_test = context.metadata.loss_test[loss_fn.name]
 
+    if isinstance(model, NamA2WaveNetTorch):
+        model.populate_loudness_and_gain_metadata()
+
     context.model = model
 
     np.random.set_state(np_rng_state)

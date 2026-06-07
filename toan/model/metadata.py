@@ -64,6 +64,9 @@ class ModelA2Metadata:
     comment: str | None = None
     loss_test: dict[str, float] = dataclasses.field(default_factory=dict)
     input_level_dbu: float | None = None
+    # Below two are computed post-training
+    loudness: float | None = None
+    gain: float | None = None
 
     @classmethod
     def from_generic(cls, generic: ModelGenericMetadata) -> "ModelA2Metadata":
@@ -83,6 +86,8 @@ class ModelA2Metadata:
 @dataclass
 class SubmodelA2Metadata:
     loss_test: dict[str, float] = dataclasses.field(default_factory=dict)
+    loudness: float | None = None
+    gain: float | None = None
 
     @classmethod
     def from_generic(cls, generic: ModelGenericMetadata) -> "SubmodelA2Metadata":
