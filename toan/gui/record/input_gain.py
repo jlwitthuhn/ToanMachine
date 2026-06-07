@@ -15,8 +15,7 @@ from toan.soundio import SdIoController
 
 VOLUME_TEXT = [
     "In this section you will set the input gain on your interface. You want the audio signal to be captured as loudly as possible without clipping.",
-    "Press 'Play Test Sound' below and adjust your input gain so that the volume is between 90 and 95. If the volume reads 100 then you are clipping and should reduce your gain.",
-    "If you do not see any volume, go back and ensure you have selected the correct input and output devices.",
+    "Press 'Play Test Sound' below and adjust your input gain so that the volume is around 90. If the volume reads 99 or higher then you are clipping and should reduce your gain.",
 ]
 
 BAR_PRECISION = 1000
@@ -35,6 +34,7 @@ class RecordInputGainPage(QtWidgets.QWizardPage):
     bar_progress: int = 0
     bar_update_timer: QtCore.QTimer
     text_volume: QtWidgets.QLineEdit
+    label_gain_feedback: QtWidgets.QLabel
 
     io_controller: SdIoController | None = None
     volume_samples: np.ndarray
@@ -84,6 +84,10 @@ class RecordInputGainPage(QtWidgets.QWizardPage):
         self.text_volume.setReadOnly(True)
         layout.addWidget(self.text_volume)
 
+        self.label_gain_feedback = QtWidgets.QLabel("", self)
+        self.label_gain_feedback.setVisible(False)
+        layout.addWidget(self.label_gain_feedback)
+
     def cleanupPage(self, /) -> None:
         if self.play_active:
             self._clicked_play_test()
@@ -121,7 +125,18 @@ class RecordInputGainPage(QtWidgets.QWizardPage):
 
     def _update_status(self):
         self.bar_input_level.setValue(self.bar_progress)
-        self.text_volume.setText(f"{self.bar_progress / 10}")
+        volume = self.bar_progress / 10
+        self.text_volume.setText(f"{volume}")
+
+        self.label_gain_feedback.setVisible(self.play_active)
+        if volume < 80:
+            self.label_gain_feedback.setText("Increase gain")
+        elif volume <= 92:
+            self.label_gain_feedback.setText("Good gain")
+        elif volume <= 99:
+            self.label_gain_feedback.setText("Reduce gain")
+        else:
+            self.label_gain_feedback.setText("Clipping")
 
     def _input_callback(
         self, indata: np.ndarray, frames: int, time, status: sd.CallbackFlags
