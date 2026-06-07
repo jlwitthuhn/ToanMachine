@@ -264,8 +264,8 @@ def generate_capture_signal(
     main_sweep_end += 0
     signal_train = concat_signals(
         [
-            block_white_noise,
             block_sweep,
+            block_white_noise,
             block_warble * 0.9,
             block_plucked * 0.9,
             block_builtin_wavs,
