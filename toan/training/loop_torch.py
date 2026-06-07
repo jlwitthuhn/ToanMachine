@@ -21,20 +21,32 @@ from toan.training.loss import LossFunction
 from toan.training.loss_torch import calculate_loss_torch
 
 
+def _calculate_submodel_losses(
+    loss_fn: LossFunction,
+    model_output: torch.Tensor,
+    target: torch.Tensor,
+) -> list[torch.Tensor]:
+    # A2 models stack one prediction per submodel as (num_submodels, batch, length),
+    # so report each submodel's own loss. A1 models produce a single output.
+    if model_output.ndim == 3:
+        return [
+            calculate_loss_torch(loss_fn, model_output[i], target)
+            for i in range(model_output.shape[0])
+        ]
+    return [calculate_loss_torch(loss_fn, model_output, target)]
+
+
 def _calculate_model_loss(
     loss_fn: LossFunction,
     model_output: torch.Tensor,
     target: torch.Tensor,
 ) -> torch.Tensor:
-    # A2 models stack one prediction per submodel as (num_submodels, batch, length)
     # Train every submodel jointly by summing each submodel's own loss
-    if model_output.ndim == 3:
-        total = calculate_loss_torch(loss_fn, model_output[0], target)
-        for i in range(1, model_output.shape[0]):
-            total = total + calculate_loss_torch(loss_fn, model_output[i], target)
-        return total
-    # A1 models just produce one output
-    return calculate_loss_torch(loss_fn, model_output, target)
+    submodel_losses = _calculate_submodel_losses(loss_fn, model_output, target)
+    total = submodel_losses[0]
+    for submodel_loss in submodel_losses[1:]:
+        total = total + submodel_loss
+    return total
 
 
 def run_training_loop_torch(context: TrainingProgressContext, config: TrainingConfig):
@@ -113,12 +125,21 @@ def run_training_loop_torch(context: TrainingProgressContext, config: TrainingCo
         )
         return input, output
 
-    def measure_test_loss(func: LossFunction) -> float:
+    def measure_test_loss_per_submodel(
+        func: LossFunction,
+    ) -> tuple[float, list[float]]:
         model.train(False)
         test_in, test_out = get_test_data()
         with torch.no_grad():
             model_out = model(test_in)
-            return _calculate_model_loss(func, model_out, test_out).item()
+            per_submodel = [
+                loss.item()
+                for loss in _calculate_submodel_losses(func, model_out, test_out)
+            ]
+        return sum(per_submodel), per_submodel
+
+    def measure_test_loss(func: LossFunction) -> float:
+        return measure_test_loss_per_submodel(func)[0]
 
     with context.lock:
         context.iters_done = 0
@@ -194,13 +215,22 @@ def run_training_loop_torch(context: TrainingProgressContext, config: TrainingCo
                         context.loss_test = loss_test
 
     if context.signal_dry_test is not None:
+        num_submodels = (
+            len(model.submodels) if isinstance(model, NamA2WaveNetTorch) else 1
+        )
+        submodel_loss_tests: list[dict[str, float]] = [{} for _ in range(num_submodels)]
         for this_loss in LossFunction:
-            context.metadata.loss_test[this_loss.name] = measure_test_loss(this_loss)
+            full_loss, per_submodel = measure_test_loss_per_submodel(this_loss)
+            context.metadata.loss_test[this_loss.name] = full_loss
+            for submodel_dict, submodel_loss in zip(submodel_loss_tests, per_submodel):
+                submodel_dict[this_loss.name] = submodel_loss
 
         model.metadata.loss_test = dict(context.metadata.loss_test)
         if isinstance(model, NamA2WaveNetTorch):
-            for submodel_metadata in model.submodel_metadata:
-                submodel_metadata.loss_test = dict(context.metadata.loss_test)
+            for submodel_metadata, submodel_loss_test in zip(
+                model.submodel_metadata, submodel_loss_tests
+            ):
+                submodel_metadata.loss_test = submodel_loss_test
 
         # Overall loss will use the last stage loss fn
         loss_fn = config.stages[-1].loss_fn
