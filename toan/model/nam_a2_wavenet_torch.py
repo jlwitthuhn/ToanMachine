@@ -207,6 +207,7 @@ class _NamA2WaveNetSubmodelTorch(nn.Module):
         y, head_input = x, None
         for group in self.layer_groups:
             head_input, y = group(y, x, head_input)
+        head_input = self.config.head_scale * head_input
         result = head_input if self.head is None else self.head(head_input)
         return result
 
