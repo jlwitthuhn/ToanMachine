@@ -73,12 +73,12 @@ def _get_a1_rev_ystd_training_config() -> TrainingConfig:
 def _get_a2_training_config() -> TrainingConfig:
     config = TrainingConfig()
     the_stage = config.stages[0]
-    the_stage.batch_size_list = [(0.0, 24), (0.60, 40), (0.70, 56), (0.80, 72)]
-    the_stage.steps_warmup = 200
-    the_stage.steps_main = 1800
+    the_stage.batch_size_list = [(0.0, 24), (0.50, 40), (0.70, 56)]
+    the_stage.steps_warmup = 100
+    the_stage.steps_main = 1750
     the_stage.test_interval = 100
     the_stage.learn_rate_hi = 6.0e-3
-    the_stage.learn_rate_lo = 1.0e-3
+    the_stage.learn_rate_lo = 1.5e-3
     return config
 
 
