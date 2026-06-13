@@ -21,6 +21,22 @@ from toan.training.loss import LossFunction
 from toan.training.loss_torch import calculate_loss_torch
 
 
+# Get the specific samples that will produce candidate models
+def _final_output_sample_steps(
+    total_steps: int, final_output_steps: int, final_output_num: int
+) -> set[int]:
+    if final_output_num <= 1 or total_steps <= 0:
+        return set()
+    window = min(final_output_steps, total_steps)
+    start = total_steps - window
+    span = window - 1
+    steps: set[int] = set()
+    for k in range(final_output_num):
+        offset = round(k * span / (final_output_num - 1))
+        steps.add(start + offset)
+    return steps
+
+
 def _calculate_submodel_losses(
     loss_fn: LossFunction,
     model_output: torch.Tensor,
@@ -141,9 +157,26 @@ def run_training_loop_torch(context: TrainingProgressContext, config: TrainingCo
     def measure_test_loss(func: LossFunction) -> float:
         return measure_test_loss_per_submodel(func)[0]
 
+    def export_model_weights():
+        if isinstance(model, NamA2WaveNetTorch):
+            return [
+                submodel.export_nam_linear_weights() for submodel in model.submodels
+            ]
+        return model.export_nam_linear_weights()
+
+    def restore_model_weights(weights) -> None:
+        model.import_nam_linear_weights(weights)
+
     with context.lock:
         context.iters_done = 0
         context.iters_total = config.steps_total()
+
+    final_sample_steps = _final_output_sample_steps(
+        config.steps_total(), config.final_output_steps, config.final_output_num
+    )
+    best_final_loss = math.inf
+    best_final_weights = None
+    steps_before_stage = 0
 
     for stage_config in config.stages:
         summary = TrainingStageSummary(
@@ -213,6 +246,23 @@ def run_training_loop_torch(context: TrainingProgressContext, config: TrainingCo
                         loss_test = measure_test_loss(stage_config.loss_fn)
                         summary.losses_test.append(loss_test)
                         context.loss_test = loss_test
+
+                # Check if this step is a candidate for the final output
+                global_step = steps_before_stage + i
+                if (
+                    context.signal_dry_test is not None
+                    and global_step in final_sample_steps
+                ):
+                    final_loss = measure_test_loss(stage_config.loss_fn)
+                    if final_loss < best_final_loss:
+                        best_final_loss = final_loss
+                        best_final_weights = export_model_weights()
+
+        steps_before_stage += stage_config.steps_total()
+
+    # Adopt the best-scoring snapshot before computing final metadata losses.
+    if best_final_weights is not None:
+        restore_model_weights(best_final_weights)
 
     if context.signal_dry_test is not None:
         num_submodels = (
