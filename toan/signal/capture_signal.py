@@ -122,6 +122,7 @@ def _generate_sweep_block(
 
     small_sweeps = []
     duration_multiplier = 0.99
+    small_sweep_base_duration = 0.36
     for magnitude in small_sweep_magnitudes:
         # Use a few more samples each on each distinct multiplier
         # This way we don't just get scaled versions of exactly the same waveform
@@ -129,13 +130,21 @@ def _generate_sweep_block(
         for f_start in small_sweep_begins:
             small_sweeps.append(
                 generate_chirp(
-                    sample_rate, f_start, sweep_max, 0.36 * duration_multiplier
+                    sample_rate,
+                    f_start,
+                    sweep_max,
+                    small_sweep_base_duration * duration_multiplier,
+                    16,
                 )
                 * magnitude
             )
             small_sweeps.append(
                 generate_chirp(
-                    sample_rate, sweep_max, f_start, 0.36 * duration_multiplier
+                    sample_rate,
+                    sweep_max,
+                    f_start,
+                    small_sweep_base_duration * duration_multiplier,
+                    16,
                 )
                 * magnitude
             )
