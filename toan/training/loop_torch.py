@@ -8,9 +8,7 @@ import numpy as np
 import torch
 from torch import optim
 
-from toan.model.metadata import ModelA1Metadata, ModelA2Metadata
-from toan.model.nam_a1_wavenet_config import NamA1WaveNetConfig
-from toan.model.nam_a1_wavenet_torch import NamA1WaveNetTorch
+from toan.model.metadata import ModelA2Metadata
 from toan.model.nam_a2_wavenet_config import NamA2WaveNetContainerConfig
 from toan.model.nam_a2_wavenet_torch import NamA2WaveNetTorch
 from toan.training import TrainingStageSummary
@@ -43,7 +41,7 @@ def _calculate_submodel_losses(
     target: torch.Tensor,
 ) -> list[torch.Tensor]:
     # A2 models stack one prediction per submodel as (num_submodels, batch, length),
-    # so report each submodel's own loss. A1 models produce a single output.
+    # so report each submodel's own loss. A non-stacked 2D output is a single submodel.
     if model_output.ndim == 3:
         return [
             calculate_loss_torch(loss_fn, model_output[i], target)
@@ -69,14 +67,7 @@ def run_training_loop_torch(context: TrainingProgressContext, config: TrainingCo
     assert len(config.stages) > 0
     assert context.metadata is not None
     assert context.sample_rate is not None
-    if isinstance(context.model_config, NamA1WaveNetConfig):
-        model = NamA1WaveNetTorch(
-            context.model_config,
-            ModelA1Metadata.from_generic(context.metadata),
-            context.sample_rate,
-            rng_seed=config.rng_seed,
-        )
-    elif isinstance(context.model_config, NamA2WaveNetContainerConfig):
+    if isinstance(context.model_config, NamA2WaveNetContainerConfig):
         model = NamA2WaveNetTorch(
             context.model_config,
             ModelA2Metadata.from_generic(context.metadata),
@@ -84,7 +75,7 @@ def run_training_loop_torch(context: TrainingProgressContext, config: TrainingCo
             rng_seed=config.rng_seed,
         )
     else:
-        raise NotImplementedError("Only NAM A1 and A2 are supported.")
+        raise NotImplementedError("Only NAM A2 is supported.")
     device = torch.device("mps")
     model.to(device)
 
@@ -158,11 +149,7 @@ def run_training_loop_torch(context: TrainingProgressContext, config: TrainingCo
         return measure_test_loss_per_submodel(func)[0]
 
     def export_model_weights():
-        if isinstance(model, NamA2WaveNetTorch):
-            return [
-                submodel.export_nam_linear_weights() for submodel in model.submodels
-            ]
-        return model.export_nam_linear_weights()
+        return [submodel.export_nam_linear_weights() for submodel in model.submodels]
 
     def restore_model_weights(weights) -> None:
         model.import_nam_linear_weights(weights)
@@ -265,9 +252,7 @@ def run_training_loop_torch(context: TrainingProgressContext, config: TrainingCo
         restore_model_weights(best_final_weights)
 
     if context.signal_dry_test is not None:
-        num_submodels = (
-            len(model.submodels) if isinstance(model, NamA2WaveNetTorch) else 1
-        )
+        num_submodels = len(model.submodels)
         submodel_loss_tests: list[dict[str, float]] = [{} for _ in range(num_submodels)]
         for this_loss in LossFunction:
             full_loss, per_submodel = measure_test_loss_per_submodel(this_loss)
@@ -276,18 +261,16 @@ def run_training_loop_torch(context: TrainingProgressContext, config: TrainingCo
                 submodel_dict[this_loss.name] = submodel_loss
 
         model.metadata.loss_test = dict(context.metadata.loss_test)
-        if isinstance(model, NamA2WaveNetTorch):
-            for submodel_metadata, submodel_loss_test in zip(
-                model.submodel_metadata, submodel_loss_tests
-            ):
-                submodel_metadata.loss_test = submodel_loss_test
+        for submodel_metadata, submodel_loss_test in zip(
+            model.submodel_metadata, submodel_loss_tests
+        ):
+            submodel_metadata.loss_test = submodel_loss_test
 
         # Overall loss will use the last stage loss fn
         loss_fn = config.stages[-1].loss_fn
         context.loss_test = context.metadata.loss_test[loss_fn.name]
 
-    if isinstance(model, NamA2WaveNetTorch):
-        model.populate_loudness_and_gain_metadata()
+    model.populate_loudness_and_gain_metadata()
 
     context.model = model
 

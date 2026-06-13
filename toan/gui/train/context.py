@@ -5,8 +5,7 @@
 import numpy as np
 
 from toan.model.metadata import ModelGenericMetadata
-from toan.model.nam_a1_wavenet_config import NamA1WaveNetConfig
-from toan.model.nam_a2_wavenet_config import NamA2WaveNetConfig
+from toan.model.nam_a2_wavenet_config import NamA2WaveNetContainerConfig
 from toan.training.config import TrainingConfig
 from toan.training.context import TrainingProgressContext
 
@@ -16,7 +15,7 @@ class TrainingGuiContext:
     loaded_metadata: ModelGenericMetadata | None = None
     sample_rate: int = 0
 
-    model_config: NamA1WaveNetConfig | NamA2WaveNetConfig | None = None
+    model_config: NamA2WaveNetContainerConfig | None = None
     train_config: TrainingConfig | None = None
 
     signal_dry: np.ndarray | None = None

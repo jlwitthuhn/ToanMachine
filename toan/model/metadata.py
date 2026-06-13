@@ -35,28 +35,6 @@ class ModelGenericMetadata:
 
 
 @dataclass
-class ModelA1Metadata:
-    name: str
-    gear_make: str
-    gear_model: str
-    comment: str | None = None
-    loss_test: dict[str, float] = dataclasses.field(default_factory=dict)
-
-    @classmethod
-    def from_generic(cls, generic: ModelGenericMetadata) -> "ModelA1Metadata":
-        return cls(
-            name=generic.name,
-            gear_make=generic.gear_make,
-            gear_model=generic.gear_model,
-            comment=generic.comment,
-            loss_test=dict(generic.loss_test),
-        )
-
-    def export_dict(self) -> dict:
-        return _export_metadata_dict(self)
-
-
-@dataclass
 class ModelA2Metadata:
     name: str
     gear_make: str

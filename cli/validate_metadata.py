@@ -52,8 +52,7 @@ def main() -> int:
     if architecture != "SlimmableContainer":
         print(
             f"Error: expected an A2 (SlimmableContainer) profile, got "
-            f"architecture={architecture!r}. A1 profiles carry no loudness/gain "
-            f"metadata and are not supported."
+            f"architecture={architecture!r}."
         )
         return 2
 

@@ -5,7 +5,6 @@
 from PySide6 import QtWidgets
 
 from toan.gui.train.context import TrainingGuiContext
-from toan.model.nam_a1_wavenet_presets import get_a1_wavenet_config
 from toan.model.nam_a2_wavenet_presets import get_a2_wavenet_config
 from toan.model.presets import ModelConfigPreset
 from toan.training.config import get_training_config_from_preset
@@ -48,11 +47,6 @@ class TrainModelConfigPage(QtWidgets.QWizardPage):
         self.combo_size = QtWidgets.QComboBox(self)
         for allowed_model in [
             ModelConfigPreset.A2_NAM,
-            ModelConfigPreset.A1_NAM_STANDARD,
-            ModelConfigPreset.A1_NAM_LITE,
-            ModelConfigPreset.A1_NAM_FEATHER,
-            ModelConfigPreset.A1_CUSTOM_XSTD,
-            ModelConfigPreset.A1_CUSTOM_REVYSTD,
         ]:
             label = allowed_model.get_label()
             self.combo_size.addItem(label, allowed_model.value)
@@ -75,11 +69,9 @@ class TrainModelConfigPage(QtWidgets.QWizardPage):
         self.context.loaded_metadata.gear_model = self.edit_device_model.text()
         selected_preset = ModelConfigPreset(self.combo_size.currentData())
 
-        maybe_config = get_a1_wavenet_config(selected_preset)
+        maybe_config = get_a2_wavenet_config(selected_preset)
         if maybe_config is None:
-            maybe_config = get_a2_wavenet_config(selected_preset)
-            if maybe_config is None:
-                return False
+            return False
         self.context.model_config = maybe_config
 
         self.context.train_config = get_training_config_from_preset(selected_preset)

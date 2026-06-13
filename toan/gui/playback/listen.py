@@ -8,7 +8,6 @@ import torch
 from PySide6 import QtWidgets
 
 from toan.gui.playback import PlaybackContext
-from toan.model.nam_a1_wavenet_torch import NamA1WaveNetTorch
 from toan.model.nam_a2_wavenet_torch import NamA2WaveNetTorch
 from toan.soundio import SdChannel, generate_descriptions, get_input_devices
 
@@ -133,12 +132,9 @@ class PlaybackListenPage(QtWidgets.QWizardPage):
 
 
 def _convert_complete_signal(
-    raw_signal: np.ndarray, model: NamA1WaveNetTorch | NamA2WaveNetTorch
+    raw_signal: np.ndarray, model: NamA2WaveNetTorch
 ) -> np.ndarray:
     x = torch.tensor(raw_signal).reshape(1, -1)
     with torch.no_grad():
-        if isinstance(model, NamA2WaveNetTorch):
-            output = model.forward_best(x)
-        else:
-            output = model(x)
+        output = model.forward_best(x)
     return np.array(output.squeeze())

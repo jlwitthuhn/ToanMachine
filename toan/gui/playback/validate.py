@@ -7,9 +7,7 @@ import json
 from PySide6 import QtGui, QtWidgets
 
 from toan.gui.playback import PlaybackContext
-from toan.model.metadata import ModelA1Metadata, ModelA2Metadata
-from toan.model.nam_a1_wavenet_config import json_a1_wavenet_config
-from toan.model.nam_a1_wavenet_torch import NamA1WaveNetTorch
+from toan.model.metadata import ModelA2Metadata
 from toan.model.nam_a2_wavenet_config import json_a2_wavenet_container_config
 from toan.model.nam_a2_wavenet_torch import NamA2WaveNetTorch
 
@@ -66,63 +64,13 @@ class PlaybackValidatePage(QtWidgets.QWizardPage):
         self.context.sample_rate = int(nam_json["sample_rate"])
 
         json_version = nam_json["version"]
-        if json_version == "0.5.4":
-            self._init_a1(nam_json)
-        elif json_version == "0.7.0":
+        if json_version == "0.7.0":
             self._init_a2(nam_json)
         else:
             self.text_edit.append(f"Error: Unsupported version: {json_version}")
 
     def isComplete(self):
         return self.context.nam_model is not None
-
-    def _init_a1(self, nam_json: dict):
-        if "architecture" not in nam_json:
-            self.text_edit.append("Error: Architecture is not specified")
-            return
-
-        arch = nam_json["architecture"]
-        if not isinstance(arch, str):
-            self.text_edit.append("Error: Architecture is not a string")
-            return
-        if arch != "WaveNet":
-            self.text_edit.append(f"Error: Unsupported architecture: {arch}")
-            return
-
-        if "config" not in nam_json:
-            self.text_edit.append("Error: Model config is not specified")
-            return
-
-        self.text_edit.append("Loading config...")
-
-        try:
-            model_config = json_a1_wavenet_config(nam_json["config"])
-        except:
-            self.text_edit.append("Error: a1 wavenet config is not valid")
-            return
-
-        self.text_edit.append("Creating model...")
-
-        metadata = ModelA1Metadata(
-            "Playback A1 NAM model", "Toan Machine", "Test model"
-        )
-
-        model = NamA1WaveNetTorch(model_config, metadata, self.context.sample_rate)
-        self.text_edit.append(f"Model parameters: {model.parameter_count}")
-
-        if "weights" not in nam_json or not isinstance(nam_json["weights"], list):
-            self.text_edit.append("Error: Model weights are not specified")
-            return
-
-        weights = nam_json["weights"]
-        weight_count = len(weights)
-        self.text_edit.append(f"Profile parameters: {weight_count}")
-
-        model.import_nam_linear_weights(weights)
-        self.text_edit.append("A1 model successfully loaded")
-
-        self.context.nam_model = model
-        self.completeChanged.emit()
 
     def _init_a2(self, nam_json: dict):
         if "architecture" not in nam_json:
