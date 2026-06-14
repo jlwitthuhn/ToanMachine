@@ -36,8 +36,8 @@ class TrainingConfig:
     )
     rng_seed: int = 0x35
     compile_model: bool = False
-    final_output_steps: int = 100
-    final_output_num: int = 3
+    final_output_steps: int = 120
+    final_output_num: int = 4
 
     def steps_total(self) -> int:
         total = 0
