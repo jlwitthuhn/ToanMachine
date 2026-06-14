@@ -181,7 +181,7 @@ def _generate_sweep_block(
         # We don't want volume modulation to sync with any of the sweeps
         volume_modulation_cycles = multisweep_layer_count + 2.5
         volume_modulation_cycle_period = int(root_size / volume_modulation_cycles)
-        volume_modulation = generate_cosine_wave(
+        volume_modulation = generate_sine_wave(
             root_size, volume_modulation_cycle_period, 0.05, 1.0
         )
 
