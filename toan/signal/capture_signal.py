@@ -27,7 +27,7 @@ class ChordWithEffects:
 @dataclass
 class CaptureSignalConfig:
     sweep_duration: float = 10.0
-    multisweep_layers: int = 0
+    multisweep_layers: int = 10
     warble_duration: float = 6.5
     warble_octave_scale: float = 0.72
     noise_duration: float = 8.0
@@ -167,7 +167,7 @@ def _generate_sweep_block(
             this_index = i + 1
             this_duration = duration / this_index
             single_chirp = generate_chirp(
-                sample_rate, 18.0, sweep_max, this_duration, 16
+                sample_rate, 20.0, sweep_max, this_duration, 16
             )
             this_layer = np.tile(single_chirp, this_index)
             if len(this_layer) < root_size:
@@ -177,7 +177,15 @@ def _generate_sweep_block(
             multisweep_layers.append(this_layer)
         multisweep_block = sum(multisweep_layers)
         multisweep_block = multisweep_block / np.max(np.abs(multisweep_block))
-        signal_list.append(multisweep_block)
+
+        # We don't want volume modulation to sync with any of the sweeps
+        volume_modulation_cycles = multisweep_layer_count + 2.5
+        volume_modulation_cycle_period = int(root_size / volume_modulation_cycles)
+        volume_modulation = generate_cosine_wave(
+            root_size, volume_modulation_cycle_period, 0.05, 1.0
+        )
+
+        signal_list.append(multisweep_block * volume_modulation)
 
     return (
         concat_signals(
