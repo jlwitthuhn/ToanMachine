@@ -161,8 +161,11 @@ def run_training_loop_torch(context: TrainingProgressContext, config: TrainingCo
     final_sample_steps = _final_output_sample_steps(
         config.steps_total(), config.final_output_steps, config.final_output_num
     )
-    best_final_loss = math.inf
-    best_final_weights = None
+    # Candidate snapshots are always scored with the final stage's loss function
+    final_stage_loss_fn = config.stages[-1].loss_fn
+    num_submodels = len(model.submodels)
+    best_submodel_losses: list[float] = [math.inf] * num_submodels
+    best_submodel_weights: list[list[float] | None] = [None] * num_submodels
     steps_before_stage = 0
 
     for stage_config in config.stages:
@@ -235,24 +238,32 @@ def run_training_loop_torch(context: TrainingProgressContext, config: TrainingCo
                         context.loss_test = loss_test
 
                 # Check if this step is a candidate for the final output
+                # and measure all submodels if it is
                 global_step = steps_before_stage + i
                 if (
                     context.signal_dry_test is not None
                     and global_step in final_sample_steps
                 ):
-                    final_loss = measure_test_loss(stage_config.loss_fn)
-                    if final_loss < best_final_loss:
-                        best_final_loss = final_loss
-                        best_final_weights = export_model_weights()
+                    _, per_submodel_losses = measure_test_loss_per_submodel(
+                        final_stage_loss_fn
+                    )
+                    current_weights = export_model_weights()
+                    for idx, submodel_loss in enumerate(per_submodel_losses):
+                        if submodel_loss < best_submodel_losses[idx]:
+                            best_submodel_losses[idx] = submodel_loss
+                            best_submodel_weights[idx] = current_weights[idx]
 
         steps_before_stage += stage_config.steps_total()
 
-    # Adopt the best-scoring snapshot before computing final metadata losses.
-    if best_final_weights is not None:
-        restore_model_weights(best_final_weights)
+    # Create a new model from the best-scoring weights of each submodel
+    if any(weights is not None for weights in best_submodel_weights):
+        recombined_weights = export_model_weights()
+        for idx, weights in enumerate(best_submodel_weights):
+            if weights is not None:
+                recombined_weights[idx] = weights
+        restore_model_weights(recombined_weights)
 
     if context.signal_dry_test is not None:
-        num_submodels = len(model.submodels)
         submodel_loss_tests: list[dict[str, float]] = [{} for _ in range(num_submodels)]
         for this_loss in LossFunction:
             full_loss, per_submodel = measure_test_loss_per_submodel(this_loss)
@@ -267,8 +278,7 @@ def run_training_loop_torch(context: TrainingProgressContext, config: TrainingCo
             submodel_metadata.loss_test = submodel_loss_test
 
         # Overall loss will use the last stage loss fn
-        loss_fn = config.stages[-1].loss_fn
-        context.loss_test = context.metadata.loss_test[loss_fn.name]
+        context.loss_test = context.metadata.loss_test[final_stage_loss_fn.name]
 
     model.populate_loudness_and_gain_metadata()
 
