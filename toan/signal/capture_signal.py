@@ -27,6 +27,7 @@ class ChordWithEffects:
 @dataclass
 class CaptureSignalConfig:
     sweep_duration: float = 10.0
+    multisweep_layers: int = 0
     warble_duration: float = 6.5
     warble_octave_scale: float = 0.72
     noise_duration: float = 8.0
@@ -103,6 +104,7 @@ def _generate_calibration_block(sample_rate: int) -> np.ndarray:
 def _generate_sweep_block(
     sample_rate: int,
     duration: float,
+    multisweep_layer_count: int,
     small_sweep_begins: list[int],
     small_sweep_magnitudes: list[int],
 ) -> tuple[np.ndarray, int]:
@@ -151,14 +153,35 @@ def _generate_sweep_block(
     np.random.shuffle(small_sweeps)
     small_block = concat_signals(small_sweeps, sample_rate // 24)
 
+    signal_list = [
+        sweep_up,
+        sweep_down_cos,
+        sweep_down_sin,
+        small_block,
+    ]
+
+    if multisweep_layer_count > 0:
+        multisweep_layers = []
+        root_size = len(sweep_up)
+        for i in range(multisweep_layer_count):
+            this_index = i + 1
+            this_duration = duration / this_index
+            single_chirp = generate_chirp(
+                sample_rate, 18.0, sweep_max, this_duration, 16
+            )
+            this_layer = np.tile(single_chirp, this_index)
+            if len(this_layer) < root_size:
+                extra = root_size - len(this_layer)
+                this_layer = np.concatenate([this_layer, np.zeros(extra)])
+            assert len(this_layer) == root_size
+            multisweep_layers.append(this_layer)
+        multisweep_block = sum(multisweep_layers)
+        multisweep_block = multisweep_block / np.max(np.abs(multisweep_block))
+        signal_list.append(multisweep_block)
+
     return (
         concat_signals(
-            [
-                sweep_up,
-                sweep_down_cos,
-                sweep_down_sin,
-                small_block,
-            ],
+            signal_list,
             sample_rate // 4,
         ),
         sweep_up_end,
@@ -250,6 +273,7 @@ def generate_capture_signal(
     block_sweep, main_sweep_end = _generate_sweep_block(
         sample_rate,
         config.sweep_duration,
+        config.multisweep_layers,
         config.small_sweep_begins,
         config.small_sweep_magnitudes,
     )
