@@ -39,6 +39,13 @@ class _LossStats:
     med: float = math.inf
     mean: float = math.inf
 
+    def __init__(self, losses: list[float]):
+        self.min = float(np.min(losses))
+        self.max = float(np.max(losses))
+        self.mean = float(np.mean(losses))
+        self.std = float(np.std(losses)) if len(losses) >= 3 else math.inf
+        self.med = float(np.median(losses)) if len(losses) >= 3 else math.inf
+
     def as_formatted_str(self) -> str:
         vars = [f" min: {self.min}", f" max: {self.max}"]
         if self.std < math.inf:
@@ -136,13 +143,7 @@ def main():
             train_config.rng_seed = original_seed + i
             loss = do_iteration(label, train_config, save_model, i)
             losses.append(loss)
-        loss_min: float = float(np.min(losses))
-        loss_max: float = float(np.max(losses))
-        loss_mean: float = float(np.mean(losses))
-        loss_stats = _LossStats(min=loss_min, max=loss_max, mean=loss_mean)
-        if len(losses) >= 3:
-            loss_stats.std = float(np.std(losses))
-            loss_stats.med = float(np.median(losses))
+        loss_stats = _LossStats(losses)
         if args.output is not None:
             with open(args.output, "a", encoding="utf-8") as output_file:
                 output_file.write(
