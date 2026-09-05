@@ -146,7 +146,7 @@ def main():
         if args.output is not None:
             with open(args.output, "a", encoding="utf-8") as output_file:
                 output_file.write(
-                    json.dumps({"name": label, **asdict(loss_stats)}) + "\n"
+                    json.dumps({"name": label, "loss": asdict(loss_stats)}) + "\n"
                 )
         print(f"{label} summary:")
         print(loss_stats.as_formatted_str())
