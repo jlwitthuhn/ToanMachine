@@ -117,7 +117,7 @@ def main():
 
     loss_dict: dict[str, _LossStats] = {}
 
-    def do_iteration_and_log(
+    def multi_train_with_config(
         label: str,
         train_config: TrainingConfig,
         save_model: bool = True,
@@ -146,7 +146,7 @@ def main():
     train_config = get_training_config_from_preset(THE_PRESET)
     train_config.stages[0].test_interval = 0
     iter_count = 5
-    do_iteration_and_log("default", train_config, False, iter_count)
+    multi_train_with_config("default", train_config, False, iter_count)
 
     print()
     print("++ Summary ++")
