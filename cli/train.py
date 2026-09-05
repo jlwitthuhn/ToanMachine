@@ -163,11 +163,11 @@ def main():
         print(loss_stats.as_formatted_str())
         loss_dict[label] = loss_stats
 
-    # Copy paste the below bit to do multiple training runs with different configs
-
+    iter_count = 5
     train_config = get_training_config_from_preset(THE_PRESET)
     train_config.stages[0].test_interval = 0
-    iter_count = 5
+
+    # Copy paste the below bit to do multiple training runs with different configs
     multi_train_with_config("default", train_config, False, iter_count)
 
     print()
