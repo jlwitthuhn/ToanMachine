@@ -16,6 +16,7 @@ class TrainingStageSummary:
     losses_test: list[float] = field(default_factory=list)
     test_interval: int = 100
     warmup_length: int = 0
+    duration_seconds: float = 0.0
 
     def generate_loss_graph(self, smooth_factor: int) -> Figure:
         fig, ax = plt.subplots()

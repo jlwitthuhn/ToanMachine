@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
 import math
+import time
 
 import numpy as np
 import torch
@@ -170,6 +171,7 @@ def run_training_loop_torch(context: TrainingProgressContext, config: TrainingCo
     steps_before_stage = 0
 
     for stage_config in config.stages:
+        stage_start_time = time.perf_counter()
         summary = TrainingStageSummary(
             test_interval=stage_config.test_interval,
             warmup_length=stage_config.steps_warmup,
@@ -212,6 +214,8 @@ def run_training_loop_torch(context: TrainingProgressContext, config: TrainingCo
 
         for i in range(stage_config.steps_total()):
             if context.quit:
+                with context.lock:
+                    summary.duration_seconds = time.perf_counter() - stage_start_time
                 return
             model.train(True)
             this_batch_size = get_batch_size(stage_config, i)
@@ -255,6 +259,8 @@ def run_training_loop_torch(context: TrainingProgressContext, config: TrainingCo
                             best_submodel_weights[idx] = current_weights[idx]
 
         steps_before_stage += stage_config.steps_total()
+        with context.lock:
+            summary.duration_seconds = time.perf_counter() - stage_start_time
 
     # Create a new model from the best-scoring weights of each submodel
     if any(weights is not None for weights in best_submodel_weights):
