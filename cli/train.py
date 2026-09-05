@@ -65,7 +65,7 @@ def main():
     arg_parser.add_argument(
         "--output",
         type=str,
-        help="Path to append training loss statistics in JSONL format",
+        help="Path to append training loss statistics and stage timing in JSONL format",
     )
 
     args = arg_parser.parse_args()
@@ -76,7 +76,7 @@ def main():
 
     def do_iteration(
         name: str, train_config: TrainingConfig, save_model: bool = True, index: int = 1
-    ) -> float:
+    ) -> tuple[float, list[float]]:
         print(f"Iteration {index}")
 
         train_context = TrainingProgressContext()
@@ -123,10 +123,11 @@ def main():
             with open(model_path, "w") as file:
                 file.write(train_context.model.export_nam_json_str())
 
+        stage_timing = [summary.duration_seconds for summary in train_context.summaries]
         if train_context.loss_test is not None:
-            return train_context.loss_test
+            return train_context.loss_test, stage_timing
         else:
-            return train_context.loss_train
+            return train_context.loss_train, stage_timing
 
     loss_dict: dict[str, _LossStats] = {}
 
@@ -138,16 +139,25 @@ def main():
     ):
         print(f"Beginning training for {label}")
         losses: list[float] = []
+        stage_timings: list[list[float]] = []
         original_seed = train_config.rng_seed
         for i in range(count):
             train_config.rng_seed = original_seed + i
-            loss = do_iteration(label, train_config, save_model, i)
+            loss, stage_timing = do_iteration(label, train_config, save_model, i)
             losses.append(loss)
+            stage_timings.append(stage_timing)
         loss_stats = _LossStats(losses)
         if args.output is not None:
             with open(args.output, "a", encoding="utf-8") as output_file:
                 output_file.write(
-                    json.dumps({"name": label, "loss": asdict(loss_stats)}) + "\n"
+                    json.dumps(
+                        {
+                            "name": label,
+                            "loss": asdict(loss_stats),
+                            "stage_timing": np.median(stage_timings, axis=0).tolist(),
+                        }
+                    )
+                    + "\n"
                 )
         print(f"{label} summary:")
         print(loss_stats.as_formatted_str())
