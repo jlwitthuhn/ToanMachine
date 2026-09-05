@@ -157,6 +157,7 @@ def run_training_loop_torch(context: TrainingProgressContext, config: TrainingCo
     with context.lock:
         context.iters_done = 0
         context.iters_total = config.steps_total()
+        context.summaries.clear()
 
     final_sample_steps = _final_output_sample_steps(
         config.steps_total(), config.final_output_steps, config.final_output_num
@@ -173,7 +174,7 @@ def run_training_loop_torch(context: TrainingProgressContext, config: TrainingCo
             test_interval=stage_config.test_interval,
             warmup_length=stage_config.steps_warmup,
         )
-        context.summary = summary
+        context.summaries.append(summary)
 
         data_loader = TrainingDataLoaderMlx(
             context.signal_dry_train,

@@ -51,9 +51,9 @@ class TrainGraphPage(QtWidgets.QWizardPage):
         layout.addWidget(self.tab_root)
 
     def initializePage(self):
-        self.graph_loss.figure = (
-            self.context.progress_context.summary.generate_loss_graph(5)
-        )
+        self.graph_loss.figure = self.context.progress_context.summaries[
+            -1
+        ].generate_loss_graph(5)
         self._build_nam_tabs()
 
     def validatePage(self) -> bool:

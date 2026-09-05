@@ -31,6 +31,9 @@ class TrainingProgressContext:
     loss_test: float | None = None
 
     model: NamA2WaveNetTorch | None = None
-    summary: TrainingStageSummary | None = None
+    summaries: list[TrainingStageSummary]
 
     quit: bool = False
+
+    def __init__(self):
+        self.summaries = []
