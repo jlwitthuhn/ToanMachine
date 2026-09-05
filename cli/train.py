@@ -2,12 +2,13 @@
 # https://www.gnu.org/licenses/gpl-3.0.en.html
 # SPDX-License-Identifier: GPL-3.0-only
 
+import json
 import math
 import os
 import threading
 import time
 from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 
 import numpy as np
 from matplotlib.figure import Figure
@@ -54,6 +55,11 @@ def main():
         formatter_class=ArgumentDefaultsHelpFormatter,
     )
     arg_parser.add_argument("zip_path", type=str, help="Path to recording zip file")
+    arg_parser.add_argument(
+        "--output",
+        type=str,
+        help="Path to append training loss statistics in JSONL format",
+    )
 
     args = arg_parser.parse_args()
 
@@ -130,13 +136,18 @@ def main():
             train_config.rng_seed = original_seed + i
             loss = do_iteration(label, train_config, save_model, i)
             losses.append(loss)
-        loss_min: float = np.min(losses)
-        loss_max: float = np.max(losses)
+        loss_min: float = float(np.min(losses))
+        loss_max: float = float(np.max(losses))
         loss_mean: float = float(np.mean(losses))
         loss_stats = _LossStats(min=loss_min, max=loss_max, mean=loss_mean)
         if len(losses) >= 3:
             loss_stats.std = float(np.std(losses))
             loss_stats.med = float(np.median(losses))
+        if args.output is not None:
+            with open(args.output, "a", encoding="utf-8") as output_file:
+                output_file.write(
+                    json.dumps({"name": label, **asdict(loss_stats)}) + "\n"
+                )
         print(f"{label} summary:")
         print(loss_stats.as_formatted_str())
         loss_dict[label] = loss_stats
