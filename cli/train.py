@@ -167,7 +167,7 @@ def main():
         print(loss_stats.as_formatted_str())
         loss_dict[label] = loss_stats
 
-    iter_count = 5
+    iter_count = 7
     train_config = get_training_config_from_preset(THE_PRESET)
     train_config.stages[0].test_interval = 0
 
