@@ -82,7 +82,7 @@ def main():
     run_zip_loader(zip_context, args.zip_path)
 
     def do_iteration(
-        name: str, train_config: TrainingConfig, save_model: bool = True, index: int = 1
+        name: str, train_config: TrainingConfig, index: int = 1
     ) -> tuple[float, list[float]]:
         print(f"Iteration {index}")
 
@@ -119,20 +119,10 @@ def main():
                     progress_bar.update(train_context.iters_done - progress_bar.n)
                 time.sleep(1.0)
 
-        if save_model or args.output is not None:
+        if args.output is not None:
             fig: Figure = train_context.summaries[-1].generate_loss_graph(3)
             try:
-                if args.output is not None:
-                    fig.savefig(os.path.join(args.output, f"loss_{name}.png"))
-                if save_model:
-                    print("Training complete, saving model...")
-                    model_root_path = f"./output/{name}"
-                    graph_path = f"{model_root_path}/graph.png"
-                    os.makedirs(model_root_path, exist_ok=True)
-                    fig.savefig(graph_path)
-                    model_path = f"{model_root_path}/model.nam"
-                    with open(model_path, "w") as file:
-                        file.write(train_context.model.export_nam_json_str())
+                fig.savefig(os.path.join(args.output, f"loss_{name}.png"))
             finally:
                 plt.close(fig)
 
@@ -147,7 +137,6 @@ def main():
     def multi_train_with_config(
         label: str,
         train_config: TrainingConfig,
-        save_model: bool = True,
         count: int = 1,
     ):
         print(f"Beginning training for {label}")
@@ -156,7 +145,7 @@ def main():
         original_seed = train_config.rng_seed
         for i in range(count):
             train_config.rng_seed = original_seed + i
-            loss, stage_timing = do_iteration(label, train_config, save_model, i)
+            loss, stage_timing = do_iteration(label, train_config, i)
             losses.append(loss)
             stage_timings.append(stage_timing)
         loss_stats = _LossStats(losses)
@@ -183,7 +172,7 @@ def main():
     train_config.stages[0].test_interval = 0
 
     # Copy paste the below bit to do multiple training runs with different configs
-    multi_train_with_config("default", train_config, False, iter_count)
+    multi_train_with_config("default", train_config, iter_count)
 
     print()
     print("++ Summary ++")
