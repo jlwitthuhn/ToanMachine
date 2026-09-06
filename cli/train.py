@@ -11,6 +11,7 @@ from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser
 from dataclasses import asdict, dataclass
 
 import numpy as np
+from matplotlib import pyplot as plt
 from matplotlib.figure import Figure
 from tqdm import tqdm
 
@@ -65,7 +66,10 @@ def main():
     arg_parser.add_argument(
         "--output",
         type=str,
-        help="Directory for training.jsonl, which appends training loss statistics and stage timing",
+        help=(
+            "Directory for per-configuration loss graphs and training.jsonl, which "
+            "appends training loss statistics and stage timing"
+        ),
     )
 
     args = arg_parser.parse_args()
@@ -115,16 +119,22 @@ def main():
                     progress_bar.update(train_context.iters_done - progress_bar.n)
                 time.sleep(1.0)
 
-        if save_model:
-            print("Training complete, saving model...")
-            model_root_path = f"./output/{name}"
-            graph_path = f"{model_root_path}/graph.png"
-            os.makedirs(model_root_path, exist_ok=True)
+        if save_model or args.output is not None:
             fig: Figure = train_context.summaries[-1].generate_loss_graph(3)
-            fig.savefig(graph_path)
-            model_path = f"{model_root_path}/model.nam"
-            with open(model_path, "w") as file:
-                file.write(train_context.model.export_nam_json_str())
+            try:
+                if args.output is not None:
+                    fig.savefig(os.path.join(args.output, f"loss_{name}.png"))
+                if save_model:
+                    print("Training complete, saving model...")
+                    model_root_path = f"./output/{name}"
+                    graph_path = f"{model_root_path}/graph.png"
+                    os.makedirs(model_root_path, exist_ok=True)
+                    fig.savefig(graph_path)
+                    model_path = f"{model_root_path}/model.nam"
+                    with open(model_path, "w") as file:
+                        file.write(train_context.model.export_nam_json_str())
+            finally:
+                plt.close(fig)
 
         stage_timing = [summary.duration_seconds for summary in train_context.summaries]
         if train_context.loss_test is not None:
