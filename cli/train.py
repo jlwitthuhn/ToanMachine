@@ -65,10 +65,13 @@ def main():
     arg_parser.add_argument(
         "--output",
         type=str,
-        help="Path to append training loss statistics and stage timing in JSONL format",
+        help="Directory for training.jsonl, which appends training loss statistics and stage timing",
     )
 
     args = arg_parser.parse_args()
+
+    if args.output is not None:
+        os.makedirs(args.output, exist_ok=True)
 
     print("Loading recording zip file...")
     zip_context = ZipLoaderContext()
@@ -148,7 +151,9 @@ def main():
             stage_timings.append(stage_timing)
         loss_stats = _LossStats(losses)
         if args.output is not None:
-            with open(args.output, "a", encoding="utf-8") as output_file:
+            with open(
+                os.path.join(args.output, "training.jsonl"), "a", encoding="utf-8"
+            ) as output_file:
                 output_file.write(
                     json.dumps(
                         {
