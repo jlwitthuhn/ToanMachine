@@ -169,7 +169,6 @@ def main():
 
     iter_count = 7
     train_config = get_training_config_from_preset(THE_PRESET)
-    train_config.stages[0].test_interval = 0
 
     # Copy paste the below bit to do multiple training runs with different configs
     multi_train_with_config("default", train_config, iter_count)
