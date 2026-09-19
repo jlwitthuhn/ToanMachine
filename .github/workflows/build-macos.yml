@@ -46,6 +46,7 @@ jobs:
         run: mv dist/ToanMachine.dmg "dist/ToanMachine-${VERSION}.dmg"
 
       - name: Attest DMG
+        id: attest
         uses: actions/attest@v4
         with:
           subject-path: dist/ToanMachine-${{ env.VERSION }}.dmg
@@ -53,9 +54,29 @@ jobs:
       - name: Publish prerelease
         env:
           GH_TOKEN: ${{ github.token }}
+          ATTESTATION_URL: ${{ steps.attest.outputs.attestation-url }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}
         run: |
+          cat > "$RUNNER_TEMP/release-notes.md" <<EOF
+          Built by GitHub Actions.
+
+          - [Build run]($RUN_URL)
+          - [Build attestation]($ATTESTATION_URL)
+
+          Verify the downloaded DMG:
+          ~~~sh
+          gh attestation verify "ToanMachine-${VERSION}.dmg" \\
+            --repo "$GITHUB_REPOSITORY" \\
+            --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/build-macos.yml" \\
+            --deny-self-hosted-runners
+          ~~~
+          EOF
+
           gh release create "release/$VERSION" "dist/ToanMachine-${VERSION}.dmg" \
             --target "$GITHUB_SHA" \
             --title "$VERSION" \
             --prerelease \
-            --notes ""
+            --notes-file "$RUNNER_TEMP/release-notes.md"
+
+      - name: Print DMG SHA256
+        run: shasum -a 256 "dist/ToanMachine-${VERSION}.dmg"
