@@ -62,14 +62,6 @@ jobs:
 
           - [Build run]($RUN_URL)
           - [Build attestation]($ATTESTATION_URL)
-
-          Verify the downloaded DMG:
-          ~~~sh
-          gh attestation verify "ToanMachine-${VERSION}.dmg" \\
-            --repo "$GITHUB_REPOSITORY" \\
-            --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/build-macos.yml" \\
-            --deny-self-hosted-runners
-          ~~~
           EOF
 
           gh release create "release/$VERSION" "dist/ToanMachine-${VERSION}.dmg" \
