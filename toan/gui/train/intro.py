@@ -5,9 +5,8 @@
 from PySide6 import QtWidgets
 
 INTRO_TEXT = [
-    "Welcome to the training wizard.",
-    "This wizard will guide you through the process of creating a NAM model from a recording of a device.",
-    'Before you begin, you will need to have already recorded your device with the "Record Device" button from the main window.',
+    "Welcome to the training wizard. This wizard will guide you through the process of creating a NAM model from a recording of a device.",
+    "Before you begin, you will need to have already created a recording with the 'Record Device' button from the main window.",
 ]
 
 
