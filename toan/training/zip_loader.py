@@ -119,70 +119,41 @@ def run_zip_loader(context: ZipLoaderContext, input_file: str | io.BytesIO):
                 print_status("Error: segment 'clicks' end must be greater than begin")
                 return
 
-            if "train_begin" not in config_json or not isinstance(
-                config_json["train_begin"], int
-            ):
-                print_status("Error: config.json does not contain key 'train_begin'")
+            if "train" not in segments:
+                print_status("Error: config.json does not contain segment 'train'")
                 return
-            train_begin = config_json["train_begin"]
+            train_begin, train_end = segments["train"]
             if train_begin < 0:
-                print_status("Error: key 'train_begin' cannot be negative")
+                print_status("Error: segment 'train' begin cannot be negative")
                 return
-
-            if "train_end" not in config_json or not isinstance(
-                config_json["train_end"], int
-            ):
-                print_status("Error: config.json does not contain key 'train_end'")
-                return
-            train_end = config_json["train_end"]
             if train_end <= train_begin:
-                print_status(
-                    "Error: key 'train_end' must be greater than 'train_begin'"
-                )
+                print_status("Error: segment 'train' end must be greater than begin")
                 return
 
-            if "test_begin" not in config_json or not isinstance(
-                config_json["test_begin"], int
-            ):
-                print_status("Error: config.json does not contain key 'test_begin'")
+            if "test" not in segments:
+                print_status("Error: config.json does not contain segment 'test'")
                 return
-            test_begin = config_json["test_begin"]
+            test_begin, test_end = segments["test"]
             if test_begin < 0:
-                print_status("Error: key 'test_begin' cannot be negative")
+                print_status("Error: segment 'test' begin cannot be negative")
                 return
-
-            if "test_end" not in config_json or not isinstance(
-                config_json["test_end"], int
-            ):
-                print_status("Error: config.json does not contain key 'test_end'")
-                return
-            test_end = config_json["test_end"]
             if test_end < test_begin:
-                print_status("Error: key 'test_end' cannot be less than 'test_begin'")
+                print_status("Error: segment 'test' end cannot be less than begin")
                 return
 
             has_test_data = test_end > test_begin
             if has_test_data:
                 print_status("Recording contains test data")
 
-            if "sweep_begin" not in config_json or not isinstance(
-                config_json["sweep_begin"], int
-            ):
-                print_status("Error: config.json does not contain key 'sweep_begin'")
+            if "sweep" not in segments:
+                print_status("Error: config.json does not contain segment 'sweep'")
                 return
-            sweep_begin = config_json["sweep_begin"]
+            sweep_begin, sweep_end = segments["sweep"]
             if sweep_begin < 0:
-                print_status("Error: key 'sweep_begin' cannot be negative")
+                print_status("Error: segment 'sweep' begin cannot be negative")
                 return
-
-            if "sweep_end" not in config_json or not isinstance(
-                config_json["sweep_end"], int
-            ):
-                print_status("Error: config.json does not contain key 'sweep_end'")
-                return
-            sweep_end = config_json["sweep_end"]
             if sweep_end <= 0:
-                print_status("Error: key 'sweep_end' must be greater than 0")
+                print_status("Error: segment 'sweep' end must be greater than 0")
                 return
 
             if "dry_signal" not in config_json or not isinstance(
