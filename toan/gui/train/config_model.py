@@ -67,14 +67,19 @@ class TrainModelConfigPage(QtWidgets.QWizardPage):
         self.context.loaded_metadata.name = self.edit_model_name.text()
         self.context.loaded_metadata.gear_make = self.edit_device_make.text()
         self.context.loaded_metadata.gear_model = self.edit_device_model.text()
-        selected_preset = ModelConfigPreset(self.combo_size.currentData())
 
-        maybe_config = get_a2_wavenet_config(selected_preset)
+        self.context.model_preset = ModelConfigPreset(self.combo_size.currentData())
+        if self.context.model_preset is None:
+            return False
+
+        maybe_config = get_a2_wavenet_config(self.context.model_preset)
         if maybe_config is None:
             return False
         self.context.model_config = maybe_config
 
-        self.context.train_config = get_training_config_from_preset(selected_preset)
+        self.context.train_config = get_training_config_from_preset(
+            self.context.model_preset
+        )
         self.context.loaded_metadata.comment = self.edit_comment.text()
 
         return True
