@@ -1,48 +1,47 @@
 #!/usr/bin/env zsh
 
 if [[ ! -f gui.py ]]; then
-  print -u2 "Error: This script must be run from the project root"
-  exit 1
+	print -u2 "Error: This script must be run from the project root"
+	exit 1
 fi
 
-if [[ ! -d .venv ]]; then
-  print -u2 "Error: Virtual environment must exist at '.venv'"
-  exit 1
+if [[ ! -x .venv/bin/python ]]; then
+	print -u2 "Error: Virtual environment must exist at '.venv'"
+	exit 1
 fi
 
-. .venv/bin/activate
-print "Virtualenv loaded"
-
-pip > /dev/null
-if (( $? != 0 )); then
-  print -u2 "Error: pip must be installed"
-  exit 1
+if ! .venv/bin/python -m pip --version > /dev/null; then
+	print "Installing pip in virtual environment..."
+	if ! .venv/bin/python -m ensurepip --upgrade; then
+		print -u2 "Error: failed to install pip"
+		exit 1
+	fi
 fi
 
 print "Installing dependencies..."
-pip install -r ./requirements.txt > /dev/null
+.venv/bin/python -m pip install -r ./requirements.txt
 if (( $? != 0 )); then
-  print -u2 "Error: failed to install dependencies"
-  exit 1
+	print -u2 "Error: failed to install dependencies"
+	exit 1
 fi
 
 print "Installing pyinstaller..."
-pip install pyinstaller==6.22.3 > /dev/null
+.venv/bin/python -m pip install pyinstaller==6.22.3
 if (( $? != 0 )); then
-  print -u2 "Error: failed to install pyinstaller"
-  exit 1
+	print -u2 "Error: failed to install pyinstaller"
+	exit 1
 fi
 
 print "Running pyinstaller..."
-pyinstaller --windowed --add-data=data:data gui.py --name ToanMachine
+.venv/bin/python -m PyInstaller --noconfirm --windowed --add-data=data:data gui.py --name ToanMachine
 if (( $? != 0 )); then
-  print -u2 "Error: failed to run pyinstaller"
-  exit 1
+	print -u2 "Error: failed to run pyinstaller"
+	exit 1
 fi
 
 print "Packaging DMG..."
 hdiutil create -volname "ToanMachine" -srcfolder "./dist/ToanMachine.app" -ov -format UDZO "./dist/ToanMachine.dmg"
 if (( $? != 0 )); then
-  print -u2 "Error: failed to create disk image"
-  exit 1
+	print -u2 "Error: failed to create disk image"
+	exit 1
 fi
