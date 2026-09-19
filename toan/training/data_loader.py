@@ -56,8 +56,8 @@ class TrainingDataLoader:
         append_to_dry_point_list(self.wet_width // 2)
 
     def make_batch(self, batch_size: int) -> tuple[np.ndarray, np.ndarray]:
-        input_list: list[mx.array] = []
-        output_list: list[mx.array] = []
+        input_list: list = []
+        output_list: list = []
         for i in range(batch_size):
             if len(self.remaining_begin_points) == 0:
                 self.remaining_begin_points = self.dry_begin_points[:]
