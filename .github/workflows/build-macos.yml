@@ -59,10 +59,12 @@ jobs:
         run: |
           cat > "$RUNNER_TEMP/release-notes.md" <<EOF
           
-          To run the MacOS build:
+          To install the MacOS build:
           * Open the DMG and copy ToanMachine.app to your Applications directory.
           * Open a terminal.
           * Run `xattr -cr /Applications/ToanMachine.app`.
+          
+          You only have to run `xattr` once, after that you can open ToanMachine.app like a normal application.
           
           Built by GitHub Actions.
 
