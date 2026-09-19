@@ -14,7 +14,7 @@ class TrainingStageConfig:
     steps_main: int = 1650
     test_interval: int = 100
     # If batch_size is 0, batch_size_list will be used
-    batch_size: int = 24
+    batch_size: int = 25
     batch_size_list: list[tuple[float, int]] = field(
         default_factory=lambda: [(0.0, 24), (0.50, 48)]
     )
