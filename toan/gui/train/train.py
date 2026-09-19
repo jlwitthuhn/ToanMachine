@@ -32,8 +32,8 @@ class TrainTrainPage(QtWidgets.QWizardPage):
         super().__init__(parent)
         self.context = context
         self.context.progress_context = TrainingProgressContext()
-        self.context.progress_lock = threading.Lock()
-        self.refresh_timer = QtCore.QTimer()
+        self.training_thread: threading.Thread | None = None
+        self.refresh_timer = QtCore.QTimer(self)
         self.refresh_timer.setInterval(150)
         self.refresh_timer.setSingleShot(False)
         self.refresh_timer.timeout.connect(self.refresh_page)
@@ -77,18 +77,21 @@ class TrainTrainPage(QtWidgets.QWizardPage):
         self.context.progress_context.signal_dry_train = self.context.signal_dry
         self.context.progress_context.signal_wet_train = self.context.signal_wet
 
-        def thread_func():
-            run_training_loop_torch(
-                self.context.progress_context, self.context.train_config
-            )
-
-        self.context.quit_training = False
+        self.context.progress_context.quit = False
         self.timestamp_begin = datetime.datetime.now()
-        threading.Thread(target=thread_func).start()
+        self.refresh_timer.start()
+        self.training_thread = threading.Thread(
+            target=run_training_loop_torch,
+            args=(self.context.progress_context, self.context.train_config),
+        )
+        self.training_thread.start()
 
     def cleanupPage(self):
         self.refresh_timer.stop()
-        self.context.quit_training = True
+        self.context.progress_context.quit = True
+        if self.training_thread is not None:
+            self.training_thread.join()
+            self.training_thread = None
 
     def isComplete(self) -> bool:
         return self.context.progress_context.model is not None

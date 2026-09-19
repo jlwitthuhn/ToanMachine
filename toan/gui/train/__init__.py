@@ -27,8 +27,13 @@ class TrainingWizard(QtWidgets.QWizard):
         self.addPage(TrainValidatePage(self, self.context))
         self.addPage(TrainModelConfigPage(self, self.context))
         self.addPage(TrainTrainConfigPage(self, self.context))
-        self.addPage(TrainTrainPage(self, self.context))
+        self.train_page = TrainTrainPage(self, self.context)
+        self.addPage(self.train_page)
         self.addPage(TrainGraphPage(self, self.context))
 
         self.setWindowTitle("Training Wizard")
         self.setModal(True)
+
+    def done(self, result: int):
+        self.train_page.cleanupPage()
+        super().done(result)
