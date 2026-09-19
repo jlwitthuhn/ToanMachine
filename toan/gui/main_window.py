@@ -79,6 +79,15 @@ class MainWindow(QtWidgets.QWidget):
             debug_group_box.setLayout(debug_layout)
             layout.addWidget(debug_group_box)
 
+        about_group_box = QtWidgets.QGroupBox(self)
+        about_layout = QtWidgets.QVBoxLayout(about_group_box)
+
+        about_button = QtWidgets.QPushButton("About", self)
+        about_button.clicked.connect(self._clicked_about)
+        about_layout.addWidget(about_button)
+
+        layout.addWidget(about_group_box)
+
         self.setLayout(layout)
 
     def _clicked_record_device(self):
@@ -96,3 +105,8 @@ class MainWindow(QtWidgets.QWidget):
     def _clicked_train_model(self):
         wizard = TrainingWizard(self)
         wizard.show()
+
+    def _clicked_about(self):
+        QtWidgets.QMessageBox.information(
+            self, "About", "Toan Machine\nhttps://github.com/jlwitthuhn/ToanMachine"
+        )
