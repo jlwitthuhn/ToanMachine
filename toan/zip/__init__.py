@@ -5,8 +5,12 @@
 import json
 
 SAVE_README_TEXT = [
-    "This zip file was created by Toan Machine to be used for training a neural network.",
+    "This zip file was created by Toan Machine to be used for training a NAM capture.",
     "If you just want to create a capture there isn't much to see here.",
+    "Contents:\n"
+    + "- config.json: metadata about the device and recording\n"
+    + "- dry.wav: dry signal\n"
+    + "- wet.wav: wet signal",
     "https://github.com/jlwitthuhn/ToanMachine",
 ]
 
