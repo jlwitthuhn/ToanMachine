@@ -88,26 +88,35 @@ def run_zip_loader(context: ZipLoaderContext, input_file: str | io.BytesIO):
 
             print_status(f"Sample rate: {config_json["sample_rate"]}")
 
-            if "clicks_begin" not in config_json or not isinstance(
-                config_json["clicks_begin"], int
+            if "segments" not in config_json or not isinstance(
+                config_json["segments"], dict
             ):
-                print_status("Error: config.json does not contain key 'clicks_begin'")
+                print_status("Error: config.json does not contain key 'segments'")
                 return
-            clicks_begin = config_json["clicks_begin"]
-            if clicks_begin < 0:
-                print_status("Error: key 'clicks_begin' cannot be negative")
-                return
+            segments = config_json["segments"]
+            for segment_name, segment_bounds in segments.items():
+                if not isinstance(segment_bounds, list) or not all(
+                    isinstance(bound, int) for bound in segment_bounds
+                ):
+                    print_status(
+                        f"Error: segment '{segment_name}' must be an array of integers"
+                    )
+                    return
+                if len(segment_bounds) != 2:
+                    print_status(
+                        f"Error: segment '{segment_name}' must have exactly 2 entries"
+                    )
+                    return
 
-            if "clicks_end" not in config_json or not isinstance(
-                config_json["clicks_end"], int
-            ):
-                print_status("Error: config.json does not contain key 'clicks_end'")
+            if "clicks" not in segments:
+                print_status("Error: config.json does not contain segment 'clicks'")
                 return
-            clicks_end = config_json["clicks_end"]
+            clicks_begin, clicks_end = segments["clicks"]
+            if clicks_begin < 0:
+                print_status("Error: segment 'clicks' begin cannot be negative")
+                return
             if clicks_end <= clicks_begin:
-                print_status(
-                    "Error: key 'clicks_end' must be greater than 'clicks_begin'"
-                )
+                print_status("Error: segment 'clicks' end must be greater than begin")
                 return
 
             if "train_begin" not in config_json or not isinstance(

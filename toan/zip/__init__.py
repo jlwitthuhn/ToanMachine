@@ -50,8 +50,9 @@ def create_training_zip(
         "device_make": dev_make,
         "device_model": dev_model,
         "sample_rate": sample_rate,
-        "clicks_begin": segment_clicks[0],
-        "clicks_end": segment_clicks[1],
+        "segments": {
+            "clicks": [segment_clicks[0], segment_clicks[1]],
+        },
         "train_begin": segment_train[0],
         "train_end": segment_train[1],
         "test_begin": segment_test[0],
