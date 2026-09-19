@@ -10,6 +10,8 @@ on:
 
 permissions:
   contents: write
+  id-token: write
+  attestations: write
 
 jobs:
   build:
@@ -40,11 +42,18 @@ jobs:
       - name: Build DMG
         run: ./script/build_macos.sh
 
+      - name: Rename DMG
+        run: mv dist/ToanMachine.dmg "dist/ToanMachine-${VERSION}.dmg"
+
+      - name: Attest DMG
+        uses: actions/attest@v4
+        with:
+          subject-path: dist/ToanMachine-${{ env.VERSION }}.dmg
+
       - name: Publish prerelease
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          mv dist/ToanMachine.dmg "dist/ToanMachine-${VERSION}.dmg"
           gh release create "release/$VERSION" "dist/ToanMachine-${VERSION}.dmg" \
             --target "$GITHUB_SHA" \
             --title "$VERSION" \
