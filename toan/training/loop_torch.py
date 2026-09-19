@@ -15,7 +15,7 @@ from toan.model.nam_a2_wavenet_torch import NamA2WaveNetTorch
 from toan.training import TrainingStageSummary
 from toan.training.config import TrainingConfig, TrainingStageConfig
 from toan.training.context import TrainingProgressContext
-from toan.training.data_loader import TrainingDataLoaderMlx
+from toan.training.data_loader import TrainingDataLoader
 from toan.training.loss import LossFunction
 from toan.training.loss_torch import calculate_loss_torch
 
@@ -178,7 +178,7 @@ def run_training_loop_torch(context: TrainingProgressContext, config: TrainingCo
         )
         context.summaries.append(summary)
 
-        data_loader = TrainingDataLoaderMlx(
+        data_loader = TrainingDataLoader(
             context.signal_dry_train,
             context.signal_wet_train,
             stage_config.input_sample_width,

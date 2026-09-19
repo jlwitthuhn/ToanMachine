@@ -5,7 +5,7 @@
 import numpy as np
 
 
-class TrainingDataLoaderMlx:
+class TrainingDataLoader:
     signal_dry: np.ndarray
     signal_wet: np.ndarray
 
