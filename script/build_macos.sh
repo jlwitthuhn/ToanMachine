@@ -39,6 +39,21 @@ if (( $? != 0 )); then
 	exit 1
 fi
 
+print "Adding microphone permission..."
+/usr/libexec/PlistBuddy -c "Add :NSMicrophoneUsageDescription string Toan Machine needs microphone access to record audio from your guitar gear." "./dist/ToanMachine.app/Contents/Info.plist"
+if (( $? != 0 )); then
+	print -u2 "Error: failed to add microphone permission"
+	exit 1
+fi
+
+# Updating Info.plist above invalidates PyInstaller's bundle signature.
+print "Re-signing app bundle..."
+codesign --force --deep --sign - "./dist/ToanMachine.app"
+if (( $? != 0 )); then
+	print -u2 "Error: failed to sign app bundle"
+	exit 1
+fi
+
 print "Packaging DMG..."
 hdiutil create -volname "ToanMachine" -srcfolder "./dist/ToanMachine.app" -ov -format UDZO "./dist/ToanMachine.dmg"
 if (( $? != 0 )); then
