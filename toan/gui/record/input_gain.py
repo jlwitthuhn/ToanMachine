@@ -14,7 +14,7 @@ from toan.signal.mix import concat_signals
 from toan.soundio import SdIoController
 
 VOLUME_TEXT = [
-    "In this section you will set the input gain on your interface. You want the audio signal to be captured as loudly as possible without clipping.",
+    "This page allows you to calibrate the input gain of your interface. You want the audio signal to be captured as loudly as possible without clipping.",
     "Press 'Play Test Sound' below and adjust your input gain so that the volume is around 90. If the volume reads 99 or higher then you are clipping and should reduce your gain.",
 ]
 

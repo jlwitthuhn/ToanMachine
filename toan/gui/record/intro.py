@@ -6,8 +6,9 @@ from PySide6 import QtWidgets
 
 INTRO_TEXT = [
     "Welcome to the recording wizard.",
-    "This will guide you through a step-by-step process to capture a recording of your pedal or amp.",
-    "To begin: Ensure you have pedal connected such that you can send a signal out of this computer, through your pedal, and back into this computer.",
+    "This wizard will guide you through a step-by-step process to capture a recording of your pedal or amp.",
+    "To begin, connect your pedal such that you can send a signal out an interface, through the pedal, and back into your interface.",
+    "If you are recording an amp, be sure you have it connected through a load box and not directly plugged in to your interface.",
 ]
 
 

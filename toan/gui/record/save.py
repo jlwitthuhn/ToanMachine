@@ -8,7 +8,7 @@ from toan.gui.record import RecordingContext
 from toan.zip import create_training_zip
 
 SAVE_TEXT = [
-    "You did et.",
+    "Recording complete. Click 'Done' below to save your recording.",
 ]
 
 

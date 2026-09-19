@@ -12,12 +12,11 @@ from toan.gui.record.context import RecordingContext
 from toan.signal.generator.trig import generate_sine_wave
 
 OUTPUT_VOLTAGE_TEXT = [
-    "Set you interface's output voltage here.",
-    "This step requires that you own a multimeter or otherwise can figure out your interface's output level. If you cannot determine this, skip this step.",
-    "Be sure to measure straight out of your interface, after the reamp box if you are using one, before it goes through any of the pedals/amps you want to capture.",
+    "This step requires that you own a multimeter or otherwise can figure out your interface's output voltage. If you cannot measure this, skip this step.",
+    "This should measure the voltage going in to the device you are capturing, so measure just before the device in your signal chain.",
 ]
 
-TONE_TEXT = "Press 'Play Test Tone' to output a 300Hz signal, then measure your interface's output with a multimeter."
+TONE_TEXT = "Press 'Play Test Tone' to output a 300Hz sine wave, then measure your interface's output with a multimeter."
 
 TONE_FREQUENCY = 300
 

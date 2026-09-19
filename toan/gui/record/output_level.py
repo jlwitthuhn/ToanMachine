@@ -13,9 +13,9 @@ from toan.soundio import SdChannel, SdDevice, generate_descriptions, get_output_
 from toan.soundio.record_wet import RecordWetController, RecordWetProgress
 
 OUTPUT_LEVEL_TEXT = [
-    "In this section you will set the output level of your interface. For overdrive and similar effects it is very important to get this right to ensure that the input signal is loud enough to trigger the desired clipping effect.",
-    "Click the 'Record' button to play some synthetic chords through your pedal and record the result. Then press 'Play' and the recorded result will be played back out.",
-    "If the recording clips, you will need to turn down your input gain. Don't worry about setting it too precisely because you will calibrate it on the next screen.",
+    "This page guides you through setting the output level of your interface. For overdrive and similar effects it is very important to get this right to ensure that the input signal is loud enough to trigger the desired effect.",
+    "Click the 'Record' button to play some synthesized chords through your device and record the result. Then press 'Play' and listen to the recording.",
+    "If the recording clips, you will need to turn down your input gain.",
 ]
 
 

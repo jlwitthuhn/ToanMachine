@@ -10,8 +10,8 @@ from toan.signal.mix import concat_signals
 from toan.soundio.record_wet import RecordWetController, RecordWetProgress
 
 RECORD_TEXT = [
-    "In this section you will send a signal through your pedal and record the result.",
-    "Once you have started, allow the full recording to complete before proceeding. Do not change any settings on your pedal while recording.",
+    "Configuration complete. Click 'Record' below to begin recording.",
+    "Do not change any settings on your pedal or interface while recording.",
 ]
 
 
