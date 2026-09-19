@@ -2,8 +2,9 @@
 # https://www.gnu.org/licenses/gpl-3.0.en.html
 # SPDX-License-Identifier: GPL-3.0-only
 
-from PySide6 import QtCore, QtWidgets
+from PySide6 import QtCore, QtGui, QtWidgets
 
+from toan.formatting import format_seconds_as_mmss
 from toan.gui.record import RecordingContext
 from toan.signal.capture_signal import generate_capture_signal
 from toan.signal.mix import concat_signals
@@ -20,6 +21,7 @@ class RecordWetSignalPage(QtWidgets.QWizardPage):
 
     button_record: QtWidgets.QPushButton
     bar_progress: QtWidgets.QProgressBar
+    label_time: QtWidgets.QLabel
     bar_update_timer: QtCore.QTimer
 
     record_controller: RecordWetController | None = None
@@ -53,8 +55,17 @@ class RecordWetSignalPage(QtWidgets.QWizardPage):
         label_progress = QtWidgets.QLabel("Progress:", self)
         layout.addWidget(label_progress)
 
+        progress_layout = QtWidgets.QHBoxLayout()
         self.bar_progress = QtWidgets.QProgressBar(self)
-        layout.addWidget(self.bar_progress)
+        progress_layout.addWidget(self.bar_progress, 1)
+
+        self.label_time = QtWidgets.QLabel("00:00 / 00:00", self)
+        font = QtGui.QFont("Courier New")
+        font.setStyleHint(QtGui.QFont.StyleHint.Monospace)
+        self.label_time.setFont(font)
+        self.label_time.setToolTip("Time elapsed / Total duration")
+        progress_layout.addWidget(self.label_time)
+        layout.addLayout(progress_layout)
 
     def cleanupPage(self):
         if self.record_controller is not None:
@@ -102,6 +113,7 @@ class RecordWetSignalPage(QtWidgets.QWizardPage):
             self.context.output_channel,
         )
         self.record_progress = self.record_controller.progress
+        self._update_status()
         self.record_controller.start()
 
         self.bar_update_timer.start()
@@ -109,7 +121,15 @@ class RecordWetSignalPage(QtWidgets.QWizardPage):
     def _update_status(self):
         self.bar_progress.setMaximum(len(self.context.signal_dry))
         if self.record_progress is not None:
-            self.bar_progress.setValue(self.record_progress.samples_played)
+            samples_played = min(
+                self.record_progress.samples_played, len(self.context.signal_dry)
+            )
+            self.bar_progress.setValue(samples_played)
+            elapsed = samples_played / self.context.sample_rate
+            total = len(self.context.signal_dry) / self.context.sample_rate
+            self.label_time.setText(
+                f"{format_seconds_as_mmss(elapsed)} / {format_seconds_as_mmss(total)}"
+            )
             if self.record_progress.samples_recorded >= len(self.context.signal_dry):
                 self._complete()
                 self.bar_update_timer.stop()
