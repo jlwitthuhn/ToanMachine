@@ -4,6 +4,7 @@
 
 import json
 import math
+import sys
 from pathlib import Path
 
 import numpy as np
@@ -24,7 +25,7 @@ from toan.wav import load_and_resample_wav
 
 def _load_loudness_probe_signal(sample_rate: int) -> np.ndarray:
     script_dir = Path(__file__).resolve().parent
-    root_dir = script_dir.parent.parent
+    root_dir = Path(getattr(sys, "_MEIPASS", script_dir.parent.parent))
     probe_path = root_dir.joinpath("data").joinpath("nam_loudness.flac").resolve()
     return load_and_resample_wav(sample_rate, str(probe_path))
 

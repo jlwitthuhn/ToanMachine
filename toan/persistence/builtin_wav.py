@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
 import enum
+import sys
 from pathlib import Path
 
 import numpy as np
@@ -17,7 +18,7 @@ class BuiltinWav(enum.Enum):
 
 def _get_builtin_wav_dir() -> Path:
     script_dir = Path(__file__).resolve().parent
-    root_dir = script_dir.parent.parent
+    root_dir = Path(getattr(sys, "_MEIPASS", script_dir.parent.parent))
     return root_dir.joinpath("data").joinpath("training_wav").resolve()
 
 
