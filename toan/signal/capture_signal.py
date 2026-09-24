@@ -81,9 +81,7 @@ class CaptureSignalConfig:
 class CaptureSignalWithDetails:
     signal: np.ndarray
     sample_rate: int
-    segment_clicks: tuple[int, int]
-    segment_train: tuple[int, int]
-    segment_sweep: tuple[int, int]
+    segments: dict[str, tuple[int, int]]
 
 
 def _generate_calibration_block(sample_rate: int) -> np.ndarray:
@@ -332,13 +330,13 @@ def generate_capture_signal(
         ],
         0,
     )
-    segment_clicks = (0, len(block_calibration) + len(silence_half_second))
-    segment_train = (len(block_calibration), len(raw_signal))
-    segment_sweep = (main_sweep_begin, main_sweep_end)
+    segments = {
+        "clicks": (0, len(block_calibration) + len(silence_half_second)),
+        "train": (len(block_calibration), len(raw_signal)),
+        "sweep": (main_sweep_begin, main_sweep_end),
+    }
     return CaptureSignalWithDetails(
         raw_signal,
         sample_rate,
-        segment_clicks,
-        segment_train,
-        segment_sweep,
+        segments,
     )

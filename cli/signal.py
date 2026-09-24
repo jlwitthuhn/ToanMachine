@@ -99,7 +99,7 @@ def _synthezise_and_record(
         assert extra_signal_train.ndim == 1
         signal_dry = concat_signals([signal_dry, extra_signal_train], sample_rate // 4)
 
-    train_begin, _ = capture_signal_details.segment_train
+    train_begin, _ = capture_signal_details.segments["train"]
     segment_train: tuple[int, int] = (train_begin, len(signal_dry))
     segment_test: tuple[int, int] = (0, 0)
     if extra_signal_test is not None:
@@ -130,10 +130,10 @@ def _synthezise_and_record(
             signal_wet,
             "Test Make",
             "Test Model",
-            capture_signal_details.segment_clicks,
+            capture_signal_details.segments["clicks"],
             segment_train,
             segment_test,
-            capture_signal_details.segment_sweep,
+            capture_signal_details.segments["sweep"],
         )
 
         print("Validating zip file...")
