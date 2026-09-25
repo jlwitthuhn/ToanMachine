@@ -10,7 +10,7 @@ from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg
 from PySide6 import QtWidgets
 
 from toan.gui.train import TrainingGuiContext
-from toan.signal.analysis import generate_spectrogram
+from toan.signal.analysis import generate_spectrogram, generate_sweep_frequency_response
 
 
 class TrainGraphPage(QtWidgets.QWizardPage):
@@ -18,6 +18,7 @@ class TrainGraphPage(QtWidgets.QWizardPage):
 
     graph_loss: FigureCanvasQTAgg
     graph_spec_real: FigureCanvasQTAgg
+    graph_fr_sweep: FigureCanvasQTAgg
 
     signal_nam_big_sweep: np.ndarray | None = None
     signal_nam_small_sweep: np.ndarray | None = None
@@ -109,6 +110,14 @@ class TrainGraphPage(QtWidgets.QWizardPage):
 
         self._add_nam_tab("NAM (Big)", self.signal_nam_big_sweep)
         self._add_nam_tab("NAM (Small)", self.signal_nam_small_sweep)
+
+        fr_widget = QtWidgets.QWidget()
+        fr_layout = QtWidgets.QVBoxLayout(fr_widget)
+        self.graph_fr_sweep = FigureCanvasQTAgg()
+        fr_layout.addWidget(self.graph_fr_sweep)
+        fr_index = self.tab_root.addTab(fr_widget, "FR (Sweep)")
+        self._lazy_loaders[fr_index] = self._load_sweep_frequency_response
+
         self._nam_tabs_built = True
 
     def _add_nam_tab(self, title: str, signal: np.ndarray) -> None:
@@ -132,6 +141,20 @@ class TrainGraphPage(QtWidgets.QWizardPage):
         canvas.figure = generate_spectrogram(self.context.sample_rate, signal)
         canvas.draw_idle()
         canvas.flush_events()
+
+    def _load_sweep_frequency_response(self) -> None:
+        assert self.signal_nam_big_sweep is not None
+        assert self.signal_nam_small_sweep is not None
+        self.graph_fr_sweep.figure = generate_sweep_frequency_response(
+            self.context.sample_rate,
+            {
+                "Real": self.context.signal_wet_sweep,
+                "NAM (Big)": self.signal_nam_big_sweep,
+                "NAM (Small)": self.signal_nam_small_sweep,
+            },
+        )
+        self.graph_fr_sweep.draw_idle()
+        self.graph_fr_sweep.flush_events()
 
     def clicked_tab(self, index: int) -> None:
         if index in self._loaded:

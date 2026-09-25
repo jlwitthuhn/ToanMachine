@@ -9,6 +9,11 @@ import scipy
 from matplotlib import pyplot as plt
 from scipy.constants import femto
 
+# Parameters of the main sweep in toan/signal/capture_signal.py
+_SWEEP_DURATION = 10.0
+_SWEEP_BEGIN_FREQ = 18.0
+_SWEEP_END_FREQ = 24000.0
+
 
 @dataclass
 class SignalClickDetails:
@@ -125,4 +130,47 @@ def generate_spectrogram(sample_rate: int, signal: np.ndarray) -> plt.Figure:
     ax.set_yscale("log")
     ax.set_ylim(20, sample_rate // 2)
     fig.colorbar(mesh, ax=ax)
+    return fig
+
+
+def _measure_sweep_magnitude(
+    sample_rate: int, signal: np.ndarray, window_octaves: float, points: int
+) -> tuple[np.ndarray, np.ndarray]:
+    begin_freq = _SWEEP_BEGIN_FREQ
+    end_freq = min(_SWEEP_END_FREQ, sample_rate // 2)
+    sweep_samples = int(sample_rate * _SWEEP_DURATION)
+
+    # The sweep is logarithmic, so a fixed window spans a fixed fraction of an octave
+    octaves = np.log2(end_freq / begin_freq)
+    window_size = int(window_octaves * sweep_samples / octaves)
+    window = scipy.signal.get_window("hann", window_size)
+    window = window / np.sum(window)
+
+    # Windowed RMS, where each output is centered on its window
+    power = scipy.signal.fftconvolve(
+        np.square(signal.astype(np.float64)), window, mode="valid"
+    )
+    magnitude = np.sqrt(np.maximum(power, 0.0))
+    centers = np.arange(len(power)) + (window_size - 1) / 2
+    freq = begin_freq * (end_freq / begin_freq) ** (centers / sweep_samples)
+
+    indices = np.linspace(0, len(power) - 1, points).astype(int)
+    return freq[indices], magnitude[indices]
+
+
+def generate_sweep_frequency_response(
+    sample_rate: int, signals: dict[str, np.ndarray]
+) -> plt.Figure:
+    fig, ax = plt.subplots()
+
+    for label, signal in signals.items():
+        freq, magnitude = _measure_sweep_magnitude(sample_rate, signal, 1 / 6, 1000)
+        ax.plot(freq, magnitude, label=label)
+
+    ax.set_xlabel("Frequency")
+    ax.set_ylabel("Magnitude")
+    ax.set_xscale("log")
+    ax.set_yscale("log")
+    ax.grid(True, which="both")
+    ax.legend()
     return fig
