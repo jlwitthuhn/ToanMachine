@@ -10,7 +10,6 @@ from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg
 from PySide6 import QtWidgets
 
 from toan.gui.train import TrainingGuiContext
-from toan.model.nam_a2_wavenet_torch import NamA2WaveNetTorch
 from toan.signal.analysis import generate_spectrogram
 
 
@@ -19,6 +18,9 @@ class TrainGraphPage(QtWidgets.QWizardPage):
 
     graph_loss: FigureCanvasQTAgg
     graph_spec_real: FigureCanvasQTAgg
+
+    signal_nam_big_sweep: np.ndarray | None = None
+    signal_nam_small_sweep: np.ndarray | None = None
 
     def __init__(self, parent, context: TrainingGuiContext):
         super().__init__(parent)
@@ -54,6 +56,7 @@ class TrainGraphPage(QtWidgets.QWizardPage):
         self.graph_loss.figure = self.context.progress_context.summaries[
             -1
         ].generate_loss_graph(5)
+        self._process_nam_sweeps()
         self._build_nam_tabs()
 
     def validatePage(self) -> bool:
@@ -67,39 +70,54 @@ class TrainGraphPage(QtWidgets.QWizardPage):
 
         return True
 
-    def _build_nam_tabs(self) -> None:
-        if self._nam_tabs_built:
+    def _process_nam_sweeps(self) -> None:
+        if self.signal_nam_big_sweep is not None:
             return
 
         model = self.context.progress_context.model
         if model is None:
             return
 
-        if isinstance(model, NamA2WaveNetTorch):
-            param_counts = [
-                sum(p.numel() for p in submodel.parameters())
-                for submodel in model.submodels
-            ]
-            order = sorted(
-                range(len(param_counts)), key=lambda i: param_counts[i], reverse=True
-            )
-            titles = ["NAM (Big)", "NAM (Small)"]
-            for title, sub_index in zip(titles, order):
-                self._add_nam_tab(title, sub_index)
-        else:
-            self._add_nam_tab("Spectrogram (NAM)", None)
+        param_counts = [
+            sum(p.numel() for p in submodel.parameters())
+            for submodel in model.submodels
+        ]
+        order = sorted(
+            range(len(param_counts)), key=lambda i: param_counts[i], reverse=True
+        )
 
+        device = next(model.parameters()).device
+        input = np.concat(
+            [np.zeros(model.receptive_field - 1), self.context.signal_dry_sweep]
+        )
+        input = torch.tensor(input.astype(np.float32)).to(device)
+
+        # Outputs are stacked like (num_submodels, batch, length)
+        with torch.no_grad():
+            outputs = model(input.reshape(1, -1))
+        outputs = outputs[:, 0, :].cpu().numpy()
+
+        self.signal_nam_big_sweep = outputs[order[0]]
+        self.signal_nam_small_sweep = outputs[order[-1]]
+
+    def _build_nam_tabs(self) -> None:
+        if self._nam_tabs_built:
+            return
+
+        if self.signal_nam_big_sweep is None or self.signal_nam_small_sweep is None:
+            return
+
+        self._add_nam_tab("NAM (Big)", self.signal_nam_big_sweep)
+        self._add_nam_tab("NAM (Small)", self.signal_nam_small_sweep)
         self._nam_tabs_built = True
 
-    def _add_nam_tab(self, title: str, sub_index: int | None) -> None:
+    def _add_nam_tab(self, title: str, signal: np.ndarray) -> None:
         widget = QtWidgets.QWidget()
         layout = QtWidgets.QVBoxLayout(widget)
         canvas = FigureCanvasQTAgg()
         layout.addWidget(canvas)
         index = self.tab_root.addTab(widget, title)
-        self._lazy_loaders[index] = lambda: self._load_nam_spectrogram(
-            canvas, sub_index
-        )
+        self._lazy_loaders[index] = lambda: self._load_nam_spectrogram(canvas, signal)
 
     def _load_real_spectrogram(self) -> None:
         self.graph_spec_real.figure = generate_spectrogram(
@@ -109,23 +127,9 @@ class TrainGraphPage(QtWidgets.QWizardPage):
         self.graph_spec_real.flush_events()
 
     def _load_nam_spectrogram(
-        self, canvas: FigureCanvasQTAgg, sub_index: int | None
+        self, canvas: FigureCanvasQTAgg, signal: np.ndarray
     ) -> None:
-        the_model = self.context.progress_context.model
-        assert the_model is not None
-        input = np.concat(
-            [np.zeros(the_model.receptive_field - 1), self.context.signal_dry_sweep]
-        )
-        input = torch.tensor(input.astype(np.float32)).to(torch.device("mps"))
-
-        with torch.no_grad():
-            if sub_index is None:
-                output = the_model(input.reshape(1, -1))
-            else:
-                output = the_model.submodels[sub_index](input.reshape(1, -1))
-        output = output.squeeze().cpu().detach().numpy()
-
-        canvas.figure = generate_spectrogram(self.context.sample_rate, output)
+        canvas.figure = generate_spectrogram(self.context.sample_rate, signal)
         canvas.draw_idle()
         canvas.flush_events()
 
