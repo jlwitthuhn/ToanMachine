@@ -7,18 +7,38 @@ from typing import Callable
 import numpy as np
 import torch
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg
+from matplotlib.figure import Figure
 from PySide6 import QtWidgets
 
 from toan.gui.train import TrainingGuiContext
 from toan.signal.analysis import generate_spectrogram, generate_sweep_frequency_response
 
 
+# Widget to host a graph and keep it the right size
+class FigurePanel(QtWidgets.QWidget):
+    canvas: FigureCanvasQTAgg | None = None
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self._layout = QtWidgets.QVBoxLayout(self)
+        self._layout.setContentsMargins(0, 0, 0, 0)
+
+    def set_figure(self, figure: Figure) -> None:
+        if self.canvas is not None:
+            self._layout.removeWidget(self.canvas)
+            self.canvas.deleteLater()
+        self.canvas = FigureCanvasQTAgg(figure)
+        self._layout.addWidget(self.canvas)
+
+
 class TrainGraphPage(QtWidgets.QWizardPage):
     context: TrainingGuiContext
 
-    graph_loss: FigureCanvasQTAgg
-    graph_spec_real: FigureCanvasQTAgg
-    graph_fr_sweep: FigureCanvasQTAgg
+    graph_loss: FigurePanel
+    graph_fr_sweep: FigurePanel
+
+    combo_spec_source: QtWidgets.QComboBox
+    stack_spec: QtWidgets.QStackedWidget
 
     signal_nam_big_sweep: np.ndarray | None = None
     signal_nam_small_sweep: np.ndarray | None = None
@@ -38,25 +58,47 @@ class TrainGraphPage(QtWidgets.QWizardPage):
         self._loaded: set[int] = set()
         self._nam_tabs_built = False
 
+        # Spectrogram sources are also populated only when selected
+        self._spec_loaders: list[Callable[[], None]] = []
+        self._spec_loaded: set[int] = set()
+
         loss_widget = QtWidgets.QWidget()
         loss_layout = QtWidgets.QVBoxLayout(loss_widget)
-        self.graph_loss = FigureCanvasQTAgg()
+        self.graph_loss = FigurePanel()
         loss_layout.addWidget(self.graph_loss)
         self.tab_root.addTab(loss_widget, "Loss")
 
-        spec_real_widget = QtWidgets.QWidget()
-        spec_real_layout = QtWidgets.QVBoxLayout(spec_real_widget)
-        self.graph_spec_real = FigureCanvasQTAgg()
-        spec_real_layout.addWidget(self.graph_spec_real)
-        real_index = self.tab_root.addTab(spec_real_widget, "Spectrogram (Real)")
-        self._lazy_loaders[real_index] = self._load_real_spectrogram
+        spec_widget = QtWidgets.QWidget()
+        spec_layout = QtWidgets.QVBoxLayout(spec_widget)
+
+        source_row = QtWidgets.QWidget(spec_widget)
+        source_row_layout = QtWidgets.QHBoxLayout(source_row)
+        source_row_layout.setContentsMargins(0, 0, 0, 0)
+        source_row_layout.addWidget(QtWidgets.QLabel("Source:", source_row))
+        self.combo_spec_source = QtWidgets.QComboBox(source_row)
+        source_row_layout.addWidget(self.combo_spec_source)
+        source_row_layout.addStretch(1)
+        spec_layout.addWidget(source_row)
+
+        self.stack_spec = QtWidgets.QStackedWidget(spec_widget)
+        spec_layout.addWidget(self.stack_spec)
+        spec_index = self.tab_root.addTab(spec_widget, "Spectrogram")
+        self._lazy_loaders[spec_index] = lambda: self._load_spectrogram_source(
+            self.combo_spec_source.currentIndex()
+        )
+
+        self._add_spectrogram_source("Recording", lambda: self.context.signal_wet_sweep)
+        # Connect after the first source so selecting it does not load it early
+        self.combo_spec_source.currentIndexChanged.connect(
+            self.selected_spectrogram_source
+        )
 
         layout.addWidget(self.tab_root)
 
     def initializePage(self):
-        self.graph_loss.figure = self.context.progress_context.summaries[
-            -1
-        ].generate_loss_graph(5)
+        self.graph_loss.set_figure(
+            self.context.progress_context.summaries[-1].generate_loss_graph(5)
+        )
         self._process_nam_sweeps()
         self._build_nam_tabs()
 
@@ -108,53 +150,52 @@ class TrainGraphPage(QtWidgets.QWizardPage):
         if self.signal_nam_big_sweep is None or self.signal_nam_small_sweep is None:
             return
 
-        self._add_nam_tab("NAM (Big)", self.signal_nam_big_sweep)
-        self._add_nam_tab("NAM (Small)", self.signal_nam_small_sweep)
+        self._add_spectrogram_source("NAM (Big)", lambda: self.signal_nam_big_sweep)
+        self._add_spectrogram_source("NAM (Small)", lambda: self.signal_nam_small_sweep)
 
         fr_widget = QtWidgets.QWidget()
         fr_layout = QtWidgets.QVBoxLayout(fr_widget)
-        self.graph_fr_sweep = FigureCanvasQTAgg()
+        self.graph_fr_sweep = FigurePanel()
         fr_layout.addWidget(self.graph_fr_sweep)
         fr_index = self.tab_root.addTab(fr_widget, "FR (Sweep)")
         self._lazy_loaders[fr_index] = self._load_sweep_frequency_response
 
         self._nam_tabs_built = True
 
-    def _add_nam_tab(self, title: str, signal: np.ndarray) -> None:
-        widget = QtWidgets.QWidget()
-        layout = QtWidgets.QVBoxLayout(widget)
-        canvas = FigureCanvasQTAgg()
-        layout.addWidget(canvas)
-        index = self.tab_root.addTab(widget, title)
-        self._lazy_loaders[index] = lambda: self._load_nam_spectrogram(canvas, signal)
-
-    def _load_real_spectrogram(self) -> None:
-        self.graph_spec_real.figure = generate_spectrogram(
-            self.context.sample_rate, self.context.signal_wet_sweep
-        )
-        self.graph_spec_real.draw_idle()
-        self.graph_spec_real.flush_events()
-
-    def _load_nam_spectrogram(
-        self, canvas: FigureCanvasQTAgg, signal: np.ndarray
+    def _add_spectrogram_source(
+        self, title: str, get_signal: Callable[[], np.ndarray]
     ) -> None:
-        canvas.figure = generate_spectrogram(self.context.sample_rate, signal)
-        canvas.draw_idle()
-        canvas.flush_events()
+        panel = FigurePanel()
+        self.stack_spec.addWidget(panel)
+        self._spec_loaders.append(lambda: self._load_spectrogram(panel, get_signal()))
+        self.combo_spec_source.addItem(title)
+
+    def _load_spectrogram_source(self, index: int) -> None:
+        if index in self._spec_loaded:
+            return
+        self._spec_loaders[index]()
+        self._spec_loaded.add(index)
+
+    def _load_spectrogram(self, panel: FigurePanel, signal: np.ndarray) -> None:
+        panel.set_figure(generate_spectrogram(self.context.sample_rate, signal))
 
     def _load_sweep_frequency_response(self) -> None:
         assert self.signal_nam_big_sweep is not None
         assert self.signal_nam_small_sweep is not None
-        self.graph_fr_sweep.figure = generate_sweep_frequency_response(
-            self.context.sample_rate,
-            {
-                "Real": self.context.signal_wet_sweep,
-                "NAM (Big)": self.signal_nam_big_sweep,
-                "NAM (Small)": self.signal_nam_small_sweep,
-            },
+        self.graph_fr_sweep.set_figure(
+            generate_sweep_frequency_response(
+                self.context.sample_rate,
+                {
+                    "Recording": self.context.signal_wet_sweep,
+                    "NAM (Big)": self.signal_nam_big_sweep,
+                    "NAM (Small)": self.signal_nam_small_sweep,
+                },
+            )
         )
-        self.graph_fr_sweep.draw_idle()
-        self.graph_fr_sweep.flush_events()
+
+    def selected_spectrogram_source(self, index: int) -> None:
+        self._load_spectrogram_source(index)
+        self.stack_spec.setCurrentIndex(index)
 
     def clicked_tab(self, index: int) -> None:
         if index in self._loaded:
