@@ -132,7 +132,7 @@ def generate_spectrogram(sample_rate: int, signal: np.ndarray) -> plt.Figure:
     return fig
 
 
-def _measure_sweep_magnitude(
+def _measure_sweep_dbfs(
     sample_rate: int, signal: np.ndarray, window_octaves: float, points: int
 ) -> tuple[np.ndarray, np.ndarray]:
     begin_freq = _SWEEP_BEGIN_FREQ
@@ -149,12 +149,16 @@ def _measure_sweep_magnitude(
     power = scipy.signal.fftconvolve(
         np.square(signal.astype(np.float64)), window, mode="valid"
     )
-    magnitude = np.sqrt(np.maximum(power, 0.0))
+    rms = np.sqrt(np.maximum(power, 0.0))
+
+    # AES17 dBFS, so a full-scale sine reads 0 dBFS, floored at -120 dBFS
+    dbfs = 20.0 * np.log10(np.maximum(rms * np.sqrt(2.0), 1e-6))
+
     centers = np.arange(len(power)) + (window_size - 1) / 2
     freq = begin_freq * (end_freq / begin_freq) ** (centers / sweep_samples)
 
     indices = np.linspace(0, len(power) - 1, points).astype(int)
-    return freq[indices], magnitude[indices]
+    return freq[indices], dbfs[indices]
 
 
 def generate_sweep_frequency_response(
@@ -163,13 +167,12 @@ def generate_sweep_frequency_response(
     fig, ax = plt.subplots()
 
     for label, signal in signals.items():
-        freq, magnitude = _measure_sweep_magnitude(sample_rate, signal, 1 / 6, 1000)
-        ax.plot(freq, magnitude, label=label)
+        freq, dbfs = _measure_sweep_dbfs(sample_rate, signal, 1 / 6, 1000)
+        ax.plot(freq, dbfs, label=label)
 
     ax.set_xlabel("Frequency")
-    ax.set_ylabel("Magnitude")
+    ax.set_ylabel("dBFS")
     ax.set_xscale("log")
-    ax.set_yscale("log")
     ax.grid(True, which="both")
     ax.legend()
     return fig
