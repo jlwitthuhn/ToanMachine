@@ -22,8 +22,10 @@ class ZipLoaderContext:
     signal_wet: np.ndarray | None = None
     signal_dry_test: np.ndarray | None = None
     signal_dry_sweep: np.ndarray | None = None
+    signal_dry_white_noise: np.ndarray | None = None
     signal_wet_test: np.ndarray | None = None
     signal_wet_sweep: np.ndarray | None = None
+    signal_wet_white_noise: np.ndarray | None = None
     metadata: ModelGenericMetadata | None = None
     sample_rate: int = 0
 
@@ -156,6 +158,21 @@ def run_zip_loader(context: ZipLoaderContext, input_file: str | io.BytesIO):
                 print_status("Error: segment 'sweep' end must be greater than 0")
                 return
 
+            if "white_noise" not in segments:
+                print_status(
+                    "Error: config.json does not contain segment 'white_noise'"
+                )
+                return
+            white_noise_begin, white_noise_end = segments["white_noise"]
+            if white_noise_begin < 0:
+                print_status("Error: segment 'white_noise' begin cannot be negative")
+                return
+            if white_noise_end <= white_noise_begin:
+                print_status(
+                    "Error: segment 'white_noise' end must be greater than begin"
+                )
+                return
+
             if "dry_signal" not in config_json or not isinstance(
                 config_json["dry_signal"], str
             ):
@@ -265,9 +282,15 @@ def run_zip_loader(context: ZipLoaderContext, input_file: str | io.BytesIO):
             context.signal_wet = train_wet
             context.signal_dry_test = test_dry
             context.signal_dry_sweep = dry_signal[sweep_begin:sweep_end]
+            context.signal_dry_white_noise = dry_signal[
+                white_noise_begin:white_noise_end
+            ]
             context.signal_wet_test = test_wet
             context.signal_wet_sweep = wet_signal[
                 sweep_begin + latency_samples : sweep_end + latency_samples
+            ]
+            context.signal_wet_white_noise = wet_signal[
+                white_noise_begin + latency_samples : white_noise_end + latency_samples
             ]
 
             input_level_dbu = config_json.get("input_level_dbu")

@@ -24,7 +24,9 @@ class TrainingGuiContext:
     signal_wet: np.ndarray | None = None
     signal_dry_test: np.ndarray | None = None
     signal_dry_sweep: np.ndarray | None = None
+    signal_dry_white_noise: np.ndarray | None = None
     signal_wet_test: np.ndarray | None = None
     signal_wet_sweep: np.ndarray | None = None
+    signal_wet_white_noise: np.ndarray | None = None
 
     progress_context: TrainingProgressContext | None = None
