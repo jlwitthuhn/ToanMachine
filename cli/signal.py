@@ -130,10 +130,12 @@ def _synthezise_and_record(
             signal_wet,
             "Test Make",
             "Test Model",
-            capture_signal_details.segments["clicks"],
-            segment_train,
-            segment_test,
-            capture_signal_details.segments["sweep"],
+            {
+                "clicks": capture_signal_details.segments["clicks"],
+                "train": segment_train,
+                "test": segment_test,
+                "sweep": capture_signal_details.segments["sweep"],
+            },
         )
 
         print("Validating zip file...")

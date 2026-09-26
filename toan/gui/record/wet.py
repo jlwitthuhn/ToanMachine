@@ -82,8 +82,6 @@ class RecordWetSignalPage(QtWidgets.QWizardPage):
         self.button_record.setEnabled(False)
 
         capture_signal_details = generate_capture_signal(self.context.sample_rate)
-        self.context.segment_dry_clicks = capture_signal_details.segments["clicks"]
-        self.context.segment_dry_sweep = capture_signal_details.segments["sweep"]
 
         capture_signal_train = concat_signals(
             [capture_signal_details.signal, self.context.extra_signal_dry_train],
@@ -96,15 +94,17 @@ class RecordWetSignalPage(QtWidgets.QWizardPage):
                 [capture_signal_train, self.context.extra_signal_dry_test],
                 self.context.sample_rate // 2,
             )
-            self.context.segment_dry_train = (train_begin, len(capture_signal_train))
-            self.context.segment_dry_test = (
-                len(capture_signal_train),
-                len(self.context.signal_dry),
-            )
+            segment_test = (len(capture_signal_train), len(self.context.signal_dry))
         else:
             self.context.signal_dry = capture_signal_train
-            self.context.segment_dry_train = (train_begin, len(capture_signal_train))
-            self.context.segment_dry_test = (0, 0)
+            segment_test = (0, 0)
+
+        self.context.segments_dry = {
+            "clicks": capture_signal_details.segments["clicks"],
+            "train": (train_begin, len(capture_signal_train)),
+            "test": segment_test,
+            "sweep": capture_signal_details.segments["sweep"],
+        }
 
         self.record_controller = RecordWetController(
             self.context.sample_rate,

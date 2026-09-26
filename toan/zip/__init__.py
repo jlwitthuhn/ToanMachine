@@ -14,6 +14,8 @@ SAVE_README_TEXT = [
     "https://github.com/jlwitthuhn/ToanMachine",
 ]
 
+REQUIRED_SEGMENTS = ["clicks", "train", "test", "sweep"]
+
 import io
 import zipfile
 
@@ -27,12 +29,13 @@ def create_training_zip(
     signal_wet: np.ndarray,
     dev_make: str,
     dev_model: str,
-    segment_clicks: tuple[int, int],
-    segment_train: tuple[int, int],
-    segment_test: tuple[int, int],
-    segment_sweep: tuple[int, int],
+    segments: dict[str, tuple[int, int]],
     dbu: float | None = None,
 ) -> io.BytesIO:
+    missing_segments = [name for name in REQUIRED_SEGMENTS if name not in segments]
+    if len(missing_segments) > 0:
+        raise ValueError(f"Missing required segments: {', '.join(missing_segments)}")
+
     wav_dry = io.BytesIO()
     scipy.io.wavfile.write(
         wav_dry,
@@ -54,12 +57,7 @@ def create_training_zip(
         "device_make": dev_make,
         "device_model": dev_model,
         "sample_rate": sample_rate,
-        "segments": {
-            "clicks": [segment_clicks[0], segment_clicks[1]],
-            "train": [segment_train[0], segment_train[1]],
-            "test": [segment_test[0], segment_test[1]],
-            "sweep": [segment_sweep[0], segment_sweep[1]],
-        },
+        "segments": {name: [bounds[0], bounds[1]] for name, bounds in segments.items()},
         "input_level_dbu": dbu,
         "dry_signal": "dry.wav",
         "wet_signal": "wet.wav",
