@@ -299,8 +299,11 @@ def generate_capture_signal(
     block_white_noise = _generate_white_noise_block(sample_rate, config.noise_duration)
     block_builtin_wavs = _generate_builtin_wav_block(sample_rate, config.builtin_wavs)
 
+    train_block_padding = sample_rate // 4
     main_sweep_begin += 0
     main_sweep_end += 0
+    white_noise_begin = len(block_sweep) + train_block_padding
+    white_noise_end = white_noise_begin + len(block_white_noise)
     signal_train = concat_signals(
         [
             block_sweep,
@@ -309,7 +312,7 @@ def generate_capture_signal(
             block_plucked * 0.9,
             block_builtin_wavs,
         ],
-        sample_rate // 4,
+        train_block_padding,
     )
 
     block_calibration = _generate_calibration_block(sample_rate)
@@ -320,6 +323,8 @@ def generate_capture_signal(
 
     main_sweep_begin += len(block_calibration) + len(silence_half_second)
     main_sweep_end += len(block_calibration) + len(silence_half_second)
+    white_noise_begin += len(block_calibration) + len(silence_half_second)
+    white_noise_end += len(block_calibration) + len(silence_half_second)
     raw_signal = concat_signals(
         [
             block_calibration,
@@ -334,6 +339,7 @@ def generate_capture_signal(
         "clicks": (0, len(block_calibration) + len(silence_half_second)),
         "train": (len(block_calibration), len(raw_signal)),
         "sweep": (main_sweep_begin, main_sweep_end),
+        "white_noise": (white_noise_begin, white_noise_end),
     }
     return CaptureSignalWithDetails(
         raw_signal,

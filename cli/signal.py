@@ -135,6 +135,7 @@ def _synthezise_and_record(
                 "train": segment_train,
                 "test": segment_test,
                 "sweep": capture_signal_details.segments["sweep"],
+                "white_noise": capture_signal_details.segments["white_noise"],
             },
         )
 

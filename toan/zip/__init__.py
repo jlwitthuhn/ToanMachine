@@ -14,7 +14,7 @@ SAVE_README_TEXT = [
     "https://github.com/jlwitthuhn/ToanMachine",
 ]
 
-REQUIRED_SEGMENTS = ["clicks", "train", "test", "sweep"]
+REQUIRED_SEGMENTS = ["clicks", "train", "test", "sweep", "white_noise"]
 
 import io
 import zipfile

@@ -104,6 +104,7 @@ class RecordWetSignalPage(QtWidgets.QWizardPage):
             "train": (train_begin, len(capture_signal_train)),
             "test": segment_test,
             "sweep": capture_signal_details.segments["sweep"],
+            "white_noise": capture_signal_details.segments["white_noise"],
         }
 
         self.record_controller = RecordWetController(
