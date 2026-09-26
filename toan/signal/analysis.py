@@ -10,7 +10,6 @@ from matplotlib import pyplot as plt
 from scipy.constants import femto
 
 # Parameters of the main sweep in toan/signal/capture_signal.py
-_SWEEP_DURATION = 10.0
 _SWEEP_BEGIN_FREQ = 18.0
 _SWEEP_END_FREQ = 24000.0
 
@@ -138,7 +137,7 @@ def _measure_sweep_magnitude(
 ) -> tuple[np.ndarray, np.ndarray]:
     begin_freq = _SWEEP_BEGIN_FREQ
     end_freq = min(_SWEEP_END_FREQ, sample_rate // 2)
-    sweep_samples = int(sample_rate * _SWEEP_DURATION)
+    sweep_samples = len(signal)
 
     # The sweep is logarithmic, so a fixed window spans a fixed fraction of an octave
     octaves = np.log2(end_freq / begin_freq)

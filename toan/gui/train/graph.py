@@ -157,7 +157,7 @@ class TrainGraphPage(QtWidgets.QWizardPage):
         fr_layout = QtWidgets.QVBoxLayout(fr_widget)
         self.graph_fr_sweep = FigurePanel()
         fr_layout.addWidget(self.graph_fr_sweep)
-        fr_index = self.tab_root.addTab(fr_widget, "FR (Sweep)")
+        fr_index = self.tab_root.addTab(fr_widget, "Frequency Response")
         self._lazy_loaders[fr_index] = self._load_sweep_frequency_response
 
         self._nam_tabs_built = True
