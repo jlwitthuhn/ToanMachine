@@ -36,6 +36,56 @@ class FigurePanel(QtWidgets.QWidget):
         self._layout.addWidget(self.canvas)
 
 
+class FigureSelector(QtWidgets.QWidget):
+    combo: QtWidgets.QComboBox
+    stack: QtWidgets.QStackedWidget
+
+    def __init__(self, label: str, parent=None):
+        super().__init__(parent)
+        self._generators: list[Callable[[], Figure]] = []
+        self._loaded: set[int] = set()
+        # Nothing is generated until the selector is first displayed
+        self._displayed = False
+
+        layout = QtWidgets.QVBoxLayout(self)
+
+        row = QtWidgets.QWidget(self)
+        row_layout = QtWidgets.QHBoxLayout(row)
+        row_layout.setContentsMargins(0, 0, 0, 0)
+        row_layout.addWidget(QtWidgets.QLabel(label, row))
+        self.combo = QtWidgets.QComboBox(row)
+        row_layout.addWidget(self.combo)
+        row_layout.addStretch(1)
+        layout.addWidget(row)
+
+        self.stack = QtWidgets.QStackedWidget(self)
+        layout.addWidget(self.stack)
+
+        self.combo.currentIndexChanged.connect(self.selected_option)
+
+    def add_option(self, title: str, generate: Callable[[], Figure]) -> None:
+        self.stack.addWidget(FigurePanel())
+        self._generators.append(generate)
+        self.combo.addItem(title)
+
+    def load_current(self) -> None:
+        self._displayed = True
+        self._load(self.combo.currentIndex())
+
+    def _load(self, index: int) -> None:
+        if index in self._loaded:
+            return
+        panel = self.stack.widget(index)
+        assert isinstance(panel, FigurePanel)
+        panel.set_figure(self._generators[index]())
+        self._loaded.add(index)
+
+    def selected_option(self, index: int) -> None:
+        self.stack.setCurrentIndex(index)
+        if self._displayed:
+            self._load(index)
+
+
 def _run_nam_submodels(model: NamA2WaveNetTorch, signal: np.ndarray) -> np.ndarray:
     device = next(model.parameters()).device
     input = np.concat([np.zeros(model.receptive_field - 1), signal])
@@ -51,11 +101,8 @@ class TrainGraphPage(QtWidgets.QWizardPage):
     context: TrainingGuiContext
 
     graph_loss: FigurePanel
-    graph_fr_sweep: FigurePanel
-    graph_fr_white_noise: FigurePanel
-
-    combo_spec_source: QtWidgets.QComboBox
-    stack_spec: QtWidgets.QStackedWidget
+    selector_spec: FigureSelector
+    selector_fr: FigureSelector
 
     signal_nam_big_sweep: np.ndarray | None = None
     signal_nam_small_sweep: np.ndarray | None = None
@@ -77,40 +124,16 @@ class TrainGraphPage(QtWidgets.QWizardPage):
         self._loaded: set[int] = set()
         self._nam_tabs_built = False
 
-        # Spectrogram sources are also populated only when selected
-        self._spec_loaders: list[Callable[[], None]] = []
-        self._spec_loaded: set[int] = set()
-
         loss_widget = QtWidgets.QWidget()
         loss_layout = QtWidgets.QVBoxLayout(loss_widget)
         self.graph_loss = FigurePanel()
         loss_layout.addWidget(self.graph_loss)
         self.tab_root.addTab(loss_widget, "Loss")
 
-        spec_widget = QtWidgets.QWidget()
-        spec_layout = QtWidgets.QVBoxLayout(spec_widget)
-
-        source_row = QtWidgets.QWidget(spec_widget)
-        source_row_layout = QtWidgets.QHBoxLayout(source_row)
-        source_row_layout.setContentsMargins(0, 0, 0, 0)
-        source_row_layout.addWidget(QtWidgets.QLabel("Source:", source_row))
-        self.combo_spec_source = QtWidgets.QComboBox(source_row)
-        source_row_layout.addWidget(self.combo_spec_source)
-        source_row_layout.addStretch(1)
-        spec_layout.addWidget(source_row)
-
-        self.stack_spec = QtWidgets.QStackedWidget(spec_widget)
-        spec_layout.addWidget(self.stack_spec)
-        spec_index = self.tab_root.addTab(spec_widget, "Spectrogram")
-        self._lazy_loaders[spec_index] = lambda: self._load_spectrogram_source(
-            self.combo_spec_source.currentIndex()
-        )
-
+        self.selector_spec = FigureSelector("Source:")
+        spec_index = self.tab_root.addTab(self.selector_spec, "Spectrogram")
+        self._lazy_loaders[spec_index] = self.selector_spec.load_current
         self._add_spectrogram_source("Recording", lambda: self.context.signal_wet_sweep)
-        # Connect after the first source so selecting it does not load it early
-        self.combo_spec_source.currentIndexChanged.connect(
-            self.selected_spectrogram_source
-        )
 
         layout.addWidget(self.tab_root)
 
@@ -168,73 +191,46 @@ class TrainGraphPage(QtWidgets.QWizardPage):
         self._add_spectrogram_source("NAM (Big)", lambda: self.signal_nam_big_sweep)
         self._add_spectrogram_source("NAM (Small)", lambda: self.signal_nam_small_sweep)
 
-        fr_widget = QtWidgets.QWidget()
-        fr_layout = QtWidgets.QVBoxLayout(fr_widget)
-        self.graph_fr_sweep = FigurePanel()
-        fr_layout.addWidget(self.graph_fr_sweep)
-        fr_index = self.tab_root.addTab(fr_widget, "Frequency Response")
-        self._lazy_loaders[fr_index] = self._load_sweep_frequency_response
-
-        white_noise_widget = QtWidgets.QWidget()
-        white_noise_layout = QtWidgets.QVBoxLayout(white_noise_widget)
-        self.graph_fr_white_noise = FigurePanel()
-        white_noise_layout.addWidget(self.graph_fr_white_noise)
-        white_noise_index = self.tab_root.addTab(white_noise_widget, "White Noise")
-        self._lazy_loaders[white_noise_index] = (
-            self._load_white_noise_frequency_response
-        )
+        self.selector_fr = FigureSelector("Signal:")
+        self.selector_fr.add_option("Sweep", self._generate_sweep_frequency_response)
+        self.selector_fr.add_option("Noise", self._generate_noise_frequency_response)
+        self.selector_fr.combo.setCurrentText("Noise")
+        fr_index = self.tab_root.addTab(self.selector_fr, "Frequency Response")
+        self._lazy_loaders[fr_index] = self.selector_fr.load_current
 
         self._nam_tabs_built = True
 
     def _add_spectrogram_source(
         self, title: str, get_signal: Callable[[], np.ndarray]
     ) -> None:
-        panel = FigurePanel()
-        self.stack_spec.addWidget(panel)
-        self._spec_loaders.append(lambda: self._load_spectrogram(panel, get_signal()))
-        self.combo_spec_source.addItem(title)
+        self.selector_spec.add_option(
+            title, lambda: generate_spectrogram(self.context.sample_rate, get_signal())
+        )
 
-    def _load_spectrogram_source(self, index: int) -> None:
-        if index in self._spec_loaded:
-            return
-        self._spec_loaders[index]()
-        self._spec_loaded.add(index)
-
-    def _load_spectrogram(self, panel: FigurePanel, signal: np.ndarray) -> None:
-        panel.set_figure(generate_spectrogram(self.context.sample_rate, signal))
-
-    def _load_sweep_frequency_response(self) -> None:
+    def _generate_sweep_frequency_response(self) -> Figure:
         assert self.signal_nam_big_sweep is not None
         assert self.signal_nam_small_sweep is not None
-        self.graph_fr_sweep.set_figure(
-            generate_sweep_frequency_response(
-                self.context.sample_rate,
-                {
-                    "Recording": self.context.signal_wet_sweep,
-                    "NAM (Big)": self.signal_nam_big_sweep,
-                    "NAM (Small)": self.signal_nam_small_sweep,
-                },
-            )
+        return generate_sweep_frequency_response(
+            self.context.sample_rate,
+            {
+                "Recording": self.context.signal_wet_sweep,
+                "NAM (Big)": self.signal_nam_big_sweep,
+                "NAM (Small)": self.signal_nam_small_sweep,
+            },
         )
 
-    def _load_white_noise_frequency_response(self) -> None:
+    def _generate_noise_frequency_response(self) -> Figure:
         assert self.signal_nam_big_white_noise is not None
         assert self.signal_nam_small_white_noise is not None
-        self.graph_fr_white_noise.set_figure(
-            generate_noise_frequency_response(
-                self.context.sample_rate,
-                self.context.signal_dry_white_noise,
-                {
-                    "Recording": self.context.signal_wet_white_noise,
-                    "NAM (Big)": self.signal_nam_big_white_noise,
-                    "NAM (Small)": self.signal_nam_small_white_noise,
-                },
-            )
+        return generate_noise_frequency_response(
+            self.context.sample_rate,
+            self.context.signal_dry_white_noise,
+            {
+                "Recording": self.context.signal_wet_white_noise,
+                "NAM (Big)": self.signal_nam_big_white_noise,
+                "NAM (Small)": self.signal_nam_small_white_noise,
+            },
         )
-
-    def selected_spectrogram_source(self, index: int) -> None:
-        self._load_spectrogram_source(index)
-        self.stack_spec.setCurrentIndex(index)
 
     def clicked_tab(self, index: int) -> None:
         if index in self._loaded:
