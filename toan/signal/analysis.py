@@ -176,3 +176,55 @@ def generate_sweep_frequency_response(
     ax.grid(True, which="both")
     ax.legend()
     return fig
+
+
+def _measure_band_power(
+    sample_rate: int, signal: np.ndarray, centers: np.ndarray, window_octaves: float
+) -> np.ndarray:
+    # 1 Hz resolution keeps a few bins in even the narrowest low frequency bands
+    nperseg = min(sample_rate, len(signal))
+    freq, psd = scipy.signal.welch(
+        signal.astype(np.float64), sample_rate, window="hann", nperseg=nperseg
+    )
+
+    # Integrate the PSD over a fractional octave band centered on each frequency
+    cumulative = np.concatenate([[0.0], np.cumsum(psd) * (freq[1] - freq[0])])
+    half_band = 2.0 ** (window_octaves / 2)
+    lower = np.searchsorted(freq, centers / half_band)
+    upper = np.searchsorted(freq, centers * half_band, side="right")
+    upper = np.minimum(np.maximum(upper, lower + 1), len(freq))
+    return cumulative[upper] - cumulative[lower]
+
+
+def generate_noise_frequency_response(
+    sample_rate: int, signal_dry: np.ndarray, signals: dict[str, np.ndarray]
+) -> plt.Figure:
+    window_octaves = 1 / 6
+    # Cover the same range as the sweep so the two graphs line up
+    begin_freq = _SWEEP_BEGIN_FREQ
+    end_freq = min(_SWEEP_END_FREQ, sample_rate // 2)
+    freq = np.geomspace(begin_freq, end_freq, 1000)
+
+    # The noise has a volume envelope, so every signal must cover the same span
+    # or the averaged power will be biased by how much of the quiet tail is kept
+    length = min(len(signal_dry), *(len(signal) for signal in signals.values()))
+
+    power_dry = _measure_band_power(
+        sample_rate, signal_dry[:length], freq, window_octaves
+    )
+    power_dry = np.maximum(power_dry, 1e-20)
+
+    fig, ax = plt.subplots()
+
+    for label, signal in signals.items():
+        power = _measure_band_power(sample_rate, signal[:length], freq, window_octaves)
+        # Gain relative to the dry noise, so a flat response reads as a flat line
+        gain_db = 10.0 * np.log10(np.maximum(power, 1e-20) / power_dry)
+        ax.plot(freq, gain_db, label=label)
+
+    ax.set_xlabel("Frequency")
+    ax.set_ylabel("Gain (dB)")
+    ax.set_xscale("log")
+    ax.grid(True, which="both")
+    ax.legend()
+    return fig

@@ -11,7 +11,12 @@ from matplotlib.figure import Figure
 from PySide6 import QtWidgets
 
 from toan.gui.train import TrainingGuiContext
-from toan.signal.analysis import generate_spectrogram, generate_sweep_frequency_response
+from toan.model.nam_a2_wavenet_torch import NamA2WaveNetTorch
+from toan.signal.analysis import (
+    generate_noise_frequency_response,
+    generate_spectrogram,
+    generate_sweep_frequency_response,
+)
 
 
 # Widget to host a graph and keep it the right size
@@ -31,17 +36,31 @@ class FigurePanel(QtWidgets.QWidget):
         self._layout.addWidget(self.canvas)
 
 
+def _run_nam_submodels(model: NamA2WaveNetTorch, signal: np.ndarray) -> np.ndarray:
+    device = next(model.parameters()).device
+    input = np.concat([np.zeros(model.receptive_field - 1), signal])
+    input = torch.tensor(input.astype(np.float32)).to(device)
+
+    # Outputs are stacked like (num_submodels, batch, length)
+    with torch.no_grad():
+        outputs = model(input.reshape(1, -1))
+    return outputs[:, 0, :].cpu().numpy()
+
+
 class TrainGraphPage(QtWidgets.QWizardPage):
     context: TrainingGuiContext
 
     graph_loss: FigurePanel
     graph_fr_sweep: FigurePanel
+    graph_fr_white_noise: FigurePanel
 
     combo_spec_source: QtWidgets.QComboBox
     stack_spec: QtWidgets.QStackedWidget
 
     signal_nam_big_sweep: np.ndarray | None = None
     signal_nam_small_sweep: np.ndarray | None = None
+    signal_nam_big_white_noise: np.ndarray | None = None
+    signal_nam_small_white_noise: np.ndarray | None = None
 
     def __init__(self, parent, context: TrainingGuiContext):
         super().__init__(parent)
@@ -99,7 +118,7 @@ class TrainGraphPage(QtWidgets.QWizardPage):
         self.graph_loss.set_figure(
             self.context.progress_context.summaries[-1].generate_loss_graph(5)
         )
-        self._process_nam_sweeps()
+        self._process_nam_signals()
         self._build_nam_tabs()
 
     def validatePage(self) -> bool:
@@ -113,7 +132,7 @@ class TrainGraphPage(QtWidgets.QWizardPage):
 
         return True
 
-    def _process_nam_sweeps(self) -> None:
+    def _process_nam_signals(self) -> None:
         if self.signal_nam_big_sweep is not None:
             return
 
@@ -129,19 +148,15 @@ class TrainGraphPage(QtWidgets.QWizardPage):
             range(len(param_counts)), key=lambda i: param_counts[i], reverse=True
         )
 
-        device = next(model.parameters()).device
-        input = np.concat(
-            [np.zeros(model.receptive_field - 1), self.context.signal_dry_sweep]
+        sweep_outputs = _run_nam_submodels(model, self.context.signal_dry_sweep)
+        self.signal_nam_big_sweep = sweep_outputs[order[0]]
+        self.signal_nam_small_sweep = sweep_outputs[order[-1]]
+
+        white_noise_outputs = _run_nam_submodels(
+            model, self.context.signal_dry_white_noise
         )
-        input = torch.tensor(input.astype(np.float32)).to(device)
-
-        # Outputs are stacked like (num_submodels, batch, length)
-        with torch.no_grad():
-            outputs = model(input.reshape(1, -1))
-        outputs = outputs[:, 0, :].cpu().numpy()
-
-        self.signal_nam_big_sweep = outputs[order[0]]
-        self.signal_nam_small_sweep = outputs[order[-1]]
+        self.signal_nam_big_white_noise = white_noise_outputs[order[0]]
+        self.signal_nam_small_white_noise = white_noise_outputs[order[-1]]
 
     def _build_nam_tabs(self) -> None:
         if self._nam_tabs_built:
@@ -159,6 +174,15 @@ class TrainGraphPage(QtWidgets.QWizardPage):
         fr_layout.addWidget(self.graph_fr_sweep)
         fr_index = self.tab_root.addTab(fr_widget, "Frequency Response")
         self._lazy_loaders[fr_index] = self._load_sweep_frequency_response
+
+        white_noise_widget = QtWidgets.QWidget()
+        white_noise_layout = QtWidgets.QVBoxLayout(white_noise_widget)
+        self.graph_fr_white_noise = FigurePanel()
+        white_noise_layout.addWidget(self.graph_fr_white_noise)
+        white_noise_index = self.tab_root.addTab(white_noise_widget, "White Noise")
+        self._lazy_loaders[white_noise_index] = (
+            self._load_white_noise_frequency_response
+        )
 
         self._nam_tabs_built = True
 
@@ -189,6 +213,21 @@ class TrainGraphPage(QtWidgets.QWizardPage):
                     "Recording": self.context.signal_wet_sweep,
                     "NAM (Big)": self.signal_nam_big_sweep,
                     "NAM (Small)": self.signal_nam_small_sweep,
+                },
+            )
+        )
+
+    def _load_white_noise_frequency_response(self) -> None:
+        assert self.signal_nam_big_white_noise is not None
+        assert self.signal_nam_small_white_noise is not None
+        self.graph_fr_white_noise.set_figure(
+            generate_noise_frequency_response(
+                self.context.sample_rate,
+                self.context.signal_dry_white_noise,
+                {
+                    "Recording": self.context.signal_wet_white_noise,
+                    "NAM (Big)": self.signal_nam_big_white_noise,
+                    "NAM (Small)": self.signal_nam_small_white_noise,
                 },
             )
         )
