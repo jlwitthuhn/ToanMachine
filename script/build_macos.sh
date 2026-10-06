@@ -32,6 +32,17 @@ if (( $? != 0 )); then
 	exit 1
 fi
 
+print "Writing git info..."
+git_info=$(git describe --tags --always)
+if (( $? != 0 )); then
+	print -u2 "Error: failed to get git info"
+	exit 1
+fi
+if ! print -r -- "$git_info" > data/gitinfo.txt; then
+	print -u2 "Error: failed to write git info"
+	exit 1
+fi
+
 print "Running pyinstaller..."
 .venv/bin/python -m PyInstaller --noconfirm --windowed --add-data=data:data gui.py --name ToanMachine
 if (( $? != 0 )); then

@@ -2,6 +2,9 @@
 # https://www.gnu.org/licenses/gpl-3.0.en.html
 # SPDX-License-Identifier: GPL-3.0-only
 
+import sys
+from pathlib import Path
+
 import numpy as np
 import scipy
 import sounddevice as sd
@@ -12,6 +15,15 @@ from toan.gui.record import RecordWizard
 from toan.gui.sound_manager import SoundManager
 from toan.gui.train import TrainingWizard
 from toan.signal.capture_signal import generate_capture_signal
+
+
+def _load_git_info() -> str:
+    script_dir = Path(__file__).resolve().parent
+    root_dir = Path(getattr(sys, "_MEIPASS", script_dir.parent.parent))
+    git_info_path = root_dir.joinpath("data").joinpath("gitinfo.txt").resolve()
+    if not git_info_path.is_file():
+        return "git tag not available"
+    return git_info_path.read_text(encoding="utf-8").strip()
 
 
 def _clicked_play_training_signal():
@@ -108,5 +120,7 @@ class MainWindow(QtWidgets.QWidget):
 
     def _clicked_about(self):
         QtWidgets.QMessageBox.information(
-            self, "About", "Toan Machine\nhttps://github.com/jlwitthuhn/ToanMachine"
+            self,
+            "About",
+            f"Toan Machine\n{_load_git_info()}\nhttps://github.com/jlwitthuhn/ToanMachine",
         )
