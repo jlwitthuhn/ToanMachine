@@ -30,7 +30,7 @@ class CaptureSignalConfig:
     multisweep_layers: int = 10
     warble_duration: float = 6.5
     warble_octave_scale: float = 0.72
-    noise_duration: float = 8.0
+    noise_duration: float = 9.0
     pluck_note_duration: float = 0.62
     pluck_decay: float = 0.982
     pluck_pre_smooth: int = 1
