@@ -13,7 +13,7 @@ from toan.soundio import SdChannel, SdDevice, generate_descriptions, get_output_
 from toan.soundio.record_wet import RecordWetController, RecordWetProgress
 
 OUTPUT_LEVEL_TEXT = [
-    "This page guides you through setting the output level of your interface. For overdrive and similar effects it is very important to get this right to ensure that the input signal is loud enough to trigger the desired effect.",
+    "Here you will need to set your interface output level to an appropriate volume. Ensure that it is a bit more than loud enough to trigger the level of overdrive you want to achieve. This is the maximum volume the model will support as input.",
     "Click the 'Record' button to play some synthesized chords through your device and record the result. Then press 'Play' and listen to the recording.",
     "If the recording clips, you will need to turn down your input gain.",
 ]

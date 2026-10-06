@@ -12,8 +12,8 @@ from toan.gui.record.context import RecordingContext
 from toan.signal.generator.trig import generate_sine_wave
 
 OUTPUT_VOLTAGE_TEXT = [
-    "This step requires that you own a multimeter or otherwise can figure out your interface's output voltage. If you cannot measure this, skip this step.",
-    "This should measure the voltage going in to the device you are capturing, so measure just before the device in your signal chain.",
+    "This step requires that you own a multimeter or otherwise can figure out your interface's output voltage.",
+    "Measure the voltage going in to the device you are capturing. If your signal chain includes a reamp box, be sure to measure what is coming out of the reamp rather than what is going in to it.",
 ]
 
 TONE_TEXT = "Press 'Play Test Tone' to output a 300Hz sine wave, then measure your interface's output with a multimeter."
@@ -56,7 +56,6 @@ class RecordOutputVoltagePage(QtWidgets.QWizardPage):
     tone_signal: np.ndarray
     tone_signal_index: int = 0
 
-    checkbox_calibration: QtWidgets.QCheckBox
     text_voltage: QtWidgets.QLineEdit
     combo_unit: QtWidgets.QComboBox
 
@@ -93,10 +92,6 @@ class RecordOutputVoltagePage(QtWidgets.QWizardPage):
         hline2.setFrameShadow(QtWidgets.QFrame.Shadow.Sunken)
         layout.addWidget(hline2)
 
-        self.checkbox_calibration = QtWidgets.QCheckBox("Use Voltage Calibration", self)
-        self.checkbox_calibration.toggled.connect(self._calibration_toggled)
-        layout.addWidget(self.checkbox_calibration)
-
         form_panel = QtWidgets.QWidget(self)
         form_layout = QtWidgets.QFormLayout(form_panel)
 
@@ -107,10 +102,12 @@ class RecordOutputVoltagePage(QtWidgets.QWizardPage):
         self.text_voltage = QtWidgets.QLineEdit(voltage_row)
         self.text_voltage.setFixedWidth(80)
         self.text_voltage.setValidator(QtGui.QDoubleValidator(self.text_voltage))
+        self.text_voltage.textChanged.connect(self.completeChanged)
         voltage_row_layout.addWidget(self.text_voltage)
 
         self.combo_unit = QtWidgets.QComboBox(voltage_row)
         self.combo_unit.addItems([UNIT_MILLIVOLTS_RMS, UNIT_VOLTS_RMS, UNIT_DBU])
+        self.combo_unit.currentTextChanged.connect(self.completeChanged)
         voltage_row_layout.addWidget(self.combo_unit)
 
         form_layout.addRow("Output Voltage:", voltage_row)
@@ -119,22 +116,23 @@ class RecordOutputVoltagePage(QtWidgets.QWizardPage):
 
         layout.addStretch(1)
 
-        self._calibration_toggled(self.checkbox_calibration.isChecked())
-
     def initializePage(self):
         self.combo_unit.setCurrentText(UNIT_MILLIVOLTS_RMS)
         if self.context.dbu is not None:
-            self.checkbox_calibration.setChecked(True)
             millivolts = _dbu_to_millivolts_rms(self.context.dbu)
             self.text_voltage.setText(f"{millivolts:.4g}")
         else:
-            self.checkbox_calibration.setChecked(False)
             self.text_voltage.clear()
-        self._calibration_toggled(self.checkbox_calibration.isChecked())
 
-    def _calibration_toggled(self, checked: bool):
-        self.text_voltage.setEnabled(checked)
-        self.combo_unit.setEnabled(checked)
+    def isComplete(self) -> bool:
+        return self._entered_dbu() is not None
+
+    def _entered_dbu(self) -> float | None:
+        try:
+            value = float(self.text_voltage.text())
+        except ValueError:
+            return None
+        return _to_dbu(value, self.combo_unit.currentText())
 
     def _clicked_play_tone(self):
         if self.play_active:
@@ -177,14 +175,9 @@ class RecordOutputVoltagePage(QtWidgets.QWizardPage):
             self._stop_tone()
 
     def validatePage(self) -> bool:
+        dbu = self._entered_dbu()
+        if dbu is None:
+            return False
         self.cleanupPage()
-        if self.checkbox_calibration.isChecked():
-            try:
-                value = float(self.text_voltage.text())
-            except ValueError:
-                self.context.dbu = None
-            else:
-                self.context.dbu = _to_dbu(value, self.combo_unit.currentText())
-        else:
-            self.context.dbu = None
+        self.context.dbu = dbu
         return True
