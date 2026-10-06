@@ -13,6 +13,9 @@ from scipy.constants import femto
 _SWEEP_BEGIN_FREQ = 18.0
 _SWEEP_END_FREQ = 24000.0
 
+# Fraction of the white noise skipped at each end in the noise frequency response
+_NOISE_TRIM_FRACTION = 0.1
+
 
 @dataclass
 class SignalClickDetails:
@@ -209,15 +212,18 @@ def generate_noise_frequency_response(
     # or the averaged power will be biased by how much of the quiet tail is kept
     length = min(len(signal_dry), *(len(signal) for signal in signals.values()))
 
-    power_dry = _measure_band_power(
-        sample_rate, signal_dry[:length], freq, window_octaves
-    )
+    # Skip the quiet start and end of the envelope, which carry less information
+    # than the louder middle of the noise
+    trim = int(length * _NOISE_TRIM_FRACTION)
+    span = slice(trim, length - trim)
+
+    power_dry = _measure_band_power(sample_rate, signal_dry[span], freq, window_octaves)
     power_dry = np.maximum(power_dry, 1e-20)
 
     fig, ax = plt.subplots()
 
     for label, signal in signals.items():
-        power = _measure_band_power(sample_rate, signal[:length], freq, window_octaves)
+        power = _measure_band_power(sample_rate, signal[span], freq, window_octaves)
         # Gain relative to the dry noise, so a flat response reads as a flat line
         gain_db = 10.0 * np.log10(np.maximum(power, 1e-20) / power_dry)
         ax.plot(freq, gain_db, label=label)
