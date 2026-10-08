@@ -74,12 +74,10 @@ def _apply_pickup_filter(
 # shaped like the output of a magnetic pickup under a picked string
 def generate_pluck(
     sample_rate: int,
+    sample_count: int,
     frequency: float,
-    duration: float,
     config: PluckConfig = PluckConfig(),
 ) -> np.ndarray:
-    sample_count = int(duration * sample_rate)
-
     # One period of noise is drawn per note to keep the global random stream, and with
     # it every capture signal block generated after the plucks, the same as when this
     # was a Karplus-Strong generator. Its first value varies the pick position.
@@ -139,7 +137,7 @@ def generate_generic_chord_pluck(
     shape: list[int],
     root_frequency: float,
     duration: float,
-    offset_duration: float = 1.8e-3,
+    offset_duration: float = 1.9e-3,
     config: PluckConfig = PluckConfig(),
 ) -> np.ndarray:
     frequencies: list[float] = [root_frequency]
@@ -151,12 +149,12 @@ def generate_generic_chord_pluck(
     pluck_list: list[np.ndarray] = []
     for idx, frequency in enumerate(frequencies):
         offset = int(idx * offset_duration * sample_rate)
-        pluck_raw = generate_pluck(sample_rate, frequency, duration, config)
+        sample_count = math.floor(sample_rate * duration) - offset
+        pluck_raw = generate_pluck(sample_rate, sample_count, frequency, config)
         if offset == 0:
             pluck_list.append(pluck_raw)
         else:
-            offset_buffer = np.zeros(offset)
-            pluck_list.append(np.concatenate((offset_buffer, pluck_raw[:-offset])))
+            pluck_list.append(np.concatenate((np.zeros(offset), pluck_raw)))
 
     chord = np.add.reduce(pluck_list)
     chord = chord / np.abs(chord).max()

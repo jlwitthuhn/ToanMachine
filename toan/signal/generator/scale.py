@@ -43,8 +43,9 @@ def generate_chromatic_scale(
                 this_tone = generate_tone(sample_rate, freq, note_duration, True)
                 result.append(this_tone)
             case ScaleSound.PLUCK:
+                sample_count = math.floor(sample_rate * note_duration)
                 this_pluck = generate_pluck(
-                    sample_rate, freq, note_duration, pluck_config
+                    sample_rate, sample_count, freq, pluck_config
                 )
                 result.append(this_pluck)
             case _:
