@@ -7,7 +7,7 @@ from enum import Enum
 
 import numpy as np
 
-from toan.signal.generator.pluck import generate_pluck
+from toan.signal.generator.pluck import PluckConfig, generate_pluck
 from toan.signal.generator.tone import generate_tone
 
 
@@ -33,7 +33,7 @@ def generate_chromatic_scale(
     steps: int,
     note_duration: float,
     sound_type: ScaleSound,
-    pluck_pre_smooth: int = 0,
+    pluck_config: PluckConfig = PluckConfig(),
 ) -> list[np.ndarray]:
     freqs = _generate_semitone_scale_frequencies(low_freq, steps - 1)
     result = []
@@ -44,9 +44,8 @@ def generate_chromatic_scale(
                 result.append(this_tone)
             case ScaleSound.PLUCK:
                 this_pluck = generate_pluck(
-                    sample_rate, freq, note_duration, 0.982, pluck_pre_smooth
+                    sample_rate, freq, note_duration, pluck_config
                 )
-                this_pluck = this_pluck / np.abs(this_pluck).max()
                 result.append(this_pluck)
             case _:
                 assert False

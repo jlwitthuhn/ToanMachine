@@ -12,6 +12,7 @@ from toan.signal.effect import EffectType, apply_effect
 from toan.signal.generator.chirp import generate_chirp
 from toan.signal.generator.gaussian import generate_gaussian_pulse
 from toan.signal.generator.noise import generate_white_noise
+from toan.signal.generator.pluck import PluckConfig
 from toan.signal.generator.pluck_scale import generate_named_chord_pluck_scale
 from toan.signal.generator.trig import generate_cosine_wave, generate_sine_wave
 from toan.signal.generator.warble import generate_warble_chord
@@ -32,8 +33,7 @@ class CaptureSignalConfig:
     warble_octave_scale: float = 0.72
     noise_duration: float = 9.0
     pluck_note_duration: float = 0.62
-    pluck_decay: float = 0.982
-    pluck_pre_smooth: int = 1
+    pluck: PluckConfig = field(default_factory=PluckConfig)
     small_sweep_begins: list[int] = field(
         default_factory=lambda: [
             500,
@@ -223,8 +223,7 @@ def _generate_plucked_block(
     sample_rate: int,
     chords: list[ChordWithEffects],
     note_duration: float,
-    pluck_decay: float,
-    pre_smooth: int = 0,
+    pluck_config: PluckConfig,
 ) -> np.ndarray:
     if len(chords) == 0:
         return np.zeros(1)
@@ -239,8 +238,7 @@ def _generate_plucked_block(
             6,
             note_duration,
             offset_duration,
-            pluck_decay,
-            pre_smooth,
+            pluck_config,
         )
 
     buffers = []
@@ -293,8 +291,7 @@ def generate_capture_signal(
         sample_rate,
         config.plucked_chords,
         config.pluck_note_duration,
-        config.pluck_decay,
-        config.pluck_pre_smooth,
+        config.pluck,
     )
     block_white_noise = _generate_white_noise_block(sample_rate, config.noise_duration)
     block_builtin_wavs = _generate_builtin_wav_block(sample_rate, config.builtin_wavs)
