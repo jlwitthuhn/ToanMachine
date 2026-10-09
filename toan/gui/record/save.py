@@ -39,7 +39,7 @@ class RecordSavePage(QtWidgets.QWizardPage):
             self.context.device_make,
             self.context.device_model,
             self.context.segments_dry,
-            self.context.dbu,
+            self.context.input_level_dbu,
         )
 
         with open(file_path, "wb") as f:

@@ -13,7 +13,10 @@ class RecordingContext:
     sample_rate: int = 48000
     input_channel: SdChannel
     output_channel: SdChannel
-    dbu: float | None = None
+    # Interface output calibration: dBu RMS of a sine that plays at 0 dBFS peak
+    input_level_dbu: float | None = None
+    # Interface input calibration: dBu RMS of a sine that reads 0 dBFS peak
+    output_level_dbu: float | None = None
     extra_signal_dry_test: np.ndarray | None = None
     extra_signal_dry_train: np.ndarray | None = None
     signal_dry: np.ndarray | None = None

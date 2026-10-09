@@ -9,6 +9,7 @@ from toan.gui.record.context import RecordingContext
 from toan.gui.record.device import RecordDevicePage
 from toan.gui.record.extra import RecordExtraPage
 from toan.gui.record.input_gain import RecordInputGainPage
+from toan.gui.record.input_voltage import RecordInputVoltagePage
 from toan.gui.record.intro import RecordIntroPage
 from toan.gui.record.output_calibration import RecordOutputCalibrationChoicePage
 from toan.gui.record.output_level import RecordOutputLevelPage
@@ -25,6 +26,8 @@ class RecordWizard(QtWidgets.QWizard):
     id_output_level: int
     id_output_voltage: int
     id_input_gain: int
+    id_input_voltage: int
+    id_wet_signal: int
 
     def __init__(self, parent):
         super().__init__(parent)
@@ -47,7 +50,8 @@ class RecordWizard(QtWidgets.QWizard):
             RecordOutputVoltagePage(self, self.context)
         )
         self.id_input_gain = self.addPage(RecordInputGainPage(self, self.context))
-        self.addPage(RecordWetSignalPage(self, self.context))
+        self.id_input_voltage = self.addPage(RecordInputVoltagePage(self, self.context))
+        self.id_wet_signal = self.addPage(RecordWetSignalPage(self, self.context))
         self.addPage(RecordSavePage(self, self.context))
 
         self.setWindowTitle("Recording Wizard")
@@ -55,7 +59,9 @@ class RecordWizard(QtWidgets.QWizard):
 
     def nextId(self) -> int:
         # Output calibration branches to exactly one of the level or voltage
-        # pages, and both rejoin the main sequence at input gain.
+        # pages, and both rejoin the main sequence at input gain. Input
+        # voltage is only measured when calibrating by voltage, and must come
+        # after input gain because changing the gain invalidates it.
         current_id = self.currentId()
         if current_id == self.id_output_calibration_choice:
             if self.page_output_calibration_choice.is_voltage_selected():
@@ -63,4 +69,8 @@ class RecordWizard(QtWidgets.QWizard):
             return self.id_output_level
         if current_id in (self.id_output_level, self.id_output_voltage):
             return self.id_input_gain
+        if current_id == self.id_input_gain:
+            if self.page_output_calibration_choice.is_voltage_selected():
+                return self.id_input_voltage
+            return self.id_wet_signal
         return super().nextId()

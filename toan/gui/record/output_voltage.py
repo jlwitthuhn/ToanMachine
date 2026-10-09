@@ -2,13 +2,18 @@
 # https://www.gnu.org/licenses/gpl-3.0.en.html
 # SPDX-License-Identifier: GPL-3.0-only
 
-import math
-
 import numpy as np
 import sounddevice as sd
 from PySide6 import QtGui, QtWidgets
 
 from toan.gui.record.context import RecordingContext
+from toan.gui.record.voltage import (
+    TONE_FREQUENCY,
+    UNIT_MILLIVOLTS_RMS,
+    VOLTAGE_UNITS,
+    dbu_to_millivolts_rms,
+    to_dbu,
+)
 from toan.signal.generator.trig import generate_sine_wave
 
 OUTPUT_VOLTAGE_TEXT = [
@@ -17,33 +22,6 @@ OUTPUT_VOLTAGE_TEXT = [
 ]
 
 TONE_TEXT = "Press 'Play Test Tone' to output a 300Hz sine wave, then measure your interface's output with a multimeter."
-
-TONE_FREQUENCY = 300
-
-# 0 dBu is 0.775 V RMS
-DBU_REFERENCE_VOLTS = math.sqrt(0.6)
-
-UNIT_MILLIVOLTS_RMS = "Millivolts RMS"
-UNIT_VOLTS_RMS = "Volts RMS"
-UNIT_DBU = "dBu"
-
-
-def _to_dbu(value: float, unit: str) -> float | None:
-    if unit == UNIT_DBU:
-        return value
-    if unit == UNIT_MILLIVOLTS_RMS:
-        volts = value / 1000.0
-    elif unit == UNIT_VOLTS_RMS:
-        volts = value
-    else:
-        return None
-    if volts <= 0:
-        return None
-    return 20.0 * math.log10(volts / DBU_REFERENCE_VOLTS)
-
-
-def _dbu_to_millivolts_rms(dbu: float) -> float:
-    return DBU_REFERENCE_VOLTS * (10.0 ** (dbu / 20.0)) * 1000.0
 
 
 class RecordOutputVoltagePage(QtWidgets.QWizardPage):
@@ -106,7 +84,7 @@ class RecordOutputVoltagePage(QtWidgets.QWizardPage):
         voltage_row_layout.addWidget(self.text_voltage)
 
         self.combo_unit = QtWidgets.QComboBox(voltage_row)
-        self.combo_unit.addItems([UNIT_MILLIVOLTS_RMS, UNIT_VOLTS_RMS, UNIT_DBU])
+        self.combo_unit.addItems(VOLTAGE_UNITS)
         self.combo_unit.currentTextChanged.connect(self.completeChanged)
         voltage_row_layout.addWidget(self.combo_unit)
 
@@ -118,8 +96,8 @@ class RecordOutputVoltagePage(QtWidgets.QWizardPage):
 
     def initializePage(self):
         self.combo_unit.setCurrentText(UNIT_MILLIVOLTS_RMS)
-        if self.context.dbu is not None:
-            millivolts = _dbu_to_millivolts_rms(self.context.dbu)
+        if self.context.input_level_dbu is not None:
+            millivolts = dbu_to_millivolts_rms(self.context.input_level_dbu)
             self.text_voltage.setText(f"{millivolts:.4g}")
         else:
             self.text_voltage.clear()
@@ -132,7 +110,7 @@ class RecordOutputVoltagePage(QtWidgets.QWizardPage):
             value = float(self.text_voltage.text())
         except ValueError:
             return None
-        return _to_dbu(value, self.combo_unit.currentText())
+        return to_dbu(value, self.combo_unit.currentText())
 
     def _clicked_play_tone(self):
         if self.play_active:
@@ -179,5 +157,5 @@ class RecordOutputVoltagePage(QtWidgets.QWizardPage):
         if dbu is None:
             return False
         self.cleanupPage()
-        self.context.dbu = dbu
+        self.context.input_level_dbu = dbu
         return True

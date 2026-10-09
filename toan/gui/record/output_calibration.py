@@ -60,6 +60,7 @@ class RecordOutputCalibrationChoicePage(QtWidgets.QWizardPage):
 
     def validatePage(self) -> bool:
         if not self.is_voltage_selected():
-            # Drop any voltage entered on an earlier pass through the wizard
-            self.context.dbu = None
+            # Drop any voltages entered on an earlier pass through the wizard
+            self.context.input_level_dbu = None
+            self.context.output_level_dbu = None
         return True
