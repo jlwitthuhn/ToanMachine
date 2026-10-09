@@ -30,7 +30,8 @@ def create_training_zip(
     dev_make: str,
     dev_model: str,
     segments: dict[str, tuple[int, int]],
-    dbu: float | None = None,
+    input_level_dbu: float | None = None,
+    output_level_dbu: float | None = None,
 ) -> io.BytesIO:
     missing_segments = [name for name in REQUIRED_SEGMENTS if name not in segments]
     if len(missing_segments) > 0:
@@ -58,10 +59,13 @@ def create_training_zip(
         "device_model": dev_model,
         "sample_rate": sample_rate,
         "segments": {name: [bounds[0], bounds[1]] for name, bounds in segments.items()},
-        "input_level_dbu": dbu,
         "dry_signal": "dry.wav",
         "wet_signal": "wet.wav",
     }
+    if input_level_dbu is not None:
+        metadata["input_level_dbu"] = input_level_dbu
+    if output_level_dbu is not None:
+        metadata["output_level_dbu"] = output_level_dbu
 
     zip_buffer = io.BytesIO()
     with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zip:
