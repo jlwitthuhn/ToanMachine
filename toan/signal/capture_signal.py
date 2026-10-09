@@ -228,7 +228,9 @@ def _generate_plucked_block(
     if len(chords) == 0:
         return np.zeros(1)
 
-    def generate_plucked_scale(shape: ChordType, offset_duration: float):
+    def generate_plucked_scale(
+        shape: ChordType, offset_duration: float
+    ) -> list[np.ndarray]:
         return generate_named_chord_pluck_scale(
             shape,
             sample_rate,
@@ -244,10 +246,12 @@ def _generate_plucked_block(
     buffers = []
     for i, chord in enumerate(chords):
         offset = i * 0.6e-3
-        this_chord_buffer = generate_plucked_scale(chord.chord, offset)
+        this_chord_list = generate_plucked_scale(chord.chord, offset)
+        np.random.shuffle(this_chord_list)
+        this_chord_buffer = concat_signals(this_chord_list, sample_rate // 24)
         this_chord_buffer = apply_effect(this_chord_buffer, sample_rate, chord.effect)
         buffers.append(this_chord_buffer)
-    return concat_signals(buffers, sample_rate // 4)
+    return concat_signals(buffers, sample_rate // 12)
 
 
 def _generate_white_noise_block(sample_rate: int, duration: float) -> np.ndarray:

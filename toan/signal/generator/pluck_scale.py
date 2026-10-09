@@ -8,7 +8,6 @@ from toan.music import get_note_frequency_by_name, get_note_index_by_name
 from toan.music.chord import ChordType
 from toan.music.frequency import increase_frequency_by_semitones
 from toan.signal.generator.pluck import PluckConfig, generate_generic_chord_pluck
-from toan.signal.mix import concat_signals
 
 
 def generate_generic_chord_pluck_scale(
@@ -19,9 +18,9 @@ def generate_generic_chord_pluck_scale(
     end_note: str,
     end_octave: int,
     single_duration: float,
-    offset_duration: float = 1.8e-3,
+    offset_duration: float = 2.0e-3,
     pluck_config: PluckConfig = PluckConfig(),
-) -> np.ndarray:
+) -> list[np.ndarray]:
     begin_index = get_note_index_by_name(begin_note, begin_octave)
     end_index = get_note_index_by_name(end_note, end_octave)
     semitone_width = max([0] + shape)
@@ -44,7 +43,7 @@ def generate_generic_chord_pluck_scale(
         )
         chord_list.append(this_chord)
 
-    return concat_signals(chord_list, sample_rate // 16)
+    return chord_list
 
 
 def generate_named_chord_pluck_scale(
@@ -55,9 +54,9 @@ def generate_named_chord_pluck_scale(
     end_note: str,
     end_octave: int,
     single_duration: float,
-    offset_duration: float = 1.8e-3,
+    offset_duration: float = 2.0e-3,
     pluck_config: PluckConfig = PluckConfig(),
-) -> np.ndarray:
+) -> list[np.ndarray]:
     shape = type.get_shape()
     return generate_generic_chord_pluck_scale(
         sample_rate,
