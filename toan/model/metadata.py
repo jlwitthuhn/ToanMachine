@@ -29,6 +29,7 @@ class ModelGenericMetadata:
     comment: str | None = None
     loss_test: dict[str, float] = dataclasses.field(default_factory=dict)
     input_level_dbu: float | None = None
+    output_level_dbu: float | None = None
 
     def export_dict(self) -> dict:
         return _export_metadata_dict(self)
@@ -42,6 +43,7 @@ class ModelA2Metadata:
     comment: str | None = None
     loss_test: dict[str, float] = dataclasses.field(default_factory=dict)
     input_level_dbu: float | None = None
+    output_level_dbu: float | None = None
     # Below two are computed post-training
     loudness: float | None = None
     gain: float | None = None
@@ -55,6 +57,7 @@ class ModelA2Metadata:
             comment=generic.comment,
             loss_test=dict(generic.loss_test),
             input_level_dbu=generic.input_level_dbu,
+            output_level_dbu=generic.output_level_dbu,
         )
 
     def export_dict(self) -> dict:
