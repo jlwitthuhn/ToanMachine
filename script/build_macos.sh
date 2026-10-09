@@ -65,9 +65,23 @@ if (( $? != 0 )); then
 	exit 1
 fi
 
+# Stage the app next to an Applications link so users can drag it straight
+# into Applications from the mounted disk image.
+print "Staging DMG contents..."
+dmg_staging="./dist/dmg"
+rm -rf "$dmg_staging"
+if ! mkdir -p "$dmg_staging" \
+	|| ! ditto "./dist/ToanMachine.app" "$dmg_staging/ToanMachine.app" \
+	|| ! ln -s /Applications "$dmg_staging/Applications"; then
+	print -u2 "Error: failed to stage disk image contents"
+	exit 1
+fi
+
 print "Packaging DMG..."
-hdiutil create -volname "ToanMachine" -srcfolder "./dist/ToanMachine.app" -ov -format UDZO "./dist/ToanMachine.dmg"
+hdiutil create -volname "ToanMachine" -srcfolder "$dmg_staging" -ov -format UDZO "./dist/ToanMachine.dmg"
 if (( $? != 0 )); then
 	print -u2 "Error: failed to create disk image"
 	exit 1
 fi
+
+rm -rf "$dmg_staging"
