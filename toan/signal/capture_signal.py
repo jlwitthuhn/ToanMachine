@@ -35,6 +35,7 @@ class CaptureSignalConfig:
     pluck_chord_string_delay: float = 5.0e-3
     pluck_chord_string_delta: float = 4.0e-4
     pluck_duration: float = 0.62
+    pluck_volume_low: float = 0.90
     pluck: PluckConfig = field(default_factory=PluckConfig)
     small_sweep_begins: list[int] = field(
         default_factory=lambda: [
@@ -227,6 +228,7 @@ def _generate_plucked_block(
     note_duration: float,
     string_delay: float,
     string_delta: float,
+    volume_low: float,
     pluck_config: PluckConfig,
 ) -> np.ndarray:
     if len(chords) == 0:
@@ -252,6 +254,10 @@ def _generate_plucked_block(
         offset = string_delay + i * string_delta
         this_chord_list = generate_plucked_scale(chord.chord, offset)
         np.random.shuffle(this_chord_list)
+        scale_factors = np.linspace(volume_low, 1.0, num=len(this_chord_list))
+        assert len(scale_factors) == len(this_chord_list)
+        for j, this_chord_buffer in enumerate(this_chord_list):
+            this_chord_buffer *= scale_factors[j]
         this_chord_buffer = concat_signals(this_chord_list, sample_rate // 24)
         this_chord_buffer = apply_effect(this_chord_buffer, sample_rate, chord.effect)
         buffers.append(this_chord_buffer)
@@ -301,6 +307,7 @@ def generate_capture_signal(
         config.pluck_duration,
         config.pluck_chord_string_delay,
         config.pluck_chord_string_delta,
+        config.pluck_volume_low,
         config.pluck,
     )
     block_white_noise = _generate_white_noise_block(sample_rate, config.noise_duration)
