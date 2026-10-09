@@ -137,7 +137,7 @@ def _generate_sweep_block(
                     f_start,
                     sweep_max,
                     small_sweep_base_duration * duration_multiplier,
-                    16,
+                    32,
                 )
                 * magnitude
             )
@@ -147,7 +147,7 @@ def _generate_sweep_block(
                     sweep_max,
                     f_start,
                     small_sweep_base_duration * duration_multiplier,
-                    16,
+                    32,
                 )
                 * magnitude
             )
