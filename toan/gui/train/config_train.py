@@ -15,6 +15,7 @@ class TrainTrainConfigPage(QtWidgets.QWizardPage):
 
     edit_warmup_steps: QtWidgets.QLineEdit
     edit_main_steps: QtWidgets.QLineEdit
+    edit_batch_size: QtWidgets.QLineEdit
     edit_input_width: QtWidgets.QLineEdit
     edit_lr_hi: QtWidgets.QLineEdit
     edit_lr_lo: QtWidgets.QLineEdit
@@ -50,6 +51,9 @@ class TrainTrainConfigPage(QtWidgets.QWizardPage):
         self.edit_main_steps = QtWidgets.QLineEdit(form_widget)
         form_layout.addRow("Main steps:", self.edit_main_steps)
 
+        self.edit_batch_size = QtWidgets.QLineEdit(form_widget)
+        form_layout.addRow("Batch size:", self.edit_batch_size)
+
         self.edit_input_width = QtWidgets.QLineEdit(form_widget)
         form_layout.addRow("Input width:", self.edit_input_width)
 
@@ -74,15 +78,19 @@ class TrainTrainConfigPage(QtWidgets.QWizardPage):
         try:
             new_warmup_steps = int(self.edit_warmup_steps.text())
             new_main_steps = int(self.edit_main_steps.text())
+            new_batch_size = int(self.edit_batch_size.text())
             new_input_width = int(self.edit_input_width.text())
             new_lr_hi = float(self.edit_lr_hi.text())
             new_lr_lo = float(self.edit_lr_lo.text())
         except ValueError:
             return False
+        if new_batch_size <= 0:
+            return False
 
         the_stage = self.context.train_config.stages[0]
         the_stage.steps_warmup = new_warmup_steps
         the_stage.steps_main = new_main_steps
+        the_stage.batch_size = new_batch_size
         the_stage.input_sample_width = new_input_width
         the_stage.learn_rate_hi = new_lr_hi
         the_stage.learn_rate_lo = new_lr_lo
@@ -107,6 +115,7 @@ class TrainTrainConfigPage(QtWidgets.QWizardPage):
         the_stage = self.default_stage()
         self.edit_warmup_steps.setText(str(the_stage.steps_warmup))
         self.edit_main_steps.setText(str(the_stage.steps_main))
+        self.edit_batch_size.setText(str(the_stage.batch_size))
         self.edit_input_width.setText(str(the_stage.input_sample_width))
         self.edit_lr_hi.setText(str(the_stage.learn_rate_hi))
         self.edit_lr_lo.setText(str(the_stage.learn_rate_lo))
@@ -114,6 +123,7 @@ class TrainTrainConfigPage(QtWidgets.QWizardPage):
     def edit_set_read_only(self, read_only: bool):
         self.edit_warmup_steps.setReadOnly(read_only)
         self.edit_main_steps.setReadOnly(read_only)
+        self.edit_batch_size.setReadOnly(read_only)
         self.edit_input_width.setReadOnly(read_only)
         self.edit_lr_hi.setReadOnly(read_only)
         self.edit_lr_lo.setReadOnly(read_only)
