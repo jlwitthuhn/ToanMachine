@@ -137,7 +137,7 @@ def generate_generic_chord_pluck(
     shape: list[int],
     root_frequency: float,
     duration: float,
-    offset_duration: float = 2.0e-3,
+    offset_duration: float,
     config: PluckConfig = PluckConfig(),
 ) -> np.ndarray:
     frequencies: list[float] = [root_frequency]

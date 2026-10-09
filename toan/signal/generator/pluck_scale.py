@@ -18,7 +18,7 @@ def generate_generic_chord_pluck_scale(
     end_note: str,
     end_octave: int,
     single_duration: float,
-    offset_duration: float = 2.0e-3,
+    offset_duration: float,
     pluck_config: PluckConfig = PluckConfig(),
 ) -> list[np.ndarray]:
     begin_index = get_note_index_by_name(begin_note, begin_octave)
@@ -54,7 +54,7 @@ def generate_named_chord_pluck_scale(
     end_note: str,
     end_octave: int,
     single_duration: float,
-    offset_duration: float = 2.0e-3,
+    offset_duration: float,
     pluck_config: PluckConfig = PluckConfig(),
 ) -> list[np.ndarray]:
     shape = type.get_shape()

@@ -32,7 +32,9 @@ class CaptureSignalConfig:
     warble_duration: float = 6.5
     warble_octave_scale: float = 0.72
     noise_duration: float = 9.0
-    pluck_note_duration: float = 0.62
+    pluck_chord_string_delay: float = 5.0e-3
+    pluck_chord_string_delta: float = 4.0e-4
+    pluck_duration: float = 0.62
     pluck: PluckConfig = field(default_factory=PluckConfig)
     small_sweep_begins: list[int] = field(
         default_factory=lambda: [
@@ -223,13 +225,15 @@ def _generate_plucked_block(
     sample_rate: int,
     chords: list[ChordWithEffects],
     note_duration: float,
+    string_delay: float,
+    string_delta: float,
     pluck_config: PluckConfig,
 ) -> np.ndarray:
     if len(chords) == 0:
         return np.zeros(1)
 
     def generate_plucked_scale(
-        shape: ChordType, offset_duration: float
+        shape: ChordType, string_offset: float
     ) -> list[np.ndarray]:
         return generate_named_chord_pluck_scale(
             shape,
@@ -239,13 +243,13 @@ def _generate_plucked_block(
             "G",
             6,
             note_duration,
-            offset_duration,
+            string_offset,
             pluck_config,
         )
 
     buffers = []
     for i, chord in enumerate(chords):
-        offset = i * 0.6e-3
+        offset = string_delay + i * string_delta
         this_chord_list = generate_plucked_scale(chord.chord, offset)
         np.random.shuffle(this_chord_list)
         this_chord_buffer = concat_signals(this_chord_list, sample_rate // 24)
@@ -294,7 +298,9 @@ def generate_capture_signal(
     block_plucked = _generate_plucked_block(
         sample_rate,
         config.plucked_chords,
-        config.pluck_note_duration,
+        config.pluck_duration,
+        config.pluck_chord_string_delay,
+        config.pluck_chord_string_delta,
         config.pluck,
     )
     block_white_noise = _generate_white_noise_block(sample_rate, config.noise_duration)
