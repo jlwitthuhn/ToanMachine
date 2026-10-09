@@ -33,6 +33,7 @@ class RecordWizard(QtWidgets.QWizard):
         super().__init__(parent)
         self.setAttribute(QtCore.Qt.WidgetAttribute.WA_DeleteOnClose)
         self.context = RecordingContext()
+        self.setMinimumHeight(490)
 
         self.page_output_calibration_choice = RecordOutputCalibrationChoicePage(
             self, self.context

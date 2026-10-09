@@ -19,9 +19,8 @@ from toan.signal.generator.trig import generate_sine_wave
 from toan.soundio import SdIoController
 
 INPUT_VOLTAGE_TEXT = [
-    "Here you will find the voltage level that corresponds to 0 dBFS on your interface's input.",
-    "First, connect the output directly to the input to measure the input dBFS. Do not touch your interface's input or output gain.",
-    "Once that is recorded below, unplug the cable from your interface's input and measure the voltage across its terminals.",
+    "Here you will find the voltage level that corresponds to 0 dBFS on your interface's input. Do not touch your interface's input or output gain.",
+    "First, connect the output directly to the input and play the test tone to measure the input dBFS. Once that is recorded below, unplug the cable from your interface's input and measure the voltage across its terminals.",
     "Plug your pedal back in again when you have entered both values.",
 ]
 
