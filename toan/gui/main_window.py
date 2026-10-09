@@ -2,6 +2,7 @@
 # https://www.gnu.org/licenses/gpl-3.0.en.html
 # SPDX-License-Identifier: GPL-3.0-only
 
+import platform
 import sys
 from pathlib import Path
 
@@ -122,5 +123,8 @@ class MainWindow(QtWidgets.QWidget):
         QtWidgets.QMessageBox.information(
             self,
             "About",
-            f"Toan Machine\n{_load_git_info()}\nhttps://github.com/jlwitthuhn/ToanMachine",
+            "Toan Machine\n"
+            "https://github.com/jlwitthuhn/ToanMachine\n"
+            f"{_load_git_info()}\n"
+            f"Python {platform.python_version()}",
         )
