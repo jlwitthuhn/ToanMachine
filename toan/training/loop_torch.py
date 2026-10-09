@@ -83,19 +83,6 @@ def run_training_loop_torch(context: TrainingProgressContext, config: TrainingCo
     np_rng_state = np.random.get_state()
     np.random.seed(config.rng_seed)
 
-    def get_batch_size(stage_cfg: TrainingStageConfig, iter: int) -> int:
-        if stage_cfg.batch_size > 0:
-            return stage_cfg.batch_size
-        assert len(stage_cfg.batch_size_list) > 0
-        progress = iter / stage_cfg.steps_total()
-        result = 1
-        for threshold, count in stage_cfg.batch_size_list:
-            if progress >= threshold:
-                result = count
-            else:
-                break
-        return result
-
     def make_lr_lambda(stage_cfg: TrainingStageConfig):
         hi = stage_cfg.learn_rate_hi
         lo = stage_cfg.learn_rate_lo
@@ -218,8 +205,7 @@ def run_training_loop_torch(context: TrainingProgressContext, config: TrainingCo
                     summary.duration_seconds = time.perf_counter() - stage_start_time
                 return
             model.train(True)
-            this_batch_size = get_batch_size(stage_config, i)
-            batch_in_np, batch_out_np = data_loader.make_batch(this_batch_size)
+            batch_in_np, batch_out_np = data_loader.make_batch(stage_config.batch_size)
             batch_in = torch.from_numpy(batch_in_np).float().to(device)
             batch_out = torch.from_numpy(batch_out_np).float().to(device)
 
