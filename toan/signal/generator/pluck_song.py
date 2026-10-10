@@ -40,4 +40,4 @@ def generate_mountain_king(
     plucks.append(generate_pluck(sample_rate, eighth_note_samples, freq_d))
     plucks.append(generate_pluck(sample_rate, eighth_note_samples, freq_f))
 
-    concat_signals(plucks, pause_samples)
+    return concat_signals(plucks, pause_samples)
