@@ -11,6 +11,7 @@ import scipy
 import sounddevice as sd
 from PySide6 import QtWidgets
 
+from toan.gui.input_level_helper import InputLevelHelper
 from toan.gui.playback import PlaybackWizard
 from toan.gui.record import RecordWizard
 from toan.gui.sound_manager import SoundManager
@@ -71,6 +72,10 @@ class MainWindow(QtWidgets.QWidget):
         test_model_button.clicked.connect(self._clicked_test_model)
         tools_layout.addWidget(test_model_button)
 
+        input_level_helper_button = QtWidgets.QPushButton("Input Level Helper", self)
+        input_level_helper_button.clicked.connect(self._clicked_input_level_helper)
+        tools_layout.addWidget(input_level_helper_button)
+
         layout.addWidget(tools_group_box)
 
         if show_debug:
@@ -114,6 +119,10 @@ class MainWindow(QtWidgets.QWidget):
     def _clicked_test_model(self):
         wizard = PlaybackWizard(self)
         wizard.show()
+
+    def _clicked_input_level_helper(self):
+        window = InputLevelHelper(self)
+        window.show()
 
     def _clicked_train_model(self):
         wizard = TrainingWizard(self)

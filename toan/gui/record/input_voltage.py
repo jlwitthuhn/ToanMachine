@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
 import math
+from typing import Callable
 
 import numpy as np
 import sounddevice as sd
@@ -16,7 +17,7 @@ from toan.gui.record.voltage import (
     to_dbu,
 )
 from toan.signal.generator.trig import generate_sine_wave
-from toan.soundio import SdIoController
+from toan.soundio import SdChannel, SdIoController
 
 INPUT_VOLTAGE_TEXT = [
     "Here you will find the voltage level that corresponds to 0 dBFS on your interface's input. Do not touch your interface's input or output gain.",
@@ -41,8 +42,15 @@ def _peak_to_dbfs(peak: float) -> float:
     return 20.0 * math.log10(peak)
 
 
-class RecordInputVoltagePage(QtWidgets.QWizardPage):
-    context: RecordingContext
+class InputVoltageWidget(QtWidgets.QWidget):
+    # Emitted when the entered level, voltage, or unit changes
+    measurement_changed = QtCore.Signal()
+
+    sample_rate: int
+    # Returns the (input, output) channels to use when the tone starts
+    get_channels: Callable[[], tuple[SdChannel, SdChannel]]
+    input_channel: SdChannel
+    output_channel: SdChannel
 
     play_button: QtWidgets.QPushButton
     play_active: bool = False
@@ -67,31 +75,28 @@ class RecordInputVoltagePage(QtWidgets.QWizardPage):
     text_voltage: QtWidgets.QLineEdit
     combo_unit: QtWidgets.QComboBox
 
-    def __init__(self, parent: QtWidgets.QWidget, context: RecordingContext):
+    def __init__(
+        self,
+        parent: QtWidgets.QWidget,
+        sample_rate: int,
+        get_channels: Callable[[], tuple[SdChannel, SdChannel]],
+    ):
         super().__init__(parent)
-        self.context = context
+        self.sample_rate = sample_rate
+        self.get_channels = get_channels
 
         self.tone_signal = generate_sine_wave(
-            context.sample_rate * 10, context.sample_rate // TONE_FREQUENCY
+            sample_rate * 10, sample_rate // TONE_FREQUENCY
         )
-        self.peak_samples = np.zeros(context.sample_rate // 4)
+        self.peak_samples = np.zeros(sample_rate // 4)
 
         self.bar_update_timer = QtCore.QTimer()
         self.bar_update_timer.setInterval(100)
         self.bar_update_timer.setSingleShot(False)
         self.bar_update_timer.timeout.connect(self._update_status)
 
-        self.setTitle("Input Voltage")
         layout = QtWidgets.QVBoxLayout(self)
-
-        label = QtWidgets.QLabel("\n\n".join(INPUT_VOLTAGE_TEXT), self)
-        label.setWordWrap(True)
-        layout.addWidget(label)
-
-        hline = QtWidgets.QFrame(self)
-        hline.setFrameShape(QtWidgets.QFrame.Shape.HLine)
-        hline.setFrameShadow(QtWidgets.QFrame.Shadow.Sunken)
-        layout.addWidget(hline)
+        layout.setContentsMargins(0, 0, 0, 0)
 
         # Tone controls and the meter share a grid so the slider lines up with
         # the bar and the scale value lines up with the level reading
@@ -144,10 +149,10 @@ class RecordInputVoltagePage(QtWidgets.QWizardPage):
         self.label_clipping.setVisible(False)
         layout.addWidget(self.label_clipping)
 
-        hline2 = QtWidgets.QFrame(self)
-        hline2.setFrameShape(QtWidgets.QFrame.Shape.HLine)
-        hline2.setFrameShadow(QtWidgets.QFrame.Shadow.Sunken)
-        layout.addWidget(hline2)
+        hline = QtWidgets.QFrame(self)
+        hline.setFrameShape(QtWidgets.QFrame.Shape.HLine)
+        hline.setFrameShadow(QtWidgets.QFrame.Shadow.Sunken)
+        layout.addWidget(hline)
 
         form_panel = QtWidgets.QWidget(self)
         form_layout = QtWidgets.QFormLayout(form_panel)
@@ -159,7 +164,7 @@ class RecordInputVoltagePage(QtWidgets.QWizardPage):
         self.text_level = QtWidgets.QLineEdit(level_row)
         self.text_level.setFixedWidth(80)
         self.text_level.setValidator(QtGui.QDoubleValidator(self.text_level))
-        self.text_level.textChanged.connect(self.completeChanged)
+        self.text_level.textChanged.connect(self.measurement_changed)
         level_row_layout.addWidget(self.text_level)
         level_row_layout.addWidget(QtWidgets.QLabel("dBFS peak", level_row))
         level_row_layout.addStretch(1)
@@ -173,12 +178,12 @@ class RecordInputVoltagePage(QtWidgets.QWizardPage):
         self.text_voltage = QtWidgets.QLineEdit(voltage_row)
         self.text_voltage.setFixedWidth(80)
         self.text_voltage.setValidator(QtGui.QDoubleValidator(self.text_voltage))
-        self.text_voltage.textChanged.connect(self.completeChanged)
+        self.text_voltage.textChanged.connect(self.measurement_changed)
         voltage_row_layout.addWidget(self.text_voltage)
 
         self.combo_unit = QtWidgets.QComboBox(voltage_row)
         self.combo_unit.addItems(VOLTAGE_UNITS)
-        self.combo_unit.currentTextChanged.connect(self.completeChanged)
+        self.combo_unit.currentTextChanged.connect(self.measurement_changed)
         voltage_row_layout.addWidget(self.combo_unit)
         voltage_row_layout.addStretch(1)
 
@@ -186,33 +191,27 @@ class RecordInputVoltagePage(QtWidgets.QWizardPage):
 
         layout.addWidget(form_panel)
 
-        layout.addStretch(1)
-
         self._output_scale_changed(self.slider_output_scale.value())
         self._update_status()
 
-    def initializePage(self):
-        # Any earlier measurement was taken before the input gain page was
-        # revisited, so it may no longer be valid
+    def clear(self):
         self.text_level.clear()
         self.text_voltage.clear()
         self.combo_unit.setCurrentText(UNIT_MILLIVOLTS_RMS)
 
-    def isComplete(self) -> bool:
-        return self._computed_dbu() is not None
-
-    def cleanupPage(self):
+    def stop_tone(self):
         if self.play_active:
             self._clicked_play_tone()
         assert self.play_active == False
 
-    def validatePage(self) -> bool:
-        dbu = self._computed_dbu()
-        if dbu is None:
-            return False
-        self.cleanupPage()
-        self.context.output_level_dbu = dbu
-        return True
+    def computed_dbu(self) -> float | None:
+        level_dbfs = self._entered_level_dbfs()
+        voltage_dbu = self._entered_voltage_dbu()
+        if level_dbfs is None or voltage_dbu is None:
+            return None
+        # A sine's RMS voltage scales with its peak level, so extrapolate the
+        # measured tone up to one whose peaks reach 0 dBFS
+        return voltage_dbu - level_dbfs
 
     def _entered_level_dbfs(self) -> float | None:
         try:
@@ -230,15 +229,6 @@ class RecordInputVoltagePage(QtWidgets.QWizardPage):
             return None
         return to_dbu(value, self.combo_unit.currentText())
 
-    def _computed_dbu(self) -> float | None:
-        level_dbfs = self._entered_level_dbfs()
-        voltage_dbu = self._entered_voltage_dbu()
-        if level_dbfs is None or voltage_dbu is None:
-            return None
-        # A sine's RMS voltage scales with its peak level, so extrapolate the
-        # measured tone up to one whose peaks reach 0 dBFS
-        return voltage_dbu - level_dbfs
-
     def _output_scale_changed(self, value_db: int):
         self.output_scale = 10.0 ** (value_db / 20.0)
         self.label_output_scale.setText(f"{value_db} dB")
@@ -254,6 +244,7 @@ class RecordInputVoltagePage(QtWidgets.QWizardPage):
             self.input_peak = 0.0
             self._update_status()
             return
+        self.input_channel, self.output_channel = self.get_channels()
         self.play_active = True
         self.play_button.setText("Stop Test Tone")
         self.tone_signal_index = 0
@@ -264,9 +255,9 @@ class RecordInputVoltagePage(QtWidgets.QWizardPage):
 
     def _setup_io_streams(self):
         self.io_controller = SdIoController.from_callbacks(
-            self.context.sample_rate,
-            self.context.input_channel,
-            self.context.output_channel,
+            self.sample_rate,
+            self.input_channel,
+            self.output_channel,
             self._input_callback,
             self._output_callback,
         )
@@ -293,7 +284,7 @@ class RecordInputVoltagePage(QtWidgets.QWizardPage):
         self.peak_samples = np.concat(
             (
                 self.peak_samples,
-                indata[:, self.context.input_channel.channel_index - 1],
+                indata[:, self.input_channel.channel_index - 1],
             )
         )[-buffer_length:]
         self.input_peak = float(np.max(np.abs(self.peak_samples)))
@@ -310,5 +301,55 @@ class RecordInputVoltagePage(QtWidgets.QWizardPage):
         ]
         self.tone_signal_index += frames
 
-        channel = self.context.output_channel.channel_index - 1
+        channel = self.output_channel.channel_index - 1
         outdata[:, channel] = segment * self.output_scale
+
+
+class RecordInputVoltagePage(QtWidgets.QWizardPage):
+    context: RecordingContext
+    voltage_widget: InputVoltageWidget
+
+    def __init__(self, parent: QtWidgets.QWidget, context: RecordingContext):
+        super().__init__(parent)
+        self.context = context
+
+        self.setTitle("Input Voltage")
+        layout = QtWidgets.QVBoxLayout(self)
+
+        label = QtWidgets.QLabel("\n\n".join(INPUT_VOLTAGE_TEXT), self)
+        label.setWordWrap(True)
+        layout.addWidget(label)
+
+        hline = QtWidgets.QFrame(self)
+        hline.setFrameShape(QtWidgets.QFrame.Shape.HLine)
+        hline.setFrameShadow(QtWidgets.QFrame.Shadow.Sunken)
+        layout.addWidget(hline)
+
+        self.voltage_widget = InputVoltageWidget(
+            self,
+            context.sample_rate,
+            lambda: (self.context.input_channel, self.context.output_channel),
+        )
+        self.voltage_widget.measurement_changed.connect(self.completeChanged)
+        layout.addWidget(self.voltage_widget)
+
+        layout.addStretch(1)
+
+    def initializePage(self):
+        # Any earlier measurement was taken before the input gain page was
+        # revisited, so it may no longer be valid
+        self.voltage_widget.clear()
+
+    def isComplete(self) -> bool:
+        return self.voltage_widget.computed_dbu() is not None
+
+    def cleanupPage(self):
+        self.voltage_widget.stop_tone()
+
+    def validatePage(self) -> bool:
+        dbu = self.voltage_widget.computed_dbu()
+        if dbu is None:
+            return False
+        self.cleanupPage()
+        self.context.output_level_dbu = dbu
+        return True
