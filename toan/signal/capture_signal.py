@@ -35,7 +35,7 @@ class CaptureSignalConfig:
     pluck_chord_string_delay: float = 5.0e-3
     pluck_chord_string_delta: float = 4.0e-4
     pluck_duration: float = 0.62
-    pluck_volume_low: float = 0.90
+    pluck_volume_low: float = 0.85
     pluck: PluckConfig = field(default_factory=PluckConfig)
     small_sweep_begins: list[int] = field(
         default_factory=lambda: [
