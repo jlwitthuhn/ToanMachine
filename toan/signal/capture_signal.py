@@ -255,6 +255,7 @@ def _generate_plucked_block(
         this_chord_list = generate_plucked_scale(chord.chord, offset)
         np.random.shuffle(this_chord_list)
         scale_factors = np.linspace(volume_low, 1.0, num=len(this_chord_list))
+        np.random.shuffle(scale_factors)
         assert len(scale_factors) == len(this_chord_list)
         for j, this_chord_buffer in enumerate(this_chord_list):
             this_chord_buffer *= scale_factors[j]
