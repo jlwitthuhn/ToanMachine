@@ -8,6 +8,7 @@ from PySide6 import QtWidgets
 from toan.gui.record import RecordingContext
 from toan.persistence.user_wav import UserWavDesc, get_user_wav_list
 from toan.qt import WavFileModel
+from toan.signal.effect import EffectType, apply_effect
 from toan.signal.generator.chirp import generate_chirp
 from toan.signal.generator.pluck_song import generate_mountain_king
 from toan.signal.mix import concat_signals
@@ -105,6 +106,12 @@ class RecordExtraPage(QtWidgets.QWizardPage):
         ).astype(np.float32)
         mountain_king = generate_mountain_king(self.context.sample_rate).astype(
             np.float32
+        )
+        mountain_king = apply_effect(
+            mountain_king, self.context.sample_rate, EffectType.Flanger7Hz
+        )
+        mountain_king = apply_effect(
+            mountain_king, self.context.sample_rate, EffectType.FeedbackDelay0100
         )
 
         test_wavs: list[UserWavDesc] = self.table.model().get_selected_test_wavs()
