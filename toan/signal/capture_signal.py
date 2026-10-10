@@ -39,13 +39,9 @@ class CaptureSignalConfig:
     pluck: PluckConfig = field(default_factory=PluckConfig)
     small_sweep_begins: list[int] = field(
         default_factory=lambda: [
-            500,
             1000,
-            1500,
             2000,
-            3000,
             4000,
-            6000,
             8000,
         ]
     )
