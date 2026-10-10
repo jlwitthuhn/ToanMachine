@@ -39,6 +39,10 @@ jobs:
       - name: Create virtual environment
         run: python -m virtualenv .venv
 
+      # The local repo has no tags, re-create the tag consumed by the build script
+      - name: Tag release locally
+        run: git tag "release/$VERSION"
+
       - name: Build DMG
         run: ./script/build_macos.sh
 
