@@ -188,8 +188,8 @@ class TrainGraphPage(QtWidgets.QWizardPage):
         if self.signal_nam_big_sweep is None or self.signal_nam_small_sweep is None:
             return
 
-        self._add_spectrogram_source("NAM (Big)", lambda: self.signal_nam_big_sweep)
-        self._add_spectrogram_source("NAM (Small)", lambda: self.signal_nam_small_sweep)
+        self._add_spectrogram_source("NAM Full", lambda: self.signal_nam_big_sweep)
+        self._add_spectrogram_source("NAM Lite", lambda: self.signal_nam_small_sweep)
 
         self.selector_fr = FigureSelector("Signal:")
         self.selector_fr.add_option("Sweep", self._generate_sweep_frequency_response)
@@ -214,8 +214,8 @@ class TrainGraphPage(QtWidgets.QWizardPage):
             self.context.sample_rate,
             {
                 "Recording": self.context.signal_wet_sweep,
-                "NAM (Big)": self.signal_nam_big_sweep,
-                "NAM (Small)": self.signal_nam_small_sweep,
+                "NAM Full": self.signal_nam_big_sweep,
+                "NAM Lite": self.signal_nam_small_sweep,
             },
         )
 
@@ -227,8 +227,8 @@ class TrainGraphPage(QtWidgets.QWizardPage):
             self.context.signal_dry_white_noise,
             {
                 "Recording": self.context.signal_wet_white_noise,
-                "NAM (Big)": self.signal_nam_big_white_noise,
-                "NAM (Small)": self.signal_nam_small_white_noise,
+                "NAM Full": self.signal_nam_big_white_noise,
+                "NAM Lite": self.signal_nam_small_white_noise,
             },
         )
 
