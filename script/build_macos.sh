@@ -77,6 +77,19 @@ if ! mkdir -p "$dmg_staging" \
 	exit 1
 fi
 
+if ! cat > "$dmg_staging/README.txt" <<'EOF'
+To install:
+* Drag and drop ToanMachine.app to your Applications directory.
+* Open a terminal.
+* Run 'xattr -cr /Applications/ToanMachine.app'.
+
+You only have to run 'xattr' once, after that you can open ToanMachine.app like a normal application.
+EOF
+then
+	print -u2 "Error: failed to write README"
+	exit 1
+fi
+
 print "Packaging DMG..."
 hdiutil create -volname "ToanMachine" -srcfolder "$dmg_staging" -ov -format UDZO "./dist/ToanMachine.dmg"
 if (( $? != 0 )); then
