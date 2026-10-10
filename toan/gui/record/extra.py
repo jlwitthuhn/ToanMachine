@@ -9,6 +9,7 @@ from toan.gui.record import RecordingContext
 from toan.persistence.user_wav import UserWavDesc, get_user_wav_list
 from toan.qt import WavFileModel
 from toan.signal.generator.chirp import generate_chirp
+from toan.signal.generator.pluck_song import generate_mountain_king
 from toan.signal.mix import concat_signals
 from toan.wav import load_and_resample_wav
 
@@ -102,15 +103,18 @@ class RecordExtraPage(QtWidgets.QWizardPage):
             TEST_SWEEP_END_HZ,
             TEST_SWEEP_DURATION_SEC,
         ).astype(np.float32)
+        mountain_king = generate_mountain_king(self.context.sample_rate).astype(
+            np.float32
+        )
 
         test_wavs: list[UserWavDesc] = self.table.model().get_selected_test_wavs()
-        test_ready_to_concat: list[np.ndarray] = [sweep]
+        test_ready_to_concat: list[np.ndarray] = [sweep, mountain_king]
         for this_wav in test_wavs:
             this_signal = load_and_resample_wav(self.context.sample_rate, this_wav.path)
             test_ready_to_concat.append(this_signal)
 
         self.context.extra_signal_dry_test = concat_signals(
-            test_ready_to_concat, self.context.sample_rate // 4
+            test_ready_to_concat, self.context.sample_rate // 5
         )
 
         return True
