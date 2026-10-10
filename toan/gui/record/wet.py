@@ -67,16 +67,22 @@ class RecordWetSignalPage(QtWidgets.QWizardPage):
         progress_layout.addWidget(self.label_time)
         layout.addLayout(progress_layout)
 
+    def initializePage(self):
+        # Clear state on every load so the user can leave and return to this page
+        self.context.signal_recorded = None
+        self.record_progress = None
+        self.button_record.setEnabled(True)
+        self.bar_progress.reset()
+        self.label_time.setText("00:00 / 00:00")
+
     def cleanupPage(self):
+        self.bar_update_timer.stop()
         if self.record_controller is not None:
             self.record_controller.close()
             self.record_controller = None
 
     def isComplete(self):
-        if self.context.signal_recorded is not None:
-            self.cleanupPage()
-            return True
-        return False
+        return self.context.signal_recorded is not None
 
     def _clicked_record(self):
         self.button_record.setEnabled(False)
