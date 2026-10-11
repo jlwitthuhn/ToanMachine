@@ -1,18 +1,20 @@
 # Toan Machine
 
-Toan Machine is intended to be the one program you need to train a high-quality [Neural Amp Modeler](https://www.neuralampmodeler.com/) model. All code is licensed under the terms of the [GPLv3](./LICENSE).
+Toan Machine is intended to be the one program you need to train a high-quality [Neural Amp Modeler](https://www.neuralampmodeler.com/) A2 model. All code is licensed under the terms of the [GPLv3](./LICENSE).
 
-The main design philosophy behind this project is to create an interface that directly guides an inexperienced user to creating a solid setup that can make great captures. This includes:
-* Record wet/dry signal directly within Toan Machine, no DAW required.
-* Interactive volume/gain calibration to ensure there is no clipping and the pedal/amp input is high enough to create the desired distortion.
-* Recording wet/dry pair and metadata are bundled together as a single zip file. It is impossible to mix up your tracks or load incorrect metadata.
-* Users can inject their own guitar DI into the training signal as validation data to answer the question "How accurate is this capture for my guitar specifically?".
+The main design philosophy behind this project is to create an interface that directly guides an inexperienced user through to process of creating a high quality calibrated capture. This includes:
+* Recording wet/dry signal directly within Toan Machine, no DAW required.
+* Calibrating input and output voltage with a multimeter to ensure accuracy.
+* Recorded wet/dry pair and metadata are bundled together as a single zip file. It is impossible to mix up your tracks or load incorrect metadata.
+* Users can inject their own guitar DI into the training or test data.
 
 Toan Machine is currently only compatible with Apple Silicon Macs. Support for nVidia cards on Windows is planned for the future.
 
 # Installation
 
-To install and run Toan Machine you will need to:
+The easiest way to install Toan Machine is to download from the releases section on the right side of the github repo home page. Download the Mac DMG file and follow the instructions contained inside.
+
+If you would like to run from this source instead, you will need to:
 * Clone this git repo
 * Create a python virtual environment for Toan Machine
 * Inside your virtual environment, install the packages listed in [requirements.txt](./requirements.txt)
