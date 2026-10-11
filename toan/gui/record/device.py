@@ -13,8 +13,8 @@ from toan.soundio import (
 )
 
 DEVICE_TEXT = [
-    "Output is the interface channel that is plugged in to your device's input.",
-    "Input is the interface channel that your device's output is plugged in to.",
+    "Output is the interface channel which sends the signal to your pedal.",
+    "Input is the interface channel which will record your wet signal.",
 ]
 
 

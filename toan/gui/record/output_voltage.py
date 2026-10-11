@@ -19,9 +19,10 @@ from toan.signal.generator.trig import generate_sine_wave
 OUTPUT_VOLTAGE_TEXT = [
     "This step requires that you own a multimeter or otherwise can figure out your interface's output voltage.",
     "Measure the voltage going in to the device you are capturing. If your signal chain includes a reamp box, be sure to measure what is coming out of the reamp rather than what is going in to it.",
+    "I have found that somewhere around 700 mV RMS (-0.9 dBU) works very well.",
 ]
 
-TONE_TEXT = "Press 'Play Test Tone' to output a 300Hz sine wave, then measure your interface's output with a multimeter."
+TONE_TEXT = "Press 'Play Test Tone' to output a 300Hz 0 dBFS sine wave, then measure your interface's output with a multimeter."
 
 
 class RecordOutputVoltagePage(QtWidgets.QWizardPage):

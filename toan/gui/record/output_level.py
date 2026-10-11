@@ -13,9 +13,9 @@ from toan.soundio import SdChannel, SdDevice, generate_descriptions, get_output_
 from toan.soundio.record_wet import RecordWetController, RecordWetProgress
 
 OUTPUT_LEVEL_TEXT = [
-    "Here you will need to set your interface output level to an appropriate volume. Ensure that it is a bit more than loud enough to trigger the level of overdrive you want to achieve. This is the maximum volume the model will support as input.",
-    "Click the 'Record' button to play some synthesized chords through your device and record the result. Then press 'Play' and listen to the recording.",
-    "If the recording clips, you will need to turn down your input gain.",
+    "This page will help you set your output volume to a good level for capturing a pedal.",
+    "Click 'Record' to record three successively louder synthetic chords running through your device. Then click 'Play' to listen to them. For capturing an overdrive effect, your goal is to have the softest chord have as much distortion as you ever want to get out of your pedal, and for the loudest one to have too much.",
+    "Also ensure your input gain is low enough that the recording doesn't clip.",
 ]
 
 

@@ -7,8 +7,8 @@ from PySide6 import QtWidgets
 from toan.gui.record.context import RecordingContext
 
 OUTPUT_CALIBRATION_CHOICE_TEXT = [
-    "To record your gear, you will need to ensure that 0 dBFS on your interface produces a signal at a reasonable volume. If this is too quiet, the recording won't fully capture the gain behavior of your pedal. If the signal is too loud the model won't be accurate for lower guitar-level inputs.",
-    "The best way to calibrate is to measure the RMS voltage of a 0 dBFS signal using a multimeter, but if you don't have a multimeter you can also try to calibrate it by ear.",
+    "To record your gear, you will need to ensure that 0 dBFS on your interface produces a signal at a volume high enough to cover what a guitar pickup might output. If this is too quiet, the recording won't fully capture the gain behavior of your pedal. If the signal is too loud the model will lose fidelity at the lower end of volume.",
+    "If you want to create a calibrated capture, and you should want that, you will need a multimeter. If a multimeter is not available you can set your output level by ear.",
 ]
 
 
