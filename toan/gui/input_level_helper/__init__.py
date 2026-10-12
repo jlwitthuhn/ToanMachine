@@ -4,7 +4,7 @@
 
 from PySide6 import QtCore, QtWidgets
 
-from toan.gui.record.input_voltage import InputVoltageWidget
+from toan.gui.input_level_helper.input_voltage_widget import InputVoltageWidget
 from toan.soundio import (
     SdChannel,
     generate_descriptions,

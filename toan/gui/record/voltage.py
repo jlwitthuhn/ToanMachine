@@ -4,7 +4,6 @@
 
 import math
 
-# Frequency of the sine played while measuring voltage with a multimeter
 TONE_FREQUENCY = 300
 
 # 0 dBu is 0.775 V RMS

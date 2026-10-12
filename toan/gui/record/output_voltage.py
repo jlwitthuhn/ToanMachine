@@ -42,10 +42,6 @@ class RecordOutputVoltagePage(QtWidgets.QWizardPage):
         super().__init__(parent)
         self.context = context
 
-        self.tone_signal = generate_sine_wave(
-            context.sample_rate * 10, context.sample_rate // TONE_FREQUENCY
-        )
-
         self.setTitle("Output Voltage")
         layout = QtWidgets.QVBoxLayout(self)
 
@@ -117,6 +113,10 @@ class RecordOutputVoltagePage(QtWidgets.QWizardPage):
         if self.play_active:
             self._stop_tone()
             return
+        self.tone_signal = generate_sine_wave(
+            self.context.sample_rate * 10,
+            self.context.sample_rate // TONE_FREQUENCY,
+        )
         self.play_active = True
         self.play_button.setText("Stop Test Tone")
         self.tone_signal_index = 0

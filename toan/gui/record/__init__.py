@@ -22,6 +22,7 @@ class RecordWizard(QtWidgets.QWizard):
     context: RecordingContext
 
     page_output_calibration_choice: RecordOutputCalibrationChoicePage
+    page_input_voltage: RecordInputVoltagePage
     id_output_calibration_choice: int
     id_output_level: int
     id_output_voltage: int
@@ -51,12 +52,17 @@ class RecordWizard(QtWidgets.QWizard):
             RecordOutputVoltagePage(self, self.context)
         )
         self.id_input_gain = self.addPage(RecordInputGainPage(self, self.context))
-        self.id_input_voltage = self.addPage(RecordInputVoltagePage(self, self.context))
+        self.page_input_voltage = RecordInputVoltagePage(self, self.context)
+        self.id_input_voltage = self.addPage(self.page_input_voltage)
         self.id_wet_signal = self.addPage(RecordWetSignalPage(self, self.context))
         self.addPage(RecordSavePage(self, self.context))
 
         self.setWindowTitle("Recording Wizard")
         self.setModal(True)
+
+    def done(self, result: int):
+        self.page_input_voltage.shutdown()
+        super().done(result)
 
     def nextId(self) -> int:
         # Output calibration branches to exactly one of the level or voltage
