@@ -4,7 +4,7 @@
 
 from concurrent.futures import Future, ThreadPoolExecutor
 
-from PySide6 import QtCore, QtWidgets
+from PySide6 import QtCore, QtGui, QtWidgets
 
 from toan.gui.record.context import RecordingContext
 from toan.gui.record.voltage import TONE_FREQUENCY, dbu_to_millivolts_rms
@@ -28,12 +28,12 @@ class RecordInputVoltagePage(QtWidgets.QWizardPage):
 
     button_calibrate: QtWidgets.QPushButton
     label_status: QtWidgets.QLabel
+    text_input_max_dbu: QtWidgets.QLineEdit
     poll_timer: QtCore.QTimer
 
     executor: ThreadPoolExecutor
     loopback: ToneLoopback | None = None
     calibration: Future | None = None
-    input_max_dbu: float | None = None
 
     def __init__(self, parent: QtWidgets.QWidget, context: RecordingContext):
         super().__init__(parent)
@@ -64,21 +64,52 @@ class RecordInputVoltagePage(QtWidgets.QWizardPage):
         self.label_status.setWordWrap(True)
         layout.addWidget(self.label_status)
 
+        hline2 = QtWidgets.QFrame(self)
+        hline2.setFrameShape(QtWidgets.QFrame.Shape.HLine)
+        hline2.setFrameShadow(QtWidgets.QFrame.Shadow.Sunken)
+        layout.addWidget(hline2)
+
+        form_panel = QtWidgets.QWidget(self)
+        form_layout = QtWidgets.QFormLayout(form_panel)
+
+        level_row = QtWidgets.QWidget(form_panel)
+        level_row_layout = QtWidgets.QHBoxLayout(level_row)
+        level_row_layout.setContentsMargins(0, 0, 0, 0)
+
+        self.text_input_max_dbu = QtWidgets.QLineEdit(level_row)
+        self.text_input_max_dbu.setFixedWidth(80)
+        self.text_input_max_dbu.setValidator(
+            QtGui.QDoubleValidator(self.text_input_max_dbu)
+        )
+        self.text_input_max_dbu.textChanged.connect(self.completeChanged)
+        level_row_layout.addWidget(self.text_input_max_dbu)
+        level_row_layout.addWidget(QtWidgets.QLabel("dBu", level_row))
+        level_row_layout.addStretch(1)
+
+        form_layout.addRow("0 dBFS Input Level:", level_row)
+
+        layout.addWidget(form_panel)
+
         layout.addStretch(1)
 
     def initializePage(self):
         # Revisiting input gain invalidates calibration.
-        self.input_max_dbu = None
+        self.text_input_max_dbu.clear()
         self.context.output_level_dbu = None
         self.label_status.clear()
         self.completeChanged.emit()
 
     def isComplete(self) -> bool:
-        return self.input_max_dbu is not None
+        return self.calibration is None and self._entered_dbu() is not None
+
+    def _entered_dbu(self) -> float | None:
+        try:
+            return float(self.text_input_max_dbu.text())
+        except ValueError:
+            return None
 
     def cleanupPage(self):
         self._cancel_calibration()
-        self.input_max_dbu = None
         self.context.output_level_dbu = None
         self.completeChanged.emit()
 
@@ -94,14 +125,14 @@ class RecordInputVoltagePage(QtWidgets.QWizardPage):
     def validatePage(self) -> bool:
         if not self.isComplete():
             return False
-        self.context.output_level_dbu = self.input_max_dbu
+        self.context.output_level_dbu = self._entered_dbu()
         return True
 
     def _clicked_calibrate(self):
-        self.input_max_dbu = None
+        self.text_input_max_dbu.clear()
         self.context.output_level_dbu = None
-        self.completeChanged.emit()
         self.button_calibrate.setEnabled(False)
+        self.text_input_max_dbu.setEnabled(False)
         self.label_status.setText("Calibrating...")
 
         self.loopback = ToneLoopback(
@@ -113,6 +144,7 @@ class RecordInputVoltagePage(QtWidgets.QWizardPage):
         self.calibration = self.executor.submit(
             _run_calibration, self.loopback, self.context.input_level_dbu
         )
+        self.completeChanged.emit()
         self.poll_timer.start()
 
     def _poll_calibration(self):
@@ -127,7 +159,7 @@ class RecordInputVoltagePage(QtWidgets.QWizardPage):
             self.label_status.setText(
                 f"Calibration succeeded: 0 dBFS on your input is {input_max_dbu:.2f} dBu ({millivolts:.4g} mV RMS)."
             )
-            self.input_max_dbu = input_max_dbu
+            self.text_input_max_dbu.setText(f"{input_max_dbu:.2f}")
         except LoopbackCancelled:
             self.label_status.clear()
         except Exception as error:
@@ -135,4 +167,5 @@ class RecordInputVoltagePage(QtWidgets.QWizardPage):
         self.loopback = None
         self.calibration = None
         self.button_calibrate.setEnabled(True)
+        self.text_input_max_dbu.setEnabled(True)
         self.completeChanged.emit()
