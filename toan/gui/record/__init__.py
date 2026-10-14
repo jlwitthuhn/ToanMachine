@@ -64,6 +64,26 @@ class RecordWizard(QtWidgets.QWizard):
         self.page_input_voltage.shutdown()
         super().done(result)
 
+    def validateCurrentPage(self) -> bool:
+        # Only warn once the page has accepted its input, so a failed
+        # validation leaves the user on the page without a message.
+        if not super().validateCurrentPage():
+            return False
+        current_id = self.currentId()
+        if current_id in (self.id_output_level, self.id_output_voltage):
+            QtWidgets.QMessageBox.information(
+                self,
+                "Output Level",
+                "Your output level is now set. Do not change it until the recording is complete.",
+            )
+        elif current_id == self.id_input_gain:
+            QtWidgets.QMessageBox.information(
+                self,
+                "Input Gain",
+                "Your input gain is now set. Do not change it until the recording is complete.",
+            )
+        return True
+
     def nextId(self) -> int:
         # Output calibration branches to exactly one of the level or voltage
         # pages, and both rejoin the main sequence at input gain. Input
