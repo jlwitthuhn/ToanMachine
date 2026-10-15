@@ -7,16 +7,16 @@ from PySide6 import QtWidgets
 from toan.gui.record.context import RecordingContext
 
 OUTPUT_CALIBRATION_CHOICE_TEXT = [
-    "To record your gear, you will need to ensure that 0 dBFS on your interface produces a signal at a volume high enough to cover what a guitar pickup might output. If this is too quiet, the recording won't fully capture the gain behavior of your pedal. If the signal is too loud the model will lose fidelity at the lower end of volume.",
-    "If you want to create a calibrated capture, and you should want that, you will need a multimeter. If a multimeter is not available you can set your output level by ear.",
+    "To record your gear, you will need to ensure that 0 dBFS on your interface produces a signal at a volume high enough to cover what a guitar pickup might output.",
+    "The easiest way to do this is to set your interface's output level to maximum. This will ensure the signal is strong enough to capture the full behavior of your equipment.",
+    "If you have a multimeter, you can make this a calibrated NAM capture by measuring this output voltage.",
 ]
 
 
 class RecordOutputCalibrationChoicePage(QtWidgets.QWizardPage):
     context: RecordingContext
 
-    radio_by_ear: QtWidgets.QRadioButton
-    radio_by_voltage: QtWidgets.QRadioButton
+    checkbox_calibrated: QtWidgets.QCheckBox
 
     def __init__(self, parent: QtWidgets.QWidget, context: RecordingContext):
         super().__init__(parent)
@@ -34,29 +34,15 @@ class RecordOutputCalibrationChoicePage(QtWidgets.QWizardPage):
         hline.setFrameShadow(QtWidgets.QFrame.Shadow.Sunken)
         layout.addWidget(hline)
 
-        form_panel = QtWidgets.QWidget(self)
-        form_layout = QtWidgets.QFormLayout(form_panel)
-
-        radio_widget = QtWidgets.QWidget(form_panel)
-        radio_layout = QtWidgets.QVBoxLayout(radio_widget)
-        radio_layout.setContentsMargins(0, 0, 0, 0)
-
-        self.radio_by_ear = QtWidgets.QRadioButton("Calibrate by ear", radio_widget)
-        self.radio_by_ear.setChecked(True)
-        radio_layout.addWidget(self.radio_by_ear)
-        self.radio_by_voltage = QtWidgets.QRadioButton(
-            "Calibrate by voltage (requires multimeter)", radio_widget
+        self.checkbox_calibrated = QtWidgets.QCheckBox(
+            "Calibrated capture (requires multimeter)", self
         )
-        radio_layout.addWidget(self.radio_by_voltage)
-
-        form_layout.addRow("Calibration Mode:", radio_widget)
-
-        layout.addWidget(form_panel)
+        layout.addWidget(self.checkbox_calibrated)
 
         layout.addStretch(1)
 
     def is_voltage_selected(self) -> bool:
-        return self.radio_by_voltage.isChecked()
+        return self.checkbox_calibrated.isChecked()
 
     def validatePage(self) -> bool:
         if not self.is_voltage_selected():
