@@ -27,7 +27,7 @@ class ChordWithEffects:
 
 @dataclass
 class CaptureSignalConfig:
-    sweep_duration: float = 10.0
+    sweep_duration: float = 8.0
     multisweep_layers: int = 10
     warble_duration: float = 6.5
     warble_octave_scale: float = 0.72
@@ -35,7 +35,7 @@ class CaptureSignalConfig:
     pluck_chord_string_delay: float = 5.0e-3
     pluck_chord_string_delta: float = 4.0e-4
     pluck_duration: float = 0.62
-    pluck_volume_low: float = 0.85
+    pluck_volume_low: float = 0.25
     pluck: PluckConfig = field(default_factory=PluckConfig)
     small_sweep_begins: list[int] = field(
         default_factory=lambda: [
