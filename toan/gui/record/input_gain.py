@@ -14,8 +14,9 @@ from toan.signal.mix import concat_signals
 from toan.soundio import SdIoController
 
 VOLUME_TEXT = [
-    "Here you will calibrate the input gain of your interface. You want the audio signal to be captured as loudly as possible without clipping.",
-    "Press 'Play Test Sound' below and adjust your input gain so that the volume is between 80 and 90. If the volume reads 99 or higher then you are clipping and should reduce your gain.",
+    "Now we need to set your interface input gain low enough that the signal does not clip.",
+    "You can select 'Play Test Sound' below to output a frequency sweep at 0 dBFS. As long as your input is below 80%, the training signal will not clip during recording.",
+    "The simplest way to dial this in is to start with your gain all the way down, then raise it until the volume shows anywhere between 10% and 80%.",
 ]
 
 BAR_PRECISION = 1000
@@ -43,7 +44,7 @@ class RecordInputGainPage(QtWidgets.QWizardPage):
         super().__init__(parent)
         self.context = context
 
-        single_sweep = generate_chirp(context.sample_rate, 18, 22000, 0.90)
+        single_sweep = generate_chirp(context.sample_rate, 18, 22000, 0.85)
         single_sweep_samples = len(single_sweep)
         volume_buffer_samples = math.floor(single_sweep_samples * 1.05)
         self.volume_samples = np.zeros(volume_buffer_samples)
@@ -129,14 +130,14 @@ class RecordInputGainPage(QtWidgets.QWizardPage):
         self.text_volume.setText(f"{volume}")
 
         self.label_gain_feedback.setVisible(self.play_active)
-        if volume < 80:
+        if volume < 10:
             self.label_gain_feedback.setText("Increase gain")
-        elif volume <= 92:
+        elif volume <= 80:
             self.label_gain_feedback.setText("Good gain")
         elif volume <= 99:
             self.label_gain_feedback.setText("Reduce gain")
         else:
-            self.label_gain_feedback.setText("Clipping")
+            self.label_gain_feedback.setText("Clipping, reduce gain")
 
     def _input_callback(
         self, indata: np.ndarray, frames: int, time, status: sd.CallbackFlags
