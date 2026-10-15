@@ -66,18 +66,11 @@ class RecordWizard(QtWidgets.QWizard):
         # validation leaves the user on the page without a message.
         if not super().validateCurrentPage():
             return False
-        current_id = self.currentId()
-        if current_id == self.id_output_calibration_choice:
+        if self.currentId() == self.id_input_gain:
             QtWidgets.QMessageBox.information(
                 self,
-                "Output Level",
-                "Your output level is now set. Do not change it until the recording is complete.",
-            )
-        elif current_id == self.id_input_gain:
-            QtWidgets.QMessageBox.information(
-                self,
-                "Input Gain",
-                "Your input gain is now set. Do not change it until the recording is complete.",
+                "Gain Set",
+                "Both your input and output gain are now set. Do not change either until the recording is complete.",
             )
         return True
 
