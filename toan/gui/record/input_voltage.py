@@ -12,9 +12,9 @@ from toan.soundio.input_calibration import calibrate_input_level
 from toan.soundio.tone_loopback import LoopbackCancelled, ToneLoopback
 
 INPUT_VOLTAGE_TEXT = [
-    "Here you will find the voltage level that corresponds to 0 dBFS on your interface's input. Do not touch your interface's input or output gain.",
-    "Unplug the cable going in to your pedal, the same one you measured the output voltage on, and plug it directly in to your interface's input. Then click 'Calibrate' to play a series of test tones through it.",
-    "Plug your pedal back in once calibration succeeds.",
+    "Here we will find the voltage level that corresponds to 0 dBFS on your interface's input. We already know the scale of your interface's output signal, which we can use to measure input scale.",
+    "Unplug your pedal and plug your interface's (or reamp box's) output directly into your interface's input, then click 'Calibrate' to start the automated process.",
+    "Plug your pedal back in once calibration completes.",
 ]
 
 
