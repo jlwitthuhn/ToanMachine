@@ -45,7 +45,8 @@ class CaptureSignalConfig:
             8000,
         ]
     )
-    small_sweep_magnitudes: list[int] = field(default_factory=lambda: [1.0, 0.66, 0.33])
+    small_sweep_repeats: int = 3
+    small_sweep_volume_low: float = 0.33
     warble_chords: list[ChordWithEffects] = field(
         default_factory=lambda: [
             ChordWithEffects(ChordType.Tritone, EffectType.Flanger4Hz),
@@ -103,7 +104,8 @@ def _generate_sweep_block(
     duration: float,
     multisweep_layer_count: int,
     small_sweep_begins: list[int],
-    small_sweep_magnitudes: list[int],
+    small_sweep_repeats: int,
+    small_sweep_volume_low: float,
 ) -> tuple[np.ndarray, int]:
     sweep_max = min(24000, sample_rate // 2)
     sweep_up = generate_chirp(sample_rate, 18.0, sweep_max, duration)
@@ -122,8 +124,8 @@ def _generate_sweep_block(
     small_sweeps = []
     duration_multiplier = 0.99
     small_sweep_base_duration = 0.36
-    for magnitude in small_sweep_magnitudes:
-        # Use a few more samples each on each distinct multiplier
+    for _ in range(small_sweep_repeats):
+        # Use a few more samples each on each repeat
         # This way we don't just get scaled versions of exactly the same waveform
         duration_multiplier += 0.01
         for f_start in small_sweep_begins:
@@ -135,7 +137,6 @@ def _generate_sweep_block(
                     small_sweep_base_duration * duration_multiplier,
                     32,
                 )
-                * magnitude
             )
             small_sweeps.append(
                 generate_chirp(
@@ -145,9 +146,13 @@ def _generate_sweep_block(
                     small_sweep_base_duration * duration_multiplier,
                     32,
                 )
-                * magnitude
             )
     np.random.shuffle(small_sweeps)
+    scale_factors = np.linspace(small_sweep_volume_low, 1.0, num=len(small_sweeps))
+    np.random.shuffle(scale_factors)
+    assert len(scale_factors) == len(small_sweeps)
+    for i, small_sweep in enumerate(small_sweeps):
+        small_sweep *= scale_factors[i]
     small_block = concat_signals(small_sweeps, sample_rate // 24)
 
     signal_list = [
@@ -290,7 +295,8 @@ def generate_capture_signal(
         config.sweep_duration,
         config.multisweep_layers,
         config.small_sweep_begins,
-        config.small_sweep_magnitudes,
+        config.small_sweep_repeats,
+        config.small_sweep_volume_low,
     )
     block_warble = _generate_warble_block(
         sample_rate,
