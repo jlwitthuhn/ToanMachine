@@ -13,6 +13,8 @@ CLIPPING_DBFS = -0.1
 MAX_LATENCY_SECONDS = 1.5
 SETTLE_SECONDS = 0.1
 MEASURE_SECONDS = 0.25
+# Start below full scale output, some interfaces are rated for higher output than input
+START_OUTPUT_DBFS = -20.0
 CLIPPING_STEP_DB = 5.0
 MIN_OUTPUT_DBFS = -40.0
 COMPRESSION_STEP_DB = 10.0
@@ -47,7 +49,7 @@ def check_input_is_silent(loopback: ToneLoopback) -> None:
 
 
 def measure_latency(loopback: ToneLoopback) -> int:
-    tone_begin = loopback.play_tone(0.0)
+    tone_begin = loopback.play_tone(START_OUTPUT_DBFS)
     tone_end = tone_begin + _samples(loopback, MAX_LATENCY_SECONDS)
     samples = loopback.wait_for_input(tone_begin, tone_end)
     loopback.stop_tone()
@@ -62,7 +64,7 @@ def measure_latency(loopback: ToneLoopback) -> int:
 
 
 def find_unclipped_level(loopback: ToneLoopback, latency: int) -> tuple[float, float]:
-    output_dbfs = 0.0
+    output_dbfs = START_OUTPUT_DBFS
     while output_dbfs >= MIN_OUTPUT_DBFS:
         input_dbfs = measure_input_level(loopback, latency, output_dbfs)
         if input_dbfs < CLIPPING_DBFS:
