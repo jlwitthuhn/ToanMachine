@@ -15,8 +15,8 @@ from toan.soundio import SdIoController
 
 VOLUME_TEXT = [
     "Now we need to set your interface input gain low enough that the signal does not clip.",
-    "You can select 'Play Test Sound' below to output a frequency sweep at 0 dBFS. As long as your input is below 80%, the training signal will not clip during recording.",
-    "The simplest way to dial this in is to start with your gain all the way down, then raise it until the volume shows anywhere between 10% and 80%.",
+    "You can select 'Play Test Sound' below to output a frequency sweep at 0 dBFS. As long as the listed volume is below 75%, the training signal will not clip during recording.",
+    "The simplest way to dial this in is to start with your gain all the way down, then raise it until the volume shows anywhere between 15% and 75%.",
 ]
 
 BAR_PRECISION = 1000
@@ -44,7 +44,7 @@ class RecordInputGainPage(QtWidgets.QWizardPage):
         super().__init__(parent)
         self.context = context
 
-        single_sweep = generate_chirp(context.sample_rate, 18, 22000, 0.85)
+        single_sweep = generate_chirp(context.sample_rate, 40, 20000, 0.80)
         single_sweep_samples = len(single_sweep)
         volume_buffer_samples = math.floor(single_sweep_samples * 1.05)
         self.volume_samples = np.zeros(volume_buffer_samples)
@@ -130,9 +130,9 @@ class RecordInputGainPage(QtWidgets.QWizardPage):
         self.text_volume.setText(f"{volume}")
 
         self.label_gain_feedback.setVisible(self.play_active)
-        if volume < 10:
+        if volume < 15:
             self.label_gain_feedback.setText("Increase gain")
-        elif volume <= 80:
+        elif volume <= 75:
             self.label_gain_feedback.setText("Good gain")
         elif volume <= 99:
             self.label_gain_feedback.setText("Reduce gain")
