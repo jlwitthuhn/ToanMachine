@@ -114,8 +114,14 @@ class RecordExtraPage(QtWidgets.QWizardPage):
             mountain_king, self.context.sample_rate, EffectType.FeedbackDelay0100
         )
 
+        mountain_king_low = mountain_king * 0.15
+
         test_wavs: list[UserWavDesc] = self.table.model().get_selected_test_wavs()
-        test_ready_to_concat: list[np.ndarray] = [sweep, mountain_king]
+        test_ready_to_concat: list[np.ndarray] = [
+            sweep,
+            mountain_king,
+            mountain_king_low,
+        ]
         for this_wav in test_wavs:
             this_signal = load_and_resample_wav(self.context.sample_rate, this_wav.path)
             test_ready_to_concat.append(this_signal)
