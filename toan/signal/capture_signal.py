@@ -35,7 +35,7 @@ class CaptureSignalConfig:
     pluck_chord_string_delay: float = 5.0e-3
     pluck_chord_string_delta: float = 4.0e-4
     pluck_duration: float = 0.62
-    pluck_volume_low: float = 0.25
+    pluck_volume_low: float = 0.20
     pluck: PluckConfig = field(default_factory=PluckConfig)
     small_sweep_begins: list[int] = field(
         default_factory=lambda: [
@@ -46,7 +46,7 @@ class CaptureSignalConfig:
         ]
     )
     small_sweep_repeats: int = 3
-    small_sweep_volume_low: float = 0.33
+    small_sweep_volume_low: float = 0.20
     warble_chords: list[ChordWithEffects] = field(
         default_factory=lambda: [
             ChordWithEffects(ChordType.Tritone, EffectType.Flanger4Hz),
