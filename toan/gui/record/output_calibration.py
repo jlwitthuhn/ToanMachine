@@ -16,6 +16,7 @@ OUTPUT_CALIBRATION_CHOICE_TEXT = [
 class RecordOutputCalibrationChoicePage(QtWidgets.QWizardPage):
     context: RecordingContext
 
+    checkbox_output_level_set: QtWidgets.QCheckBox
     checkbox_calibrated: QtWidgets.QCheckBox
 
     def __init__(self, parent: QtWidgets.QWidget, context: RecordingContext):
@@ -34,12 +35,21 @@ class RecordOutputCalibrationChoicePage(QtWidgets.QWizardPage):
         hline.setFrameShadow(QtWidgets.QFrame.Shadow.Sunken)
         layout.addWidget(hline)
 
+        self.checkbox_output_level_set = QtWidgets.QCheckBox(
+            "I have set my output level high enough", self
+        )
+        self.checkbox_output_level_set.toggled.connect(self.completeChanged)
+        layout.addWidget(self.checkbox_output_level_set)
+
         self.checkbox_calibrated = QtWidgets.QCheckBox(
             "Calibrated capture (requires multimeter)", self
         )
         layout.addWidget(self.checkbox_calibrated)
 
         layout.addStretch(1)
+
+    def isComplete(self) -> bool:
+        return self.checkbox_output_level_set.isChecked()
 
     def is_voltage_selected(self) -> bool:
         return self.checkbox_calibrated.isChecked()
