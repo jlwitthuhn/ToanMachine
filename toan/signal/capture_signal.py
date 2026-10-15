@@ -192,7 +192,7 @@ def _generate_sweep_block(
     return (
         concat_signals(
             signal_list,
-            sample_rate // 4,
+            sample_rate // 12,
         ),
         sweep_up_end,
     )
@@ -220,7 +220,7 @@ def _generate_warble_block(
         this_chord_buffer = apply_effect(this_chord_buffer, sample_rate, chord.effect)
         assert len(modulation) == len(this_chord_buffer)
         chord_buffers.append(this_chord_buffer * modulation)
-    return concat_signals(chord_buffers, sample_rate // 4)
+    return concat_signals(chord_buffers, sample_rate // 12)
 
 
 def _generate_plucked_block(
@@ -280,7 +280,7 @@ def _generate_builtin_wav_block(sample_rate: int, wavs: list[BuiltinWav]) -> np.
     for wav in wavs:
         this_signal = get_builtin_wav_signal(sample_rate, wav)
         buffers.append(this_signal)
-    return concat_signals(buffers, sample_rate // 4)
+    return concat_signals(buffers, sample_rate // 8)
 
 
 def generate_capture_signal(
