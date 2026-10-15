@@ -12,7 +12,6 @@ from toan.gui.record.input_gain import RecordInputGainPage
 from toan.gui.record.input_voltage import RecordInputVoltagePage
 from toan.gui.record.intro import RecordIntroPage
 from toan.gui.record.output_calibration import RecordOutputCalibrationChoicePage
-from toan.gui.record.output_level import RecordOutputLevelPage
 from toan.gui.record.output_voltage import RecordOutputVoltagePage
 from toan.gui.record.save import RecordSavePage
 from toan.gui.record.wet import RecordWetSignalPage
@@ -24,7 +23,6 @@ class RecordWizard(QtWidgets.QWizard):
     page_output_calibration_choice: RecordOutputCalibrationChoicePage
     page_input_voltage: RecordInputVoltagePage
     id_output_calibration_choice: int
-    id_output_level: int
     id_output_voltage: int
     id_input_gain: int
     id_input_voltage: int
@@ -47,7 +45,6 @@ class RecordWizard(QtWidgets.QWizard):
         self.id_output_calibration_choice = self.addPage(
             self.page_output_calibration_choice
         )
-        self.id_output_level = self.addPage(RecordOutputLevelPage(self, self.context))
         self.id_output_voltage = self.addPage(
             RecordOutputVoltagePage(self, self.context)
         )
@@ -70,7 +67,7 @@ class RecordWizard(QtWidgets.QWizard):
         if not super().validateCurrentPage():
             return False
         current_id = self.currentId()
-        if current_id in (self.id_output_level, self.id_output_voltage):
+        if current_id == self.id_output_calibration_choice:
             QtWidgets.QMessageBox.information(
                 self,
                 "Output Level",
@@ -85,16 +82,16 @@ class RecordWizard(QtWidgets.QWizard):
         return True
 
     def nextId(self) -> int:
-        # Output calibration branches to exactly one of the level or voltage
-        # pages, and both rejoin the main sequence at input gain. Input
-        # voltage is only measured when calibrating by voltage, and must come
-        # after input gain because changing the gain invalidates it.
+        # Output calibration only visits the voltage page for a calibrated
+        # capture; otherwise it goes straight to input gain. Input voltage is
+        # only measured when calibrating by voltage, and must come after input
+        # gain because changing the gain invalidates it.
         current_id = self.currentId()
         if current_id == self.id_output_calibration_choice:
             if self.page_output_calibration_choice.is_voltage_selected():
                 return self.id_output_voltage
-            return self.id_output_level
-        if current_id in (self.id_output_level, self.id_output_voltage):
+            return self.id_input_gain
+        if current_id == self.id_output_voltage:
             return self.id_input_gain
         if current_id == self.id_input_gain:
             if self.page_output_calibration_choice.is_voltage_selected():
