@@ -10,12 +10,10 @@ from toan.gui.main_window import MainWindow
 from toan.persistence.user_wav import create_user_wav_dir
 
 
-def run_qt_gui() -> None:
+def run_qt_gui(app: QtWidgets.QApplication) -> None:
     show_debug = False
     if len(sys.argv) > 1 and sys.argv[1] == "--debug":
         show_debug = True
-
-    app = QtWidgets.QApplication([])
 
     create_user_wav_dir()
 
