@@ -2,11 +2,14 @@
 # https://www.gnu.org/licenses/gpl-3.0.en.html
 # SPDX-License-Identifier: GPL-3.0-only
 
+import signal
 from collections.abc import Callable
 
 # Only PySide6 is imported up front, everything else (torch, numpy, scipy, ...)
 # is imported by ImportThread while the loading window is visible.
 from PySide6 import QtCore, QtGui, QtWidgets
+
+from toan.exception_hook import install_exception_hook
 
 
 class LoadingWindow(QtWidgets.QWidget):
@@ -41,7 +44,12 @@ class ImportThread(QtCore.QThread):
 
 
 def main() -> None:
+    # Python only checks for Ctrl+C when it runs code, which an idle Qt event loop
+    # doesn't do. Let the OS end the process immediately instead.
+    signal.signal(signal.SIGINT, signal.SIG_DFL)
+
     app = QtWidgets.QApplication([])
+    install_exception_hook()
 
     loading_window = LoadingWindow()
     loading_window.show()
