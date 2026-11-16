@@ -12,7 +12,13 @@ Toan Machine is currently only compatible with Apple Silicon Macs. Support for n
 
 # Installation
 
-The easiest way to install Toan Machine is to download from the releases section on the right side of the github repo home page. Download the Mac DMG file and follow the instructions contained inside.
+There are two main ways to install Toan Machine, depending on your level of familiarity with Python environment management.
+
+## Pre-built .App Bundle
+
+The easiest way to install Toan Machine is to download a pre-built App from the releases section [here](https://github.com/jlwitthuhn/ToanMachine/releases). Download the Mac DMG file and follow the instructions contained inside.
+
+## Run From Source
 
 If you would like to run from this source instead, you will need to:
 * Clone this git repo
