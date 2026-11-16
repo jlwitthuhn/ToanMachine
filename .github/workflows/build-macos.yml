@@ -1,12 +1,9 @@
 name: Build macOS DMG
 
+# Dispatch this workflow from a release/<version> tag; the tagged commit is
+# built and the version is taken from the tag name.
 on:
   workflow_dispatch:
-    inputs:
-      version:
-        description: Version string for the release/<version> tag and DMG filename
-        required: true
-        type: string
 
 permissions:
   contents: write
@@ -16,18 +13,32 @@ permissions:
 jobs:
   build:
     runs-on: macos-15
-    env:
-      VERSION: ${{ inputs.version }}
     steps:
       - uses: actions/checkout@v7
 
-      - name: Validate version
+      - name: Determine version
         shell: bash
         run: |
-          if [[ ! "$VERSION" =~ ^[A-Za-z0-9][A-Za-z0-9._+-]*$ ]] || ! git check-ref-format "refs/tags/release/$VERSION"; then
-            echo "Version must form a valid release/<version> Git tag."
+          if [[ "$GITHUB_REF_TYPE" != tag || "$GITHUB_REF_NAME" != release/* ]]; then
+            echo "::error::Run this workflow from a release/<version> tag, not $GITHUB_REF_TYPE '$GITHUB_REF_NAME'."
             exit 1
           fi
+
+          version="${GITHUB_REF_NAME#release/}"
+          if [[ ! "$version" =~ ^[A-Za-z0-9][A-Za-z0-9._+-]*$ ]]; then
+            echo "::error::Tag '$GITHUB_REF_NAME' does not contain a valid version."
+            exit 1
+          fi
+
+          # build_macos.sh embeds `git describe` output in the app, so make sure
+          # it matches the version used for the DMG filename and release.
+          described="$(git describe --tags --always)"
+          if [[ "$described" != "$GITHUB_REF_NAME" ]]; then
+            echo "::error::git describe reports '$described', expected '$GITHUB_REF_NAME'."
+            exit 1
+          fi
+
+          echo "VERSION=$version" >> "$GITHUB_ENV"
 
       - uses: actions/setup-python@v7
         with:
@@ -38,10 +49,6 @@ jobs:
 
       - name: Create virtual environment
         run: python -m virtualenv .venv
-
-      # The local repo has no tags, re-create the tag consumed by the build script
-      - name: Tag release locally
-        run: git tag "release/$VERSION"
 
       - name: Build DMG
         run: ./script/build_macos.sh
@@ -81,8 +88,8 @@ jobs:
           - [Build attestation]($ATTESTATION_URL)
           EOF
 
-          gh release create "release/$VERSION" "dist/ToanMachine-${VERSION}.dmg" \
-            --target "$GITHUB_SHA" \
+          gh release create "$GITHUB_REF_NAME" "dist/ToanMachine-${VERSION}.dmg" \
+            --verify-tag \
             --title "$VERSION" \
             --prerelease \
             --notes-file "$RUNNER_TEMP/release-notes.md"
