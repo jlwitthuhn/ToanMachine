@@ -72,7 +72,7 @@ jobs:
           * Open a terminal.
           * Run \`xattr -cr /Applications/ToanMachine.app\`.
           
-          You only have to run \`xattr\` once, after that you can open ToanMachine.app like a normal application.
+          You only have to run \`xattr\` once after installing or updating, after that you can open ToanMachine.app like a normal application.
           
           # Build Details
           Built by GitHub Actions.

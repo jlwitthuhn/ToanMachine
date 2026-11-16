@@ -81,9 +81,10 @@ if ! cat > "$dmg_staging/README.txt" <<'EOF'
 To install:
 * Drag and drop ToanMachine.app to your Applications directory.
 * Open a terminal.
-* Run 'xattr -cr /Applications/ToanMachine.app'.
+* Enter the following command:
+xattr -cr /Applications/ToanMachine.app
 
-You only have to run 'xattr' once, after that you can open ToanMachine.app like a normal application.
+You only have to run 'xattr' once after installing or updating, after that you can open ToanMachine.app like a normal application.
 EOF
 then
 	print -u2 "Error: failed to write README"
